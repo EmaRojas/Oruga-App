@@ -92,7 +92,7 @@ export const LoginPage = () => {
                   type="submit" 
                   variant='contained' 
                   fullWidth>
-                  Login
+                    <Typography color='secondary.main' sx={{ ml: 1 }}>Ingresar</Typography>
                 </Button>
               </Grid>
               <Grid item xs={ 12 } sm={ 6 }>
@@ -101,8 +101,8 @@ export const LoginPage = () => {
                    variant='contained' 
                    fullWidth
                    onClick={ onGoogleSignIn }>
-                  <Google />
-                  <Typography sx={{ ml: 1 }}>Google</Typography>
+                  <Google sx={{color:'secondary.main'}} />
+                  <Typography color='secondary.main' sx={{ ml: 1 }}>Google</Typography>
                 </Button>
               </Grid>
             </Grid>

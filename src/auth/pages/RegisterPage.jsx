@@ -32,7 +32,7 @@ export const RegisterPage = () => {
 
   const onSubmit = (event) => {
     event.preventDefault();
-    console.log(formState);
+    //console.log(formState);
     setFormSubmitted(true);
 
     if (!isFormValid) return;
@@ -115,7 +115,7 @@ export const RegisterPage = () => {
                   type="submit"
                   variant='contained'
                   fullWidth>
-                  Crear cuenta
+                  <Typography color='secondary.main'>Crear Cuenta</Typography>
                 </Button>
               </Grid>
             </Grid>
@@ -123,7 +123,7 @@ export const RegisterPage = () => {
 
             <Grid container direction='row' justifyContent='end'>
               <Typography sx={{ mr: 1 }}>¿Ya tienes cuenta?</Typography>
-              <Link component={RouterLink} color='inherit' to="/auth/login">
+              <Link component={RouterLink} color='primary.main' to="/auth/login">
                 ingresar
               </Link>
             </Grid>
