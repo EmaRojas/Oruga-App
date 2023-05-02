@@ -1,7 +1,7 @@
 import { Box, Toolbar, IconButton } from "@mui/material"
 import { NavBar } from "../components/NavBar";
 
-export const HomePage = () => {
+export const ClientsPage = () => {
 
   return (
     <Box sx={{ display: 'flex' }} className='animate__animated animate__fadeIn animate__faster'>
