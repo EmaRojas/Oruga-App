@@ -2,7 +2,7 @@ import React from 'react';
 import Signin from './components/auth/Signin';
 import Signup from './components/auth/Signup';
 import Account from './components/auth/Account';
-import { AuthContextProvider } from './context/AuthContext';
+import { AuthContextProvider, UserAuth } from './context/AuthContext';
 import Home from './components/Home';
 import { Route, Routes } from 'react-router-dom';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -10,13 +10,14 @@ import ResponsiveAppBar from './components/ResponsiveAppBar';
 import { AppTheme } from './theme/AppTheme';
 import './style.css'
 import { CssBaseline } from '@mui/material';
+import { Client } from './pages/Client';
 
 function App() {
   return (
     <AppTheme>
 
       <AuthContextProvider>
-      <CssBaseline />
+        <CssBaseline />
         <Routes>
           <Route path='/' element={<Signin />} />
 
@@ -34,6 +35,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Home />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path='/client'
+            element={
+              <ProtectedRoute>
+                <Client />
               </ProtectedRoute>
             }
           />
