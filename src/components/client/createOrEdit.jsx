@@ -1,19 +1,13 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, TextField, Typography } from '@mui/material';
 import { useForm } from '../../hooks/useForm';
-import { createClient, getAll } from '../../services/client.service';
+import { createClient, getAll, updateClient } from '../../services/client.service';
+import { Client } from '../../models/model'
+import { toast } from 'react-toastify';
+let formData = Client;
 
-const formData = {
-    "full_name": "",
-    "phone": "",
-    "email": "",
-    "company_name": "",
-    "cuit": "",
-    "description": "",
-    "assistance": ""
-}
-
-export const CreateOrEdit = ({ isEdit, setClients, clients }) => {
+export const CreateOrEdit = ({ isEdit, setEdit, setClients, currentUser, setCurrentUser }) => {
+    
     const [formSubmitted, setFormSubmitted] = useState(false);
     const [modal, setModal] = useState(false);
 
@@ -30,29 +24,52 @@ export const CreateOrEdit = ({ isEdit, setClients, clients }) => {
         isFormValid, full_nameValid, phoneValid, emailValid, company_nameValid, cuitValid
     } = useForm(formData, formValidations);
 
+    useEffect(() => {
+
+        formData = {
+            "_id": currentUser._id,
+            "full_name": currentUser.full_name,
+            "phone": currentUser.phone,
+            "email": currentUser.email,
+            "company_name": currentUser.company_name,
+            "cuit": currentUser.cuit,
+            "description": currentUser.description,
+            "assistance": currentUser.assistance
+        }
+
+    }, [currentUser])
+
     const handleSubmit = async (e) => {
+        const id = toast.loading("Validando formulario...")
         e.preventDefault();
         try {
             setFormSubmitted(true);
             if (!isFormValid) return;
-            const {success} = await createClient(full_name, phone, email, company_name, description, assistance, cuit);
-            if(success){
-                refreshList();
-                setModal(false);
+            if (currentUser._id.length > 1) {
+                const { success } = await updateClient(currentUser._id, full_name, phone, email, company_name, description, assistance, cuit);
+                if (success) {
+                    toast.update(id, { render: "Registro modificado", type: "success", isLoading: false, autoClose: 2000 });
+                }
+            } else {
+                const { success } = await createClient(full_name, phone, email, company_name, description, assistance, cuit);
+
+                if (success) {
+                    toast.update(id, { render: "Cliente registrado", type: "success", isLoading: false, autoClose: 2000 });
+                }
             }
+
+            reset();     
         } catch (e) {
             console.log(e.message);
         }
     }
 
-    const handleSubmitPrueba = async (e) => {
-        e.preventDefault();
-        try {
-            const response = await createClient();
-            console.log(response);
-        } catch (e) {
-            console.log(e.message);
-        }
+
+    const reset = () => {
+        setCurrentUser(Client);
+        setEdit(true);
+        refreshList();
+        setModal(false);
     }
 
     const handleOpen = () => {
@@ -63,21 +80,20 @@ export const CreateOrEdit = ({ isEdit, setClients, clients }) => {
         setModal(false);
     }
 
-    const refreshList = ()=>{
+    const refreshList = () => {
+        setCurrentUser(Client);
         getAll()
-        .then(({ clients }) => {
-            setClients(clients)
-        })
-        .catch((e) => {
-            console.log(e.message)
-        })
-      }
-    
+            .then(({ clients }) => {
+                setClients(clients)
+            })
+            .catch((e) => {
+                console.log(e.message)
+            })
+    }
 
     return (
         <>
-            <Button onClick={handleSubmitPrueba}>Post</Button>
-            <Button onClick={handleOpen}>Nuevo</Button>
+            <Button disabled={!isEdit} onClick={handleOpen}>Nuevo</Button>
             <Button disabled={isEdit} onClick={handleOpen}>Editar</Button>
             <Dialog open={modal} onClose={handleClose}>
                 <form onSubmit={handleSubmit}>
@@ -177,12 +193,24 @@ export const CreateOrEdit = ({ isEdit, setClients, clients }) => {
                         <Button onClick={handleClose}>
                             <Typography color='primary.main' sx={{ ml: 1 }}>Cancelar</Typography>
                         </Button>
-                        <Button
-                            type="submit"
-                            variant='contained'
-                        >
-                            <Typography color='secondary.main' sx={{ ml: 1 }}>Crear</Typography>
-                        </Button>
+                        {
+                            isEdit && <Button
+                                type="submit"
+                                variant='contained'
+                            >
+                                <Typography color='secondary.main' sx={{ ml: 1 }}>Crear</Typography>
+                            </Button>
+                        }
+
+                        {
+                            !isEdit && <Button
+                                type="submit"
+                                variant='contained'
+                            >
+                                <Typography color='secondary.main' sx={{ ml: 1 }}>Actualizar</Typography>
+                            </Button>
+                        }
+
                     </DialogActions>
                 </form>
             </Dialog>

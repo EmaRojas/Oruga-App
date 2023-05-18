@@ -12,10 +12,14 @@ import './style.css'
 import { CssBaseline } from '@mui/material';
 import { Client } from './pages/Client';
 
+//https://fkhadra.github.io/react-toastify/introduction
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 function App() {
   return (
     <AppTheme>
-
+        <ToastContainer autoClose={2000} position="top-center"/>
       <AuthContextProvider>
         <CssBaseline />
         <Routes>
