@@ -44,7 +44,12 @@ export const CreateOrEdit = ({ isEdit, setEdit, setClients, currentUser, setCurr
         e.preventDefault();
         try {
             setFormSubmitted(true);
-            if (!isFormValid) return;
+            if (!isFormValid)
+            {
+                toast.dismiss(id);
+                return;
+            } 
+                
             if (currentUser._id.length > 1) {
                 const { success } = await updateClient(currentUser._id, full_name, phone, email, company_name, description, assistance, cuit);
                 if (success) {

@@ -3,7 +3,7 @@ import Signin from './components/auth/Signin';
 import Signup from './components/auth/Signup';
 import Account from './components/auth/Account';
 import { AuthContextProvider, UserAuth } from './context/AuthContext';
-import Home from './components/Home';
+import Home from './pages/Home';
 import { Route, Routes } from 'react-router-dom';
 import ProtectedRoute from './components/ProtectedRoute';
 import ResponsiveAppBar from './components/ResponsiveAppBar';
