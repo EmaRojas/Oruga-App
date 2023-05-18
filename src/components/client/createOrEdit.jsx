@@ -2,14 +2,25 @@ import React, { useEffect, useState } from 'react';
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, TextField, Typography } from '@mui/material';
 import { useForm } from '../../hooks/useForm';
 import { createClient, getAll, updateClient } from '../../services/client.service';
-import { Client } from '../../models/model'
 import { toast } from 'react-toastify';
-let formData = Client;
+
+const ClientEmpty = { 
+    "_id":"",
+    "full_name": "",
+    "phone": "",
+    "email": "",
+    "company_name": "",
+    "cuit": "",
+    "description": "",
+    "assistance":""
+}
+
 
 export const CreateOrEdit = ({ isEdit, setEdit, setClients, currentUser, setCurrentUser }) => {
     
     const [formSubmitted, setFormSubmitted] = useState(false);
     const [modal, setModal] = useState(false);
+    const [disabledButton, setdisabledButton] = useState(false);
 
     const formValidations = {
         full_name: [(value) => value.length >= 1, 'Es obligatorio.'],
@@ -20,30 +31,17 @@ export const CreateOrEdit = ({ isEdit, setEdit, setClients, currentUser, setCurr
     }
 
     const {
-        formState, full_name, phone, email, company_name, description, assistance, cuit, onInputChange,
+        full_name, phone, email, company_name, description, assistance, cuit, onInputChange,
         isFormValid, full_nameValid, phoneValid, emailValid, company_nameValid, cuitValid
-    } = useForm(formData, formValidations);
-
-    useEffect(() => {
-
-        formData = {
-            "_id": currentUser._id,
-            "full_name": currentUser.full_name,
-            "phone": currentUser.phone,
-            "email": currentUser.email,
-            "company_name": currentUser.company_name,
-            "cuit": currentUser.cuit,
-            "description": currentUser.description,
-            "assistance": currentUser.assistance
-        }
-
-    }, [currentUser])
+    } = useForm(currentUser, formValidations);
 
     const handleSubmit = async (e) => {
-        const id = toast.loading("Validando formulario...")
         e.preventDefault();
+        const id = toast.loading("Validando formulario...")
         try {
+            setdisabledButton(true);
             setFormSubmitted(true);
+           
             if (!isFormValid)
             {
                 toast.dismiss(id);
@@ -52,29 +50,35 @@ export const CreateOrEdit = ({ isEdit, setEdit, setClients, currentUser, setCurr
                 
             if (currentUser._id.length > 1) {
                 const { success } = await updateClient(currentUser._id, full_name, phone, email, company_name, description, assistance, cuit);
-                if (success) {
-                    toast.update(id, { render: "Registro modificado", type: "success", isLoading: false, autoClose: 2000 });
+                if (!success) {
+                    toast.dismiss(id);
+                    return;
                 }
+                toast.update(id, { render: "Registro modificado", type: "success", isLoading: false, autoClose: 2000 });
             } else {
                 const { success } = await createClient(full_name, phone, email, company_name, description, assistance, cuit);
 
-                if (success) {
-                    toast.update(id, { render: "Cliente registrado", type: "success", isLoading: false, autoClose: 2000 });
+                if (!success) {
+                    toast.dismiss(id);
+                    return;
                 }
+                toast.update(id, { render: "Cliente registrado", type: "success", isLoading: false, autoClose: 2000 });
             }
-
+            setCurrentUser(ClientEmpty);
             reset();     
         } catch (e) {
+            toast.dismiss(id);
             console.log(e.message);
         }
     }
 
 
     const reset = () => {
-        setCurrentUser(Client);
+        setdisabledButton(false);
+        setFormSubmitted(false);
         setEdit(true);
         refreshList();
-        setModal(false);
+        handleClose();
     }
 
     const handleOpen = () => {
@@ -86,7 +90,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setClients, currentUser, setCurr
     }
 
     const refreshList = () => {
-        setCurrentUser(Client);
+        
         getAll()
             .then(({ clients }) => {
                 setClients(clients)
@@ -202,6 +206,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setClients, currentUser, setCurr
                             isEdit && <Button
                                 type="submit"
                                 variant='contained'
+                                disabled={disabledButton}
                             >
                                 <Typography color='secondary.main' sx={{ ml: 1 }}>Crear</Typography>
                             </Button>
@@ -211,6 +216,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setClients, currentUser, setCurr
                             !isEdit && <Button
                                 type="submit"
                                 variant='contained'
+                                disabled={disabledButton}
                             >
                                 <Typography color='secondary.main' sx={{ ml: 1 }}>Actualizar</Typography>
                             </Button>

@@ -8,16 +8,25 @@ import { useState } from "react";
 import { deleteClient, getAll } from "../../services/client.service";
 import { Button, ButtonGroup, Chip, Dialog, DialogContent, DialogTitle } from "@mui/material";
 import { CreateOrEdit } from "./createOrEdit";
-import { Client } from "../../models/model";
 import { ToastContainer, toast } from 'react-toastify';
 //https://github.com/gregnb/mui-datatables
 
+const ClientEmpty = { 
+    "_id":"",
+    "full_name": "",
+    "phone": "",
+    "email": "",
+    "company_name": "",
+    "cuit": "",
+    "description": "",
+    "assistance":""
+}
 
 export const Table = () => {
 
     const [clients, setClients] = useState()
     const [edit, setEdit] = useState(true);
-    const [currentUser, setCurrentUser] = useState(Client);
+    const [currentUser, setCurrentUser] = useState(ClientEmpty);
 
     const refreshTable =async () => {    
         await getAll()
@@ -28,20 +37,13 @@ export const Table = () => {
             console.log(e.message)
         })
         
-        setCurrentUser(Client);
-
+        setCurrentUser(ClientEmpty);
         setEdit(true);
     }
 
     
     useEffect(() => {
-        getAll()
-            .then(({ clients }) => {
-                setClients(clients)
-            })
-            .catch((e) => {
-                console.log(e.message)
-            })
+       refreshTable();
     }, [])
 
     const muiCache = createCache({
@@ -131,15 +133,12 @@ export const Table = () => {
             }
             if (rowsSelected.length > 1) {
                 setEdit(true)
-                setCurrentUser(Client);
+                setCurrentUser(ClientEmpty);
             }
             if (rowsSelected.length == 0) {
                 setEdit(true)
-                setCurrentUser(Client);
+                setCurrentUser(ClientEmpty);
             }
-        },
-        onTableChange: (action, state) => {
-            return false;
         },
         onRowsDelete: (rowsDeleted) => {
             const id = toast.loading("Eliminando...")
