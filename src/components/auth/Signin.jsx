@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Alert, Button, Grid, Link as RouterLink, TextField, Typography } from "@mui/material"
 import { UserAuth } from '../../context/AuthContext';
@@ -13,7 +13,14 @@ const Signin = () => {
  
   const [error, setError] = useState('');
   const navigate = useNavigate();
-  const { signIn, signInWithGoogle } = UserAuth();
+  const { signIn, signInWithGoogle, user } = UserAuth();
+
+  useEffect(() => {
+
+    if(user) {
+      navigate('/home')
+    }   
+ },[]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
