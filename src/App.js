@@ -11,10 +11,13 @@ import { AppTheme } from './theme/AppTheme';
 import './style.css'
 import { CssBaseline } from '@mui/material';
 import { Client } from './pages/Client';
+import { Membership } from './pages/Membership';
 
 //https://fkhadra.github.io/react-toastify/introduction
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { PrivateRoom } from './pages/PrivateRoom';
+import Reservation from './pages/Reservation';
 
 function App() {
   return (
@@ -47,6 +50,30 @@ function App() {
             element={
               <ProtectedRoute>
                 <Client />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path='/membership'
+            element={
+              <ProtectedRoute>
+                <Membership />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path='/privateroom'
+            element={
+              <ProtectedRoute>
+                <PrivateRoom />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path='/reservation'
+            element={
+              <ProtectedRoute>
+                <Reservation />
               </ProtectedRoute>
             }
           />
