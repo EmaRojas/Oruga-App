@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, TextField, Typography, Select, MenuItem } from '@mui/material';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, TextField, Typography, Select, MenuItem, FormLabel, RadioGroup, FormControlLabel, Radio } from '@mui/material';
 import { useForm } from '../../hooks/useForm';
 import { createMembership, getAll, updateMembership } from '../../services/membership.service';
 import { toast } from 'react-toastify';
+import { FormControl } from '@mui/base';
 
 const MembershipEmpty = { 
     "_id":"",
@@ -17,6 +18,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMemberships, currentMembershi
     const [formSubmitted, setFormSubmitted] = useState(false);
     const [modal, setModal] = useState(false);
     const [disabledButton, setdisabledButton] = useState(false);
+    const [type, setType] = React.useState('Normal');
 
     const formValidations = {
         name: [(value) => value.length >= 1, 'Es obligatorio.'],
@@ -25,7 +27,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMemberships, currentMembershi
     }
 
     const {
-        name, price, type, onInputChange,
+        name, price, onInputChange,
         isFormValid, nameValid, priceValid
     } = useForm(currentMembership, formValidations);
 
@@ -66,6 +68,9 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMemberships, currentMembershi
         }
     }
 
+    const handleChange = (event) => {
+        setType(event.target.value);
+    };
 
     const reset = () => {
         setdisabledButton(false);
@@ -131,9 +136,20 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMemberships, currentMembershi
                                 />
                             </Grid>
                             <Grid item xs={12} sx={{ mt: 2 }}>
-
+                                <FormControl>
+                                    <FormLabel id="demo-controlled-radio-buttons-group">Tipo</FormLabel>
+                                    <RadioGroup
+                                        row
+                                        aria-labelledby="demo-controlled-radio-buttons-group"
+                                        name="controlled-radio-buttons-group"
+                                        value={type}
+                                        onChange={handleChange}
+                                    >
+                                        <FormControlLabel value="Normal" control={<Radio />} label="Normal" />
+                                        <FormControlLabel value="Compartida" control={<Radio />} label="Compartida" />
+                                    </RadioGroup>
+                                </FormControl>
                             </Grid>
-
 
                         </Grid>
 

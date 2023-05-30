@@ -141,7 +141,7 @@ export const Table = () => {
             <CacheProvider value={muiCache} mt={5}>
                 <ThemeProvider theme={createTheme()}>
 
-                    <MUIDataTable
+                    <MUIDataTable className="tabluppercase"
                         title={"SALAS"}
                         data={privateRooms}
                         columns={columns}
