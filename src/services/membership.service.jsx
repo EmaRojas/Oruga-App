@@ -1,5 +1,5 @@
 
-const baseURL = 'https://orugacoworking.vercel.app/api/membership';
+const baseURL = 'https://orugacoworking.vercel.app/api/v1/membership';
 
 export const getAll = async () => {
     const response = await fetch(baseURL);
