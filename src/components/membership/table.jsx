@@ -15,6 +15,7 @@ const MembershipEmpty = {
     "_id":"",
     "name": "",
     "price": "",
+    "hours":"",
     "type": ""
 }
 
@@ -61,6 +62,14 @@ export const Table = () => {
         {
             name: "price",
             label: "Precio",
+            options: {
+                filter: true,
+                sort: false,
+            }
+        },
+        {
+            name: "hours",
+            label: "Horas",
             options: {
                 filter: true,
                 sort: false,

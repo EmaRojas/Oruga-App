@@ -1,5 +1,5 @@
 
-const baseURL = 'https://orugacoworking.vercel.app/api/privateroom';
+const baseURL = 'https://orugacoworking.vercel.app/api/v1/room';
 
 export const getAllRooms = async () => {
     const response = await fetch(baseURL);
@@ -10,7 +10,7 @@ export const getAllRooms = async () => {
     }
 }
 
-export const getPrivateRoomById = async (id) => {
+export const getRoomById = async (id) => {
     const response = await fetch(baseURL+id);
     if (!response.ok) {
         throw new Error('Data coud not be fetched!')
@@ -19,7 +19,7 @@ export const getPrivateRoomById = async (id) => {
     }
 }
 
-export const createPrivateRoom = async (name, capacity) => {
+export const createRoom = async (name, capacity) => {
     const requestOptions = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -32,7 +32,7 @@ export const createPrivateRoom = async (name, capacity) => {
     return await response.json();
 }
 
-export const updatePrivateRoom = async (id, name, capacity) => {
+export const updateRoom = async (id, name, capacity) => {
     const requestOptions = {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -45,7 +45,7 @@ export const updatePrivateRoom = async (id, name, capacity) => {
     return await response.json();
 }
 
-export const deletePrivateRoom = async (id) => {
+export const deleteRoom = async (id) => {
     const requestOptions = {
         method: 'Delete',
         headers: { 'Content-Type': 'application/json' },

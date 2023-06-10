@@ -16,7 +16,7 @@ import { Membership } from './pages/Membership';
 //https://fkhadra.github.io/react-toastify/introduction
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { PrivateRoom } from './pages/PrivateRoom';
+import { Room } from './pages/Room';
 import Reservation from './pages/Reservation';
 
 function App() {
@@ -62,10 +62,10 @@ function App() {
             }
           />
           <Route
-            path='/privateroom'
+            path='/room'
             element={
               <ProtectedRoute>
-                <PrivateRoom />
+                <Room />
               </ProtectedRoute>
             }
           />

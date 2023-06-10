@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, TextField, Typography } from '@mui/material';
 import { useForm } from '../../hooks/useForm';
-import { createPrivateRoom, getAllRooms, updatePrivateRoom } from '../../services/privateRoom.service';
+import { createRoom, getAllRooms, updateRoom } from '../../services/room.service';
 import { toast } from 'react-toastify';
 
-const PrivateRoomEmpty = { 
+const RoomEmpty = { 
     "_id":"",
     "name": "",
     "capacity": ""
 }
 
 
-export const CreateOrEdit = ({ isEdit, setEdit, setPrivateRooms, currentPrivateRoom, setCurrentPrivateRoom }) => {
+export const CreateOrEdit = ({ isEdit, setEdit, setRooms, currentRoom, setCurrentRoom }) => {
     
     const [formSubmitted, setFormSubmitted] = useState(false);
     const [modal, setModal] = useState(false);
@@ -19,13 +19,13 @@ export const CreateOrEdit = ({ isEdit, setEdit, setPrivateRooms, currentPrivateR
 
     const formValidations = {
         name: [(value) => value.length >= 1, 'Es obligatorio.'],
-        capacity: [(value) => value.length >= 1, 'Es obligatorio.'],
+        capacity: [(value) => value.length >= 1 && !isNaN(value), 'Es obligatorio. Solo se puede ingresar numeros'],
     }
 
     const {
         name, capacity, onInputChange,
         isFormValid, nameValid, capacityValid
-    } = useForm(currentPrivateRoom, formValidations);
+    } = useForm(currentRoom, formValidations);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -37,18 +37,19 @@ export const CreateOrEdit = ({ isEdit, setEdit, setPrivateRooms, currentPrivateR
             if (!isFormValid)
             {
                 toast.dismiss(id);
+                setdisabledButton(false);
                 return;
             } 
                 
-            if (currentPrivateRoom._id.length > 1) {
-                const { success } = await updatePrivateRoom(currentPrivateRoom._id, name, capacity);
+            if (currentRoom._id.length > 1) {
+                const { success } = await updateRoom(currentRoom._id, name, capacity);
                 if (!success) {
                     toast.dismiss(id);
                     return;
                 }
                 toast.update(id, { render: "Registro modificado", type: "success", isLoading: false, autoClose: 2000 });
             } else {
-                const { success } = await createPrivateRoom(name, capacity);
+                const { success } = await createRoom(name, capacity);
 
                 if (!success) {
                     toast.dismiss(id);
@@ -56,7 +57,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setPrivateRooms, currentPrivateR
                 }
                 toast.update(id, { render: "Sala creada", type: "success", isLoading: false, autoClose: 2000 });
             }
-            setCurrentPrivateRoom(PrivateRoomEmpty);
+            setCurrentRoom(RoomEmpty);
             reset();     
         } catch (e) {
             toast.dismiss(id);
@@ -84,8 +85,8 @@ export const CreateOrEdit = ({ isEdit, setEdit, setPrivateRooms, currentPrivateR
     const refreshList = () => {
         
         getAllRooms()
-            .then(({ privateRooms }) => {
-                setPrivateRooms(privateRooms)
+            .then(({ rooms }) => {
+                setRooms(rooms)
             })
             .catch((e) => {
                 console.log(e.message)
