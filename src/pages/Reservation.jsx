@@ -1,11 +1,12 @@
 import React from 'react';
 import { UserAuth } from '../context/AuthContext';
 import { Create } from "../components/reservation/create";
+import { Table } from "../components/reservation/table";
 
 import '../styles/home.css'
 
 
-const Booking = () => {
+const Reservation = () => {
 
 
   const { user } = UserAuth();
@@ -15,11 +16,11 @@ const Booking = () => {
   return (
     <div class="container">
 
-      <Create />
+      <Table />
     </div>
 
 
   )
 };
 
-export default Booking;
+export default Reservation;

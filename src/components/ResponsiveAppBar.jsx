@@ -17,6 +17,8 @@ import { signOut } from 'firebase/auth';
 import { Link } from 'react-router-dom';
 import { UserAuth } from '../context/AuthContext';
 import { ButtonGroup } from '@mui/material';
+import Logo from '../logo.png'; // Ruta de tu logo PNG
+
 
 function ResponsiveAppBar() {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
@@ -121,6 +123,12 @@ function ResponsiveAppBar() {
           >
             Salas
           </Button>
+          <Button href='/reservation'
+            onClick={handleCloseNavMenu}
+           variant='text'
+          >
+            Reservas
+          </Button>
           </ButtonGroup>
           </Menu>
         </Box>
@@ -168,6 +176,12 @@ function ResponsiveAppBar() {
             sx={{ my: 2, color: 'white', display: 'block' }}
           >
             Salas
+          </Button>
+          <Button href='/reservation'
+            onClick={handleCloseNavMenu}
+            sx={{ my: 2, color: 'white', display: 'block' }}
+          >
+            Reservas
           </Button>
         </Box>
 

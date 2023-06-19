@@ -117,10 +117,6 @@ export function Create() {
         <DialogContent>
         <Grid container>
         <Grid item xs={12} sx={{ mt: 2 }}>
-
-          <DialogContentText>
-            BUSCAR CLIENTE
-          </DialogContentText>
           <Autocomplete
             disablePortal
             id="combo-box-demo"
@@ -141,6 +137,7 @@ export function Create() {
           <DateTimePicker label="Fecha y hora"
           value={selectedDateTime}
           onChange={handleDateTimeChange}
+          name="fecha"
            />
         </DemoContainer>
         </LocalizationProvider>
