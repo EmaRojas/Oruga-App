@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, TextField, Typography, Select, MenuItem } from '@mui/material';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, TextField, Typography, Select, MenuItem, FormLabel, RadioGroup, FormControlLabel, Radio, Box } from '@mui/material';
 import { useForm } from '../../hooks/useForm';
 import { createMembership, getAll, updateMembership } from '../../services/membership.service';
 import { toast } from 'react-toastify';
+import { FormControl } from '@mui/base';
 
 const MembershipEmpty = { 
     "_id":"",
     "name": "",
     "price": "",
-    "type": ""
+    "type": "",
+    "hours": ""
 }
 
 
@@ -17,20 +19,22 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMemberships, currentMembershi
     const [formSubmitted, setFormSubmitted] = useState(false);
     const [modal, setModal] = useState(false);
     const [disabledButton, setdisabledButton] = useState(false);
+    const [type, setType] = React.useState('Normal');
 
     const formValidations = {
         name: [(value) => value.length >= 1, 'Es obligatorio.'],
-        type: [(value) => value.length >= 1, 'Es obligatorio.'],
-
+        price:[(value) => value.length >= 1 && !isNaN(value), 'Es obligatorio. No se puede ingresar letras.'],
+        hours: [(value) => !isNaN(value) && value.length >= 1, 'Es obligatorio. No se puede ingresar letras.'],
     }
 
     const {
-        name, price, type, onInputChange,
-        isFormValid, nameValid, priceValid
+        name, price, hours, onInputChange,
+        isFormValid, nameValid, priceValid, hoursValid
     } = useForm(currentMembership, formValidations);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        debugger
         const id = toast.loading("Validando formulario...")
         try {
             setdisabledButton(true);
@@ -39,24 +43,26 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMemberships, currentMembershi
             if (!isFormValid)
             {
                 toast.dismiss(id);
+                setdisabledButton(false);
+                toast.error("Formulario incorrecto")
                 return;
             } 
                 
             if (currentMembership._id.length > 1) {
-                const { success } = await updateMembership(currentMembership._id, name, price, type);
+                const { success } = await updateMembership(currentMembership._id, name, price,hours, type);
                 if (!success) {
                     toast.dismiss(id);
                     return;
                 }
                 toast.update(id, { render: "Registro modificado", type: "success", isLoading: false, autoClose: 2000 });
             } else {
-                const { success } = await createMembership(name, price, type);
-
-                if (!success) {
-                    toast.dismiss(id);
-                    return;
-                }
-                toast.update(id, { render: "Cliente registrado", type: "success", isLoading: false, autoClose: 2000 });
+                const response = await createMembership(name, price,hours, type);
+console.log(response);
+                // if (!success) {
+                //     toast.dismiss(id);
+                //     return;
+                // }
+                toast.update(id, { render: "Membresía registrada", type: "success", isLoading: false, autoClose: 2000 });
             }
             setCurrentMembership(MembershipEmpty);
             reset();     
@@ -66,6 +72,9 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMemberships, currentMembershi
         }
     }
 
+    const handleChange = (event) => {
+        setType(event.target.value);
+    };
 
     const reset = () => {
         setdisabledButton(false);
@@ -92,7 +101,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMemberships, currentMembershi
             .catch((e) => {
                 console.log(e.message)
             })
-    }
+    }      
 
     return (
         <>
@@ -100,7 +109,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMemberships, currentMembershi
             <Button disabled={isEdit} onClick={handleOpen}>Editar</Button>
             <Dialog open={modal} onClose={handleClose}>
                 <form onSubmit={handleSubmit}>
-                    <DialogTitle><Typography color='primary.main' sx={{ ml: 1 }}>NUEVO CLIENTE</Typography></DialogTitle>
+                    <DialogTitle><Typography color='primary.main' sx={{ ml: 1 }}>NUEVA MEMBRESÍA</Typography></DialogTitle>
                     <DialogContent>
 
                         <Grid container>
@@ -131,9 +140,32 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMemberships, currentMembershi
                                 />
                             </Grid>
                             <Grid item xs={12} sx={{ mt: 2 }}>
-
+                                <TextField
+                                    label="Horas"
+                                    type="text"
+                                    fullWidth
+                                    name="hours"
+                                    value={hours || ''}
+                                    onChange={onInputChange}
+                                    error={!!hoursValid && formSubmitted}
+                                    helperText={hoursValid}
+                                />
                             </Grid>
-
+                            <Grid item xs={12} sx={{ mt: 2 }}>
+                                <FormControl>
+                                    <FormLabel id="demo-controlled-radio-buttons-group">Tipo</FormLabel>
+                                    <RadioGroup
+                                        row
+                                        aria-labelledby="demo-controlled-radio-buttons-group"
+                                        name="controlled-radio-buttons-group"
+                                        value={type}
+                                        onChange={handleChange}
+                                    >
+                                        <FormControlLabel value="Normal" control={<Radio />} label="Normal" />
+                                        <FormControlLabel value="Compartida" control={<Radio />} label="Compartida" />
+                                    </RadioGroup>
+                                </FormControl>
+                            </Grid>
 
                         </Grid>
 

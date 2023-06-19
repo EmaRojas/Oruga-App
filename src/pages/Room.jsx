@@ -1,8 +1,8 @@
 import { Container, Box, ButtonGroup, Button, } from "@mui/material";
-import { Table } from "../components/privateRoom/table";
+import { Table } from "../components/room/table";
 
 
-export const PrivateRoom = () => {
+export const Room = () => {
     return (
         <Container maxWidth="xl">
             <Box sx={{ display: 'flex' }} className='animate__animated animate__fadeIn animate__faster'>

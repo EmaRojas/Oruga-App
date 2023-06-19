@@ -5,13 +5,13 @@ import { createTheme } from "@mui/material/styles";
 import { CacheProvider } from "@emotion/react";
 import createCache from "@emotion/cache";
 import { useState } from "react";
-import { deletePrivateRoom, getAllRooms } from "../../services/privateRoom.service";
+import { deleteRoom, getAllRooms } from "../../services/room.service";
 import { Button, ButtonGroup, Chip, Dialog, DialogContent, DialogTitle } from "@mui/material";
 import { CreateOrEdit } from "./createOrEdit";
 import { ToastContainer, toast } from 'react-toastify';
 //https://github.com/gregnb/mui-datatables
 
-const PrivateRoomEmpty = { 
+const RoomEmpty = { 
     "_id":"",
     "name": "",
     "capacity": ""
@@ -19,20 +19,20 @@ const PrivateRoomEmpty = {
 
 export const Table = () => {
 
-    const [privateRooms, setPrivateRooms] = useState()
+    const [rooms, setRooms] = useState()
     const [edit, setEdit] = useState(true);
-    const [currentPrivateRoom, setCurrentPrivateRoom] = useState(PrivateRoomEmpty);
+    const [currentRoom, setCurrentRoom] = useState(RoomEmpty);
 
     const refreshTable =async () => {    
         await getAllRooms()
-        .then(({ privateRooms }) => {
-            setPrivateRooms(privateRooms)
+        .then(({ rooms }) => {
+            setRooms(rooms)
         })
         .catch((e) => {
             console.log(e.message)
         })
         
-        setCurrentPrivateRoom(PrivateRoomEmpty);
+        setCurrentRoom(RoomEmpty);
         setEdit(true);
     }
 
@@ -107,15 +107,15 @@ export const Table = () => {
         onRowSelectionChange: (currentRowsSelected, allRowsSelected, rowsSelected) => {
             if (rowsSelected.length <= 1) {
                 setEdit(false)
-                setCurrentPrivateRoom(privateRooms[rowsSelected])
+                setCurrentRoom(rooms[rowsSelected])
             }
             if (rowsSelected.length > 1) {
                 setEdit(true)
-                setCurrentPrivateRoom(PrivateRoomEmpty);
+                setCurrentRoom(RoomEmpty);
             }
             if (rowsSelected.length == 0) {
                 setEdit(true)
-                setCurrentPrivateRoom(PrivateRoomEmpty);
+                setCurrentRoom(RoomEmpty);
             }
         },
         onRowsDelete: (rowsDeleted) => {
@@ -123,8 +123,8 @@ export const Table = () => {
             const { data } = rowsDeleted;
 
             data.forEach(async ({ index }) => {
-                const { _id } = privateRooms[index];
-                await deletePrivateRoom(_id);
+                const { _id } = rooms[index];
+                await deleteRoom(_id);
                 refreshTable();
             });
 
@@ -135,15 +135,15 @@ export const Table = () => {
     return (
         <>
             <ButtonGroup variant="outlined" aria-label="outlined button group">
-                <CreateOrEdit isEdit={edit} setEdit={setEdit} setPrivateRooms={setPrivateRooms} privateRooms={privateRooms} currentPrivateRoom={currentPrivateRoom} setCurrentPrivateRoom={setCurrentPrivateRoom} />
+                <CreateOrEdit isEdit={edit} setEdit={setEdit} setRooms={setRooms} Rooms={rooms} currentRoom={currentRoom} setCurrentRoom={setCurrentRoom} />
             </ButtonGroup>
 
             <CacheProvider value={muiCache} mt={5}>
                 <ThemeProvider theme={createTheme()}>
 
-                    <MUIDataTable
+                    <MUIDataTable className="tabluppercase"
                         title={"SALAS"}
-                        data={privateRooms}
+                        data={rooms}
                         columns={columns}
                         options={options}
                     />

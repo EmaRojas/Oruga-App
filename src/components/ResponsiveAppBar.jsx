@@ -117,7 +117,7 @@ function ResponsiveAppBar() {
           >
             Membresías
           </Button>
-          <Button href='/privateroom'
+          <Button href='/room'
             onClick={handleCloseNavMenu}
            variant='text'
           >
@@ -171,7 +171,7 @@ function ResponsiveAppBar() {
           >
             Membresías
           </Button>
-          <Button href='/privateroom'
+          <Button href='/room'
             onClick={handleCloseNavMenu}
             sx={{ my: 2, color: 'white', display: 'block' }}
           >

@@ -36,135 +36,135 @@ const Home = () => {
   return (
     <div class="container">
 
-      <Grid container sx={{mt:10}}>
-        <Grid item xs={12} md={2}>
+      <Grid container sx={{ m: 10 }}>
+        <Grid item xs={12} sm={3} md={3}>
           <Item>
             <div class="card">
 
-                         <Card>
-                      <CardContent>
-                         <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-                           Alocasia
-                        </Typography>
-                         <Typography variant="h5" component="div">
-                         8:00 - 13:00
-                        </Typography>
-                        <Typography color="text.secondary">
-                           <StarBorderPurple500Icon />
-                         Facundo Quintana
-                      </Typography>
-                        {/* esto en caso de comentarios / o que necesite por ejemplo el proyector */}
-                        {/*
+              <Card>
+                <CardContent>
+                  <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
+                    Alocasia
+                  </Typography>
+                  <Typography variant="h5" component="div">
+                    8:00 - 13:00
+                  </Typography>
+                  <Typography color="text.secondary">
+                    <StarBorderPurple500Icon />
+                    Facundo Quintana
+                  </Typography>
+                  {/* esto en caso de comentarios / o que necesite por ejemplo el proyector */}
+                  {/*
     //       <Typography variant="body2">
     //         well meaning and kindly.
     //         <br />
     //         {'"a benevolent smile"'}
     //       </Typography>
     // */}
-                      </CardContent>
-                     <CardActions>
-                       <Button size="small">Ver más</Button>
-                     </CardActions>
-                    </Card>
+                </CardContent>
+                <CardActions>
+                  <Button size="small">Ver más</Button>
+                </CardActions>
+              </Card>
 
             </div>
           </Item>
         </Grid>
-        <Grid item xs={12} md={2}>
+        <Grid item xs={12} sm={3} md={3}>
           <Item>
             <div class="card">
 
-                         <Card>
-                      <CardContent>
-                         <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-                           Alocasia
-                        </Typography>
-                         <Typography variant="h5" component="div">
-                         8:00 - 13:00
-                        </Typography>
-                        <Typography color="text.secondary">
-                           <StarBorderPurple500Icon />
-                         Facundo Quintana
-                      </Typography>
-                        {/* esto en caso de comentarios / o que necesite por ejemplo el proyector */}
-                        {/*
+              <Card>
+                <CardContent>
+                  <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
+                    Alocasia
+                  </Typography>
+                  <Typography variant="h5" component="div">
+                    8:00 - 13:00
+                  </Typography>
+                  <Typography color="text.secondary">
+                    <StarBorderPurple500Icon />
+                    Facundo Quintana
+                  </Typography>
+                  {/* esto en caso de comentarios / o que necesite por ejemplo el proyector */}
+                  {/*
     //       <Typography variant="body2">
     //         well meaning and kindly.
     //         <br />
     //         {'"a benevolent smile"'}
     //       </Typography>
     // */}
-                      </CardContent>
-                     <CardActions>
-                       <Button size="small">Ver más</Button>
-                     </CardActions>
-                    </Card>
+                </CardContent>
+                <CardActions>
+                  <Button size="small">Ver más</Button>
+                </CardActions>
+              </Card>
 
             </div>
           </Item>
         </Grid>
-        <Grid item xs={12} md={2}>
+        <Grid item xs={12} sm={3} md={3}>
           <Item>
             <div class="card">
 
-                         <Card>
-                      <CardContent>
-                         <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-                           Alocasia
-                        </Typography>
-                         <Typography variant="h5" component="div">
-                         8:00 - 13:00
-                        </Typography>
-                        <Typography color="text.secondary">
-                           <StarBorderPurple500Icon />
-                         Facundo Quintana
-                      </Typography>
-                        {/* esto en caso de comentarios / o que necesite por ejemplo el proyector */}
-                        {/*
+              <Card>
+                <CardContent>
+                  <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
+                    Alocasia
+                  </Typography>
+                  <Typography variant="h5" component="div">
+                    8:00 - 13:00
+                  </Typography>
+                  <Typography color="text.secondary">
+                    <StarBorderPurple500Icon />
+                    Facundo Quintana
+                  </Typography>
+                  {/* esto en caso de comentarios / o que necesite por ejemplo el proyector */}
+                  {/*
     //       <Typography variant="body2">
     //         well meaning and kindly.
     //         <br />
     //         {'"a benevolent smile"'}
     //       </Typography>
     // */}
-                      </CardContent>
-                     <CardActions>
-                       <Button size="small">Ver más</Button>
-                     </CardActions>
-                    </Card>
+                </CardContent>
+                <CardActions>
+                  <Button size="small">Ver más</Button>
+                </CardActions>
+              </Card>
 
             </div>
           </Item>
         </Grid>
-        <Grid item xs={12} md={2}>
+        <Grid item xs={12} sm={3} md={3}>
           <Item>
             <div class="card">
 
-                         <Card>
-                      <CardContent>
-                         <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-                           Alocasia
-                        </Typography>
-                         <Typography variant="h5" component="div">
-                         8:00 - 13:00
-                        </Typography>
-                        <Typography color="text.secondary">
-                           <StarBorderPurple500Icon />
-                         Facundo Quintana
-                      </Typography>
-                        {/* esto en caso de comentarios / o que necesite por ejemplo el proyector */}
-                        {/*
+              <Card>
+                <CardContent>
+                  <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
+                    Alocasia
+                  </Typography>
+                  <Typography variant="h5" component="div">
+                    8:00 - 13:00
+                  </Typography>
+                  <Typography color="text.secondary">
+                    <StarBorderPurple500Icon />
+                    Facundo Quintana
+                  </Typography>
+                  {/* esto en caso de comentarios / o que necesite por ejemplo el proyector */}
+                  {/*
     //       <Typography variant="body2">
     //         well meaning and kindly.
     //         <br />
     //         {'"a benevolent smile"'}
     //       </Typography>
     // */}
-                      </CardContent>
-                     <CardActions>
-                       <Button size="small">Ver más</Button>
-                     </CardActions>
-                    </Card>
+                </CardContent>
+                <CardActions>
+                  <Button size="small">Ver más</Button>
+                </CardActions>
+              </Card>
 
             </div>
           </Item>
