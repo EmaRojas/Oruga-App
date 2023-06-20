@@ -1,7 +1,7 @@
 
 const baseURL = 'https://orugacoworking.vercel.app/api/v1/membership';
 
-export const getAll = async () => {
+export const getAllMemberships = async () => {
     const response = await fetch(baseURL);
     if (!response.ok) {
         throw new Error('Data coud not be fetched!')

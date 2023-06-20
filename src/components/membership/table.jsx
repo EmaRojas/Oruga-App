@@ -5,7 +5,7 @@ import { createTheme } from "@mui/material/styles";
 import { CacheProvider } from "@emotion/react";
 import createCache from "@emotion/cache";
 import { useState } from "react";
-import { deleteMembership, getAll } from "../../services/membership.service";
+import { deleteMembership, getAll, getAllMemberships } from "../../services/membership.service";
 import { Button, ButtonGroup, Chip, Dialog, DialogContent, DialogTitle } from "@mui/material";
 import { CreateOrEdit } from "./createOrEdit";
 import { ToastContainer, toast } from 'react-toastify';
@@ -26,7 +26,7 @@ export const Table = () => {
     const [currentMembership, setCurrentMembership] = useState(MembershipEmpty);
 
     const refreshTable =async () => {    
-        await getAll()
+        await getAllMemberships()
         .then(({ memberships }) => {
             setMemberships(memberships)
         })

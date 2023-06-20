@@ -1,5 +1,6 @@
 import { Container, Box, ButtonGroup, Button, Grid } from "@mui/material";
 import { Table } from "../components/membership/table";
+import { TableMembershipsByUser } from "../components/membershipByUser/table";
 
 
 export const Membership = () => {
@@ -20,7 +21,7 @@ export const Membership = () => {
                             component='main'
                             sx={{ p: 3 }}
                         >
-                            <Table />
+                            <TableMembershipsByUser />
                         </Box>
                     </Grid>
                 </Grid>

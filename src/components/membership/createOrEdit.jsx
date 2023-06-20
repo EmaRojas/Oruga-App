@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, TextField, Typography, Select, MenuItem, FormLabel, RadioGroup, FormControlLabel, Radio, Box } from '@mui/material';
 import { useForm } from '../../hooks/useForm';
-import { createMembership, getAll, updateMembership } from '../../services/membership.service';
+import { createMembership, getAllMemberships, updateMembership } from '../../services/membership.service';
 import { toast } from 'react-toastify';
 import { FormControl } from '@mui/base';
 
@@ -94,7 +94,7 @@ console.log(response);
 
     const refreshList = () => {
         
-        getAll()
+        getAllMemberships()
             .then(({ memberships }) => {
                 setMemberships(memberships)
             })
