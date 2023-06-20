@@ -24,18 +24,36 @@ export const Table = () => {
     const [edit, setEdit] = useState(true);
     const [currentReservation, setCurrentReservation] = useState(ReservationEmpty);
 
-    const refreshTable =async () => {    
+    const formatCurrency = (value) => {
+        const numberValue = parseFloat(value);
+        if (!isNaN(numberValue)) {
+            return numberValue.toLocaleString("es-AR", { style: "currency", currency: "ARS" });
+        }
+        return value;
+    };
+    
+    const refreshTable = async () => {
         await getAllReservations()
-        .then(({ reservations }) => {
-            setReservations(reservations)
-        })
-        .catch((e) => {
-            console.log(e.message)
-        })
-        
+          .then(({ reservations }) => {
+            // Transformar los datos para la exportación CSV
+            const transformedReservations = reservations.map((reservation) => ({
+              ...reservation,
+              clientID: reservation.clientID.full_name || "",
+              roomID: reservation.roomID.name,
+              priceRoomID: reservation.priceRoomID.hour,
+              total: reservation.paymentID.total,
+              paid: reservation.paymentID.paid,
+
+            }));
+            setReservations(transformedReservations);
+          })
+          .catch((e) => {
+            console.log(e.message);
+          });
+      
         setCurrentReservation(ReservationEmpty);
         setEdit(true);
-    }
+      };
 
     
     useEffect(() => {
@@ -50,88 +68,81 @@ export const Table = () => {
 
     const [responsive, setResponsive] = useState("vertical");
 
-    const formatCurrency = (value) => {
-        const numberValue = parseFloat(value);
-        if (!isNaN(numberValue)) {
-            return numberValue.toLocaleString("es-AR", { style: "currency", currency: "ARS" });
-        }
-        return value;
-    };
+
 
     const columns = [
         {
-            name: "date",
-            label: "Fecha",
-            options: {
-                filter: true,
-                sort: false,
-            }
+          name: "date",
+          label: "Fecha",
+          options: {
+            filter: true,
+            sort: false,
+          },
         },
         {
-            name: "clientID",
-            label: "Cliente",
-            options: {
-                filter: true,
-                sort: false,
-                customBodyRender: (value, tableMeta) => {
-                    return value.full_name;
-                },
-            }
+          name: "clientID",
+          label: "Cliente",
+          options: {
+            filter: true,
+            sort: false,
+            customBodyRender: (value, tableMeta) => {
+              return value || "";
+            },
+          },
         },
         {
-            name: "roomID",
-            label: "Sala",
-            options: {
-                filter: true,
-                sort: false,
-                customBodyRender: (value, tableMeta) => {
-                    return value.name;
-                },
-            }
+          name: "roomID",
+          label: "Sala",
+          options: {
+            filter: true,
+            sort: false,
+            customBodyRender: (value, tableMeta) => {
+              return value;
+            },
+          },
         },
         {
-            name: "time",
-            label: "Hora",
-            options: {
-                filter: true,
-                sort: false,
-            }
+          name: "time",
+          label: "Hora",
+          options: {
+            filter: true,
+            sort: false,
+          },
         },
         {
-            name: "priceRoomID",
-            label: "Horas",
-            options: {
-                filter: true,
-                sort: false,
-                customBodyRender: (value, tableMeta) => {
-                    return value.hour;
-                },
-            }
+          name: "priceRoomID",
+          label: "Horas",
+          options: {
+            filter: true,
+            sort: false,
+            customBodyRender: (value, tableMeta) => {
+              return value;
+            },
+          },
         },
         {
-            name: "paymentID",
+            name: "total",
             label: "Total",
             options: {
-                filter: true,
-                sort: false,
-                customBodyRender: (value, tableMeta) => {
-                    return formatCurrency(value.total);
-                },
-            }
-        },
-        {
-            name: "paymentID",
+              filter: true,
+              sort: false,
+              customBodyRender: (value, tableMeta) => {
+                return formatCurrency(value);
+              },
+            },
+          },
+          {
+            name: "paid",
             label: "Pagado",
             options: {
-                filter: true,
-                sort: false,
-                customBodyRender: (value, tableMeta) => {
-                    return formatCurrency(value.paid);
-                },
-            }
-        },
-        
-    ];
+              filter: true,
+              sort: false,
+              customBodyRender: (value, tableMeta) => {
+                return formatCurrency(value);
+              },
+            },
+          },
+      ];
 
     const options = {
         filterType: "dropdown",
@@ -168,6 +179,12 @@ export const Table = () => {
                 text: "fila seleccionada",
                 delete: "Eliminar",
                 deleteAria: "Eliminar fila",
+            },
+            downloadOptions: {
+                filterOptions: {
+                    useDisplayedColumnsOnly: true, // it was true
+                    useDisplayedRowsOnly: true, // it was true
+                  },
             },
         },
         onRowSelectionChange: (currentRowsSelected, allRowsSelected, rowsSelected) => {

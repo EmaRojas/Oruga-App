@@ -5,7 +5,7 @@ import { createReservation, getAllReservations, updateReservation } from '../../
 import { toast } from 'react-toastify';
 import Autocomplete from '@mui/material/Autocomplete';
 import { getAll } from "../../services/client.service";
-import { getAllRooms } from "../../services/privateRoom.service";
+import { getAllRooms } from "../../services/priceRoom.service";
 import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -181,7 +181,6 @@ export const CreateOrEdit = ({ isEdit, setEdit, setReservations, currentReservat
                                     id="combo-box-demo"
                                     options={clients}
                                     getOptionLabel={(clients) => clients.full_name.toString()}
-                                    sx={{ width: 300 }}
                                     renderInput={(params) => <TextField {...params} label="Cliente" />}
                                     name="client"
                                     onChange={handleAutocompleteChange}
@@ -207,7 +206,6 @@ export const CreateOrEdit = ({ isEdit, setEdit, setReservations, currentReservat
                                     id="combo-box-demo"
                                     options={priceRooms}
                                     getOptionLabel={(priceRooms) => `${priceRooms.roomID.name.toString()} (${priceRooms.hour.toString()} hs)`}
-                                    sx={{ width: 300 }}
                                     renderInput={(params) => <TextField {...params} label="Sala" />}
                                     name="priceRoom"
                                     onChange={handleAutocompleteChangeRoom}

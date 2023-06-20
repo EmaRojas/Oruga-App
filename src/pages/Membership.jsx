@@ -1,4 +1,4 @@
-import { Container, Box, ButtonGroup, Button, } from "@mui/material";
+import { Container, Box, ButtonGroup, Button, Grid } from "@mui/material";
 import { Table } from "../components/membership/table";
 
 
@@ -6,13 +6,24 @@ export const Membership = () => {
     return (
         <Container maxWidth="xl">
             <Box sx={{ display: 'flex' }} className='animate__animated animate__fadeIn animate__faster'>
-
-                <Box
-                    component='main'
-                    sx={{ flexGrow: 1, p: 3 }}
-                >
-                    <Table />
-                </Box>
+                <Grid container spacing={2}>
+                    <Grid item md={6} xs={12}>
+                        <Box
+                            component='main'
+                            sx={{ p: 3 }}
+                        >
+                            <Table />
+                        </Box>
+                    </Grid>
+                    <Grid item md={6} xs={12}>
+                        <Box
+                            component='main'
+                            sx={{ p: 3 }}
+                        >
+                            <Table />
+                        </Box>
+                    </Grid>
+                </Grid>
             </Box>
         </Container>
     )
