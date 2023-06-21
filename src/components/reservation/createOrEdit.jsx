@@ -172,7 +172,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setReservations, currentReservat
             <Button onClick={handleOpen}>NUEVA RESERVA</Button>
             <Dialog open={modal} onClose={handleClose}>
                 <form onSubmit={handleSubmit}>
-                    <DialogTitle><Typography color='primary.main' sx={{ ml: 1 }}>NUEVA SALA</Typography></DialogTitle>
+                    <DialogTitle><Typography color='primary.main' sx={{ ml: 1 }}>NUEVA RESERVA</Typography></DialogTitle>
                     <DialogContent>
                         <Grid container>
                             <Grid item xs={12} sx={{ mt: 2 }}>
