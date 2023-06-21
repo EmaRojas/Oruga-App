@@ -1,7 +1,7 @@
 
 const baseURL = 'https://orugacoworking.vercel.app/api/v1/priceRoom';
 
-export const getAllRooms = async () => {
+export const getAllPriceRooms = async () => {
     const response = await fetch(baseURL);
     if (!response.ok) {
         throw new Error('Data coud not be fetched!')
@@ -18,19 +18,21 @@ export const getPriceRoomById = async (id) => {
         return response.json()
     }
 }
-
-export const createPriceRoom = async (name, capacity) => {
+export const createPriceRoom = async (roomID, hour, price) => {
     const requestOptions = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-            "name": name,
-            "capacity": capacity
+            "roomID": roomID,
+            "hour": hour,
+            "price": price
+
         })
     };
     const response = await fetch(baseURL, requestOptions);
     return await response.json();
 }
+
 
 export const updatePriceRoom = async (id, name, capacity) => {
     const requestOptions = {

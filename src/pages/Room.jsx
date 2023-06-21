@@ -1,5 +1,6 @@
 import { Container, Box, ButtonGroup, Button, Grid } from "@mui/material";
 import { Table } from "../components/room/table";
+import { TablePriceRoom } from "../components/priceRoom/table";
 
 
 export const Room = () => {
@@ -20,7 +21,7 @@ export const Room = () => {
                             component='main'
                             sx={{ p: 3 }}
                         >
-                            <Table />
+                            <TablePriceRoom />
                         </Box>
                     </Grid>
                 </Grid>

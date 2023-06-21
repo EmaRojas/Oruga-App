@@ -1,70 +1,51 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, TextField, Typography } from '@mui/material';
 import { useForm } from '../../hooks/useForm';
-import { createReservation, getAllReservations, updateReservation } from '../../services/reservation.service';
+import { getAllPriceRooms, createPriceRoom } from '../../services/priceRoom.service';
 import { toast } from 'react-toastify';
 import Autocomplete from '@mui/material/Autocomplete';
 import { getAll } from "../../services/client.service";
-import { getAllPriceRooms } from "../../services/priceRoom.service";
 import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { FormControlLabel, FormLabel, FormControl, Radio, RadioGroup } from '@mui/material';
 import dayjs from 'dayjs';
+import { getAllRooms } from '../../services/room.service';
 
 
-const ReservationEmpty = { 
+const PriceRoomEmpty = { 
     "_id":"",
-    "clientID": {
-        "full_name": "",
+    "roomID": {
+        "name": "",
     },
 }
 
 
-export const CreateOrEdit = ({ isEdit, setEdit, setReservations, currentReservation, setCurrentReservation }) => {
+export const CreateOrEdit = ({ isEdit, setEdit, currentPriceRoom, setcurrentPriceRoom }) => {
     
     const [formSubmitted, setFormSubmitted] = useState(false);
     const [modal, setModal] = useState(false);
     const [disabledButton, setdisabledButton] = useState(false);
 
-    const [clients, setClients] = useState();
-    const [priceRooms, setRooms] = useState();
-    const [selectedClient, setSelectedClient] = useState(null);
+    const [rooms, setRooms] = useState();
+    const [priceRooms, setPriceRooms] = useState();
+    const [selectedRoom, setSelectedRoom] = useState(null);
     const [selectedPriceRoom, setSelectedPriceRoom] = useState(null);
-  
-    const [selectedDateTime, setSelectedDateTime] = useState(null);
-  
-  
-    const [paymentMethod, setPaymentMethod] = useState('Efectivo');
-    const [paid, setPaid] = useState(0);
-  
-    const handleChange = (event) => {
-      setPaymentMethod(event.target.value);
-    };
-  
-    const handlePaidChange = (event) => {
-      setPaid(event.target.value);
-      console.log(paid);
-    };
-  
-    const handleDateTimeChange = (newDateTime) => {
-      setSelectedDateTime(newDateTime);
-    };
+    const [price, setPrice] = useState(0);
+    const [hour, setHour] = useState(0);
+
   
     const handleAutocompleteChange = (event, value) => {
-      setSelectedClient(value);
+      setSelectedRoom(value);
     };
   
-    const handleAutocompleteChangeRoom = (event, value) => {
-      setSelectedPriceRoom(value);
-    };
-  
-    const getClients =async () => {    
-      await getAll()
-      .then(({ clients }) => {
-          setClients(clients)
-          console.log(clients);
+
+    const getRooms =async () => {    
+      await getAllRooms()
+      .then(({ rooms }) => {
+          setRooms(rooms)
+          console.log(rooms);
   
       })
       .catch((e) => {
@@ -72,11 +53,10 @@ export const CreateOrEdit = ({ isEdit, setEdit, setReservations, currentReservat
       })
     }
   
-    const getRooms =async () => {    
+    const getPriceRooms =async () => {    
       await getAllPriceRooms()
       .then(({ priceRooms }) => {
-          setRooms(priceRooms);
-          console.log(priceRooms);
+          setPriceRooms(priceRooms);
   
       })
       .catch((e) => {
@@ -86,8 +66,8 @@ export const CreateOrEdit = ({ isEdit, setEdit, setReservations, currentReservat
 
     
   useEffect(() => {
-    getClients();
     getRooms();
+    getPriceRooms();
 
   }, [])
 
@@ -97,7 +77,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setReservations, currentReservat
 
     const {
         isFormValid
-    } = useForm(currentReservation, formValidations);
+    } = useForm(currentPriceRoom, formValidations);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -122,45 +102,44 @@ export const CreateOrEdit = ({ isEdit, setEdit, setReservations, currentReservat
             // } 
             
             else {
-                const date = selectedDateTime.format('YYYY-MM-DD');
-                const time = selectedDateTime.format('HH:mm');
-                const { success } = await createReservation(selectedClient._id, selectedPriceRoom._id, selectedPriceRoom.roomID._id, selectedDateTime, date, time, paymentMethod, selectedPriceRoom.price, paid );
+                const { success } = await createPriceRoom(selectedRoom._id, hour, price);
 
                 if (!success) {
                     toast.dismiss(id);
                     return;
                 }
-                toast.update(id, { render: "Sala creada", type: "success", isLoading: false, autoClose: 2000 });
+                toast.update(id, { render: "Precio creado", type: "success", isLoading: false, autoClose: 2000 });
+                reset(); 
             }
-            reset();     
+            
+            
         } catch (e) {
             toast.dismiss(id);
             console.log(e.message);
         }
     }
 
-    const refreshList = () => {
-        
-        getAllReservations()
-            .then(({ reservations }) => {
-                setReservations(reservations)
-            })
-            .catch((e) => {
-                console.log(e.message)
-            })
-    }
-
     const reset = () => {
         setdisabledButton(false);
         setFormSubmitted(false);
         setEdit(true);
-        refreshList();
+        getPriceRooms();
         handleClose();
     }
 
     const handleOpen = () => {
         setModal(true);
     }
+
+    const handlePriceChange = (event) => {
+        setPrice(event.target.value);
+        console.log(price);
+      };
+
+      const handleHourChange = (event) => {
+        setHour(event.target.value);
+        console.log(hour);
+      };
 
     const handleClose = () => {
         setModal(false);
@@ -169,19 +148,19 @@ export const CreateOrEdit = ({ isEdit, setEdit, setReservations, currentReservat
 
     return (
         <>
-            <Button onClick={handleOpen}>NUEVA RESERVA</Button>
+            <Button onClick={handleOpen}>CREAR PRECIO</Button>
             <Dialog open={modal} onClose={handleClose}>
                 <form onSubmit={handleSubmit}>
-                    <DialogTitle><Typography color='primary.main' sx={{ ml: 1 }}>NUEVA SALA</Typography></DialogTitle>
+                    <DialogTitle><Typography color='primary.main' sx={{ ml: 1 }}>NUEVO PRECIO SALA</Typography></DialogTitle>
                     <DialogContent>
                         <Grid container>
                             <Grid item xs={12} sx={{ mt: 2 }}>
                                 <Autocomplete
                                     disablePortal
                                     id="combo-box-demo"
-                                    options={clients}
-                                    getOptionLabel={(clients) => clients.full_name.toString()}
-                                    renderInput={(params) => <TextField {...params} label="Cliente" />}
+                                    options={rooms}
+                                    getOptionLabel={(rooms) => rooms.name.toString()}
+                                    renderInput={(params) => <TextField {...params} label="Seleccionar sala" />}
                                     name="client"
                                     onChange={handleAutocompleteChange}
                                 // value={value}
@@ -189,53 +168,26 @@ export const CreateOrEdit = ({ isEdit, setEdit, setReservations, currentReservat
                                 />
                             </Grid>
                             <Grid item xs={12} sx={{ mt: 2 }}>
-
-                                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                    <DemoContainer components={['DateTimePicker']}>
-                                        <DateTimePicker label="Fecha y hora"
-                                            value={selectedDateTime}
-                                            onChange={handleDateTimeChange}
-                                            name="fecha"
-                                        />
-                                    </DemoContainer>
-                                </LocalizationProvider>
-                            </Grid>
-                            <Grid item xs={12} sx={{ mt: 2 }}>
-                                <Autocomplete
-                                    disablePortal
-                                    id="combo-box-demo"
-                                    options={priceRooms}
-                                    getOptionLabel={(priceRooms) => `${priceRooms.roomID.name.toString()} (${priceRooms.hour.toString()} hs)`}
-                                    renderInput={(params) => <TextField {...params} label="Sala" />}
-                                    name="priceRoom"
-                                    onChange={handleAutocompleteChangeRoom}
+                                <TextField
+                                    label="Horas"
+                                    type="text"
+                                    fullWidth
+                                    name="hour"
+                                    value={hour}
+                                    onChange={handleHourChange}
                                 />
-                            </Grid>
-                            <Grid item xs={12} sx={{ mt: 2 }}>
-                                <FormControl>
-                                    <FormLabel id="demo-controlled-radio-buttons-group">Medio de pago</FormLabel>
-                                    <RadioGroup
-                                        row
-                                        aria-labelledby="demo-controlled-radio-buttons-group"
-                                        name="controlled-radio-buttons-group"
-                                        value={paymentMethod}
-                                        onChange={handleChange}
-                                    >
-                                        <FormControlLabel value="Efectivo" control={<Radio />} label="Efectivo" />
-                                        <FormControlLabel value="MercadoPago" control={<Radio />} label="MercadoPago" />
-                                    </RadioGroup>
-                                </FormControl>
                             </Grid>
                             <Grid item xs={12} sx={{ mt: 2 }}>
                                 <TextField
-                                    label="Monto abonado"
+                                    label="Precio"
                                     type="text"
                                     fullWidth
-                                    name="paid"
-                                    value={paid}
-                                    onChange={handlePaidChange}
+                                    name="price"
+                                    value={price}
+                                    onChange={handlePriceChange}
                                 />
                             </Grid>
+
                         </Grid>
 
 
