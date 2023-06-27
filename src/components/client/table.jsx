@@ -59,7 +59,7 @@ export const Table = () => {
             label: "Nombre",
             options: {
                 filter: true,
-                sort: false,
+                sort: true,
             }
         },
         {
@@ -83,7 +83,7 @@ export const Table = () => {
             label: "Telefono",
             options: {
                 filter: true,
-                sort: true,
+                sort: false,
             }
         },
   

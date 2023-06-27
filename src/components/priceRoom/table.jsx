@@ -13,9 +13,9 @@ import { getAllPriceRooms, deletePriceRoom } from "../../services/priceRoom.serv
 
 const PriceRoomEmpty = { 
     "_id":"",
-    "roomID": {
-        "name": "",
-    },
+    "hour": "",
+    "price":"",
+    "idRoom": ""
 }
 
 export const TablePriceRoom = () => {
@@ -34,12 +34,14 @@ export const TablePriceRoom = () => {
             return {
               ...priceRoom,
               roomID: priceRoom.roomID.name || "",
+              idRoom: priceRoom.roomID._id,
               hour: priceRoom.hour,
               price: priceRoom.price,
             };
           });
           
           setPriceRooms(transformedPriceRooms);
+          console.log(priceRooms);
         })
         .catch((e) => {
           console.log(e.message);
@@ -145,7 +147,7 @@ export const TablePriceRoom = () => {
             },
         },
         onRowSelectionChange: (currentRowsSelected, allRowsSelected, rowsSelected) => {
-            if (rowsSelected.length <= 1) {
+          if (rowsSelected.length <= 1) {
                 setEdit(false)
                 //console.log(membershipsByUser[rowsSelected]);
                 setCurrentPriceRoom(priceRooms[rowsSelected]);

@@ -19,6 +19,7 @@ export const getPriceRoomById = async (id) => {
     }
 }
 export const createPriceRoom = async (roomID, hour, price) => {
+    console.log(roomID);
     const requestOptions = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -34,13 +35,13 @@ export const createPriceRoom = async (roomID, hour, price) => {
 }
 
 
-export const updatePriceRoom = async (id, name, capacity) => {
+export const updatePriceRoom = async (id, hour, price) => {
     const requestOptions = {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-            "name": name,
-            "capacity": capacity
+            "hour": hour,
+            "price": price
         })
     };
     const response = await fetch(baseURL + "/" + id, requestOptions);

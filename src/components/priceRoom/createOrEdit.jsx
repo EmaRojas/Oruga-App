@@ -1,119 +1,87 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, TextField, Typography } from '@mui/material';
 import { useForm } from '../../hooks/useForm';
-import { getAllPriceRooms, createPriceRoom } from '../../services/priceRoom.service';
+import { createPriceRoom, updatePriceRoom, getAllPriceRooms } from '../../services/priceRoom.service';
+import { getAllRooms } from '../../services/room.service'
 import { toast } from 'react-toastify';
 import Autocomplete from '@mui/material/Autocomplete';
-import { getAll } from "../../services/client.service";
-import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
-import { FormControlLabel, FormLabel, FormControl, Radio, RadioGroup } from '@mui/material';
-import dayjs from 'dayjs';
-import { getAllRooms } from '../../services/room.service';
+import { Label } from '@mui/icons-material';
 
-
-const PriceRoomEmpty = { 
-    "_id":"",
-    "roomID": {
-        "name": "",
-    },
+const PriceRoomEmpty = {
+    "_id": "",
+    "hour": "",
+    "price": "",
+    "idRoom": ""
 }
 
 
-export const CreateOrEdit = ({ isEdit, setEdit, currentPriceRoom, setcurrentPriceRoom }) => {
-    
+export const CreateOrEdit = ({ isEdit, setEdit, setPriceRooms, currentPriceRoom, setCurrentPriceRoom }) => {
+
     const [formSubmitted, setFormSubmitted] = useState(false);
     const [modal, setModal] = useState(false);
     const [disabledButton, setdisabledButton] = useState(false);
-
     const [rooms, setRooms] = useState();
-    const [priceRooms, setPriceRooms] = useState();
-    const [selectedRoom, setSelectedRoom] = useState(null);
-    const [selectedPriceRoom, setSelectedPriceRoom] = useState(null);
-    const [price, setPrice] = useState(0);
-    const [hour, setHour] = useState(0);
-
-  
-    const handleAutocompleteChange = (event, value) => {
-      setSelectedRoom(value);
-    };
-  
-
-    const getRooms =async () => {    
-      await getAllRooms()
-      .then(({ rooms }) => {
-          setRooms(rooms)
-          console.log(rooms);
-  
-      })
-      .catch((e) => {
-          console.log(e.message)
-      })
-    }
-  
-    const getPriceRooms =async () => {    
-      await getAllPriceRooms()
-      .then(({ priceRooms }) => {
-          setPriceRooms(priceRooms);
-  
-      })
-      .catch((e) => {
-          console.log(e.message)
-      })
-    }
-
-    
-  useEffect(() => {
-    getRooms();
-    getPriceRooms();
-
-  }, [])
+    const [selectRooms, setSelectRooms] = useState();
 
     const formValidations = {
-        fecha: [(value) => value !== null, 'Es obligatorio.']
+        hour: [(value) => value.length >= 1 && !isNaN(value), 'Es obligatorio. No se puede ingresar letras.'],
+        price: [(value) => value.length >= 1 && !isNaN(value), 'Es obligatorio. No se puede ingresar letras.'],
     }
 
     const {
-        isFormValid
+        isFormValid, hour, hourValid, price, priceValid, onInputChange
     } = useForm(currentPriceRoom, formValidations);
+
+    useEffect(() => {
+        getRooms();
+    }, [])
+
+    const getRooms = async () => {
+        await getAllRooms()
+            .then(({ rooms }) => {
+                setRooms(rooms)
+            })
+            .catch((e) => {
+                console.log(e.message)
+            })
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         const id = toast.loading("Validando formulario...")
         try {
-            setdisabledButton(true);
             setFormSubmitted(true);
-           
-            if (!isFormValid)
-            {
+            
+            if (!isFormValid) {
                 toast.dismiss(id);
                 return;
-            } 
-                
-            // if (currentReservation._id.length > 1) {
-            //     const { success } = await updateReservation(currentReservation._id, clientID);
-            //     if (!success) {
-            //         toast.dismiss(id);
-            //         return;
-            //     }
-            //     toast.update(id, { render: "Registro modificado", type: "success", isLoading: false, autoClose: 2000 });
-            // } 
+            }
+            setdisabledButton(true);
             
-            else {
-                const { success } = await createPriceRoom(selectedRoom._id, hour, price);
+            if (currentPriceRoom._id.length > 1) {
+                const { success } = await updatePriceRoom(currentPriceRoom._id, hour, price);
+
+                if (!success) {
+                    toast.dismiss(id);
+                    return;
+                }
+                toast.update(id, { render: "Precio modificado", type: "success", isLoading: false, autoClose: 2000 });
+            } else {
+                console.log(rooms);
+                const { success } = await createPriceRoom(selectRooms, hour, price);
 
                 if (!success) {
                     toast.dismiss(id);
                     return;
                 }
                 toast.update(id, { render: "Precio creado", type: "success", isLoading: false, autoClose: 2000 });
-                reset(); 
+
             }
-            
-            
+            setCurrentPriceRoom(PriceRoomEmpty);
+            reset();
+
         } catch (e) {
+            setdisabledButton(false);
             toast.dismiss(id);
             console.log(e.message);
         }
@@ -123,50 +91,81 @@ export const CreateOrEdit = ({ isEdit, setEdit, currentPriceRoom, setcurrentPric
         setdisabledButton(false);
         setFormSubmitted(false);
         setEdit(true);
-        getPriceRooms();
+        refreshList();
         handleClose();
     }
 
     const handleOpen = () => {
+        console.log(currentPriceRoom);
         setModal(true);
     }
-
-    const handlePriceChange = (event) => {
-        setPrice(event.target.value);
-        console.log(price);
-      };
-
-      const handleHourChange = (event) => {
-        setHour(event.target.value);
-        console.log(hour);
-      };
 
     const handleClose = () => {
         setModal(false);
     }
 
+    const refreshList = async () => {
+
+        await getAllPriceRooms()
+        .then(({ priceRooms }) => {
+    
+          // Transformar los datos para la exportación CSV
+          const transformedPriceRooms = priceRooms.map((priceRoom) => {
+    
+            return {
+              ...priceRoom,
+              roomID: priceRoom.roomID.name || "",
+              idRoom: priceRoom.roomID._id,
+              hour: priceRoom.hour,
+              price: priceRoom.price,
+            };
+          });
+          
+          setPriceRooms(transformedPriceRooms);
+          console.log(priceRooms);
+        })
+        .catch((e) => {
+          console.log(e.message);
+        });
+    }
 
     return (
         <>
-            <Button onClick={handleOpen}>CREAR PRECIO</Button>
+            <Button disabled={!isEdit} onClick={handleOpen}>CREAR PRECIO</Button>
+            <Button disabled={isEdit} onClick={handleOpen}>Editar</Button>
             <Dialog open={modal} onClose={handleClose}>
                 <form onSubmit={handleSubmit}>
-                    <DialogTitle><Typography color='primary.main' sx={{ ml: 1 }}>NUEVO PRECIO SALA</Typography></DialogTitle>
+                    <>
+                        {
+                            isEdit &&
+                            <DialogTitle><Typography color='primary.main' sx={{ ml: 1 }}>NUEVO PRECIO SALA</Typography></DialogTitle>
+
+                        }
+                        {
+                            isEdit === false &&
+                            <DialogTitle><Typography color='primary.main' sx={{ ml: 1, textTransform: 'uppercase' }}>MODIFICAR {currentPriceRoom.roomID}</Typography></DialogTitle>
+
+                        }
+                    </>
                     <DialogContent>
                         <Grid container>
-                            <Grid item xs={12} sx={{ mt: 2 }}>
-                                <Autocomplete
-                                    disablePortal
-                                    id="combo-box-demo"
-                                    options={rooms}
-                                    getOptionLabel={(rooms) => rooms.name.toString()}
-                                    renderInput={(params) => <TextField {...params} label="Seleccionar sala" />}
-                                    name="client"
-                                    onChange={handleAutocompleteChange}
-                                // value={value}
-                                // onChange={(event, value) => console.log(value._id)}
-                                />
-                            </Grid>
+                            <> {isEdit &&
+                                <Grid visibility={!isEdit} item xs={12} sx={{ mt: 2 }}>
+                                    <Autocomplete
+                                        disablePortal
+                                        fullWidth
+                                        id="combo-box-demo"
+                                        options={rooms}
+                                        getOptionLabel={(rooms) => rooms.name.toString()}
+                                        renderInput={(params) => <TextField {...params} label="Seleccionar sala" />}
+                                        name="client"
+                                        onChange={(event, value) => setSelectRooms(value._id)}
+                                    />
+                                </Grid>
+                            }
+
+                            </>
+
                             <Grid item xs={12} sx={{ mt: 2 }}>
                                 <TextField
                                     label="Horas"
@@ -174,7 +173,9 @@ export const CreateOrEdit = ({ isEdit, setEdit, currentPriceRoom, setcurrentPric
                                     fullWidth
                                     name="hour"
                                     value={hour}
-                                    onChange={handleHourChange}
+                                    onChange={onInputChange}
+                                    error={!!hourValid && formSubmitted}
+                                    helperText={hourValid}
                                 />
                             </Grid>
                             <Grid item xs={12} sx={{ mt: 2 }}>
@@ -184,7 +185,9 @@ export const CreateOrEdit = ({ isEdit, setEdit, currentPriceRoom, setcurrentPric
                                     fullWidth
                                     name="price"
                                     value={price}
-                                    onChange={handlePriceChange}
+                                    onChange={onInputChange}
+                                    error={!!priceValid && formSubmitted}
+                                    helperText={priceValid}
                                 />
                             </Grid>
 

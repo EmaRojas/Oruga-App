@@ -1,155 +1,226 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, TextField, Typography } from '@mui/material';
-import { useForm } from '../../hooks/useForm';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, Grid, Input, InputAdornment, InputLabel, OutlinedInput, Slider, TextField, Typography } from '@mui/material';
 import { getAllMemberships } from '../../services/membership.service';
 import { toast } from 'react-toastify';
 import Autocomplete from '@mui/material/Autocomplete';
 import { getAll } from "../../services/client.service";
-import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
+import { DemoContainer, DemoItem } from '@mui/x-date-pickers/internals/demo';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { FormControlLabel, FormLabel, FormControl, Radio, RadioGroup } from '@mui/material';
+import "dayjs/locale/es";
 import dayjs from 'dayjs';
-import { createMembershipByUser } from '../../services/membershipByUser.service';
+import { createMembershipByUser, getAllMembershipsByUser } from '../../services/membershipByUser.service';
+import { DatePicker } from '@mui/x-date-pickers';
+import { set } from 'react-hook-form';
 
 
-const MembembershipBy = { 
-    "_id":"",
-    "clientID": {
-        "full_name": "",
-    },
+
+const MembembershipByUserEmpty = {
+    "_id": "",
+    "endDate": "",
+    "client": "",
+    "membership": ""
 }
 
 
-export const CreateOrEdit = ({ isEdit, setEdit, currentMembershipByUser, setcurrentMembershipByUser }) => {
-    
+export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMembershipByUser, setcurrentMembershipByUser }) => {
+
     const [formSubmitted, setFormSubmitted] = useState(false);
     const [modal, setModal] = useState(false);
     const [disabledButton, setdisabledButton] = useState(false);
 
-    const [clients, setClients] = useState();
-    const [memberships, setMemberships] = useState();
-    const [selectedClient, setSelectedClient] = useState(null);
-    const [selectedMembership, setSelectedMembership] = useState(null);
-  
-    const [selectedDateTime, setSelectedDateTime] = useState(null);
-  
-  
+    const [clients, setClients] = useState({});
+    const [memberships, setMemberships] = useState({});
+
+    const [client, setClient] = useState('');
+    const [validClient, setValidClient] = useState('Es obligatorio');
+
+    const [selectedMembership, setSelectedMembership] = useState('');
+    const [validMembership, setValidMembership] = useState('Es obligatorio');
+
+    const [endDate, setEndDate] = useState('');
+    const [validEndDate, setValidEndDate] = useState('Es obligatorio');
+    const [total, setTotal] = useState(0);
+    const [hours, setHours] = useState(0);
+
     const [paymentMethod, setPaymentMethod] = useState('Efectivo');
-  
-    const handleChange = (event) => {
-      setPaymentMethod(event.target.value);
-    };
-  
 
-    const handleDateTimeChange = (newDateTime) => {
-      setSelectedDateTime(newDateTime);
-      const endDateString = selectedDateTime.format('YYYY-MM-DD');
-        console.log(endDateString);
-    };
-  
-    const handleAutocompleteChange = (event, value) => {
-      setSelectedClient(value);
-    };
-  
-    const handleAutocompleteMembership = (event, value) => {
-      setSelectedMembership(value);
-    };
-  
-    const getClients =async () => {    
-      await getAll()
-      .then(({ clients }) => {
-          setClients(clients)
-          console.log(clients);
-  
-      })
-      .catch((e) => {
-          console.log(e.message)
-      })
-    }
-  
-    const getMemberships =async () => {    
-      await getAllMemberships()
-      .then(({ memberships }) => {
-          setMemberships(memberships);
-  
-      })
-      .catch((e) => {
-          console.log(e.message)
-      })
-    }
+    const [value, setValue] = React.useState(0.00);
 
+    const handleSliderChange = (event, newValue) => {
+        const intValue = Math.floor(newValue); // Parte entera
+        const decimalValue = newValue % 1; // Parte decimal
+        const adjustedDecimal = Math.min(decimalValue, 0.60); // Limitar la parte decimal a 0.6 (60)
+        const adjustedValue = intValue + parseFloat(adjustedDecimal.toFixed(2));
+        setValue(adjustedValue);
+        console.log(value);
+    };
+
+    const handleInputChange = (event) => {
+        console.log(event.target.value);
+        let newValue = event.target.value;
+        const intValue = Math.floor(newValue); // Parte entera
+        const decimalValue = newValue % 1; // Parte decimal
+        const adjustedDecimal = Math.min(decimalValue, 0.60); // Limitar la parte decimal a 0.6 (60)
+        const adjustedValue = intValue + parseFloat(adjustedDecimal.toFixed(2));
+        setValue(adjustedValue);
+      };
     
-  useEffect(() => {
-    getClients();
-    getMemberships();
+      const handleBlur = () => {
+        if (value < 0) {
+          setValue(0);
+        } else if (value > 60) {
+          setValue(60);
+        }
+      };
 
-  }, [])
+    const handleChange = (event) => {
+        setPaymentMethod(event.target.value);
+    };
 
-    const formValidations = {
-        fecha: [(value) => value !== null, 'Es obligatorio.']
+    const handleDateChange = (value) => {
+        if (value !== null) {
+            setEndDate(value);
+            setValidEndDate(null);
+        } else {
+            setValidEndDate('Es obligatorio');
+        }
+    };
+
+    const handleAutocompleteChange = (event, value) => {
+        if (value !== null) {
+            setClient(value._id);
+            setValidClient(null);
+        } else {
+            setValidClient('Es obligatorio');
+        }
+    };
+
+    const handleAutocompleteMembership = (event, value) => {
+        debugger
+        if (value !== null) {
+            setTotal(value?.price);
+            setHours(`${value?.hours} hs`);
+            setSelectedMembership(value._id);
+            setValidMembership(null);
+        } else {
+            setValidMembership('Es obligatorio');
+            setTotal(0);
+            setHours(0);
+        }
+    };
+
+    const getClients = async () => {
+        await getAll()
+            .then(({ clients }) => {
+                setClients(clients)
+                console.log(clients);
+
+            })
+            .catch((e) => {
+                console.log(e.message)
+            })
     }
 
-    const {
-        isFormValid
-    } = useForm(currentMembershipByUser, formValidations);
+    const getMemberships = async () => {
+        await getAllMemberships()
+            .then(({ memberships }) => {
+                setMemberships(memberships);
+
+            })
+            .catch((e) => {
+                console.log(e.message)
+            })
+    }
+
+
+    useEffect(() => {
+        const tomorrow = dayjs().add(1, 'month');
+        setEndDate(tomorrow);
+        getClients();
+        getMemberships();
+
+    }, [])
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
         const id = toast.loading("Validando formulario...")
         try {
             setdisabledButton(true);
             setFormSubmitted(true);
-           
-            if (!isFormValid)
-            {
+
+            if (client === '' || endDate === '' || selectedMembership === '') {
+                if (endDate === '') {
+                    setValidEndDate('Es obligatorio');
+                }
+
                 toast.dismiss(id);
+                setdisabledButton(false);
+                toast.error("Formulario incorrecto")
                 return;
-            } 
-                
-            // if (currentReservation._id.length > 1) {
-            //     const { success } = await updateReservation(currentReservation._id, clientID);
-            //     if (!success) {
-            //         toast.dismiss(id);
-            //         return;
-            //     }
-            //     toast.update(id, { render: "Registro modificado", type: "success", isLoading: false, autoClose: 2000 });
-            // } 
-            
-            else {
-                const { success } = await createMembershipByUser(selectedClient._id, selectedMembership._id, selectedDateTime, selectedDateTime);
+            }
+            if (currentMembershipByUser._id.length > 1) {
+                //const { success } = await updateClient(currentMembershipByUser._id, value);
+                // if (!success) {
+                //     toast.dismiss(id);
+                //     return;
+                // }
+                // toast.update(id, { render: "Se registraron las horas", type: "success", isLoading: false, autoClose: 2000 });
+            } else {
+                const { success } = await createMembershipByUser(client, selectedMembership, endDate);
 
                 if (!success) {
                     toast.dismiss(id);
                     return;
                 }
-                toast.update(id, { render: "Sala creada", type: "success", isLoading: false, autoClose: 2000 });
+                toast.update(id, { render: "Se activo la membresía", type: "success", isLoading: false, autoClose: 2000 });
+
             }
-            reset();     
+
+            reset();
         } catch (e) {
             toast.dismiss(id);
             console.log(e.message);
         }
     }
 
-    const refreshList = () => {
-        
-        // getAllReservations()
-        //     .then(({ reservations }) => {
-        //         setReservations(reservations)
-        //     })
-        //     .catch((e) => {
-        //         console.log(e.message)
-        //     })
+    const refreshList = async () => {
+
+        await getAllMembershipsByUser()
+            .then(({ membershipsByUser }) => {
+
+                // Transformar los datos para la exportación CSV
+                const transformedMemberships = membershipsByUser.map((membership) => {
+                    const dateObj = new Date(membership.endDate);
+                    const day = dateObj.getDate();
+                    const month = dateObj.getMonth() + 1; // Los meses comienzan en 0, por lo que se suma 1
+
+                    return {
+                        ...membership,
+                        clientID: membership.clientID.full_name || "",
+                        membershipID: membership.membershipID.name,
+                        endDate: day + '/' + month,
+                        hours: membership.membershipID.hours,
+                    };
+                });
+
+                setMembershipsByUser(transformedMemberships);
+            })
+            .catch((e) => {
+                console.log(e.message);
+            });
     }
 
     const reset = () => {
         setdisabledButton(false);
         setFormSubmitted(false);
         setEdit(true);
+        setTotal(0);
+        setHours(0);
         refreshList();
-        handleClose();
+        setModal(false);
     }
 
     const handleOpen = () => {
@@ -158,16 +229,51 @@ export const CreateOrEdit = ({ isEdit, setEdit, currentMembershipByUser, setcurr
 
     const handleClose = () => {
         setModal(false);
+        reset();
     }
 
 
     return (
         <>
-            <Button onClick={handleOpen}>ASIGNAR MEMBRESÍA</Button>
+            <Button disabled={!isEdit} onClick={handleOpen}>ASIGNAR MEMBRESÍA</Button>
+            <Button disabled={isEdit} onClick={handleOpen}>CARGAR HORAS</Button>
             <Dialog open={modal} onClose={handleClose}>
                 <form onSubmit={handleSubmit}>
-                    <DialogTitle><Typography color='primary.main' sx={{ ml: 1 }}>NUEVA MEMBRESÍA ACTIVA</Typography></DialogTitle>
-                    <DialogContent>
+                    <DialogTitle>
+                        <Typography hidden={!isEdit} color='primary.main' sx={{ ml: 1 }}>NUEVA MEMBRESÍA ACTIVA</Typography>
+                        <Typography hidden={isEdit} color='primary.main' sx={{ ml: 1 }}>CARGAR HORAS</Typography>
+                        <Divider />
+                    </DialogTitle>
+                    <DialogContent hidden={isEdit}>
+                        <Grid container>
+                            <Grid item xs={7} md={7} sx={{ mt: 2 }}>
+                                <Slider
+                                    value={value.toFixed(2)}
+                                    onChange={handleSliderChange}
+                                    min={0}
+                                    max={12}
+                                    step={0.1}
+                                    aria-labelledby="input-slider"
+                                />
+                            </Grid>
+                            <Grid item xs={4} md={4} sx={{ ml:2, mt: 2 }}>
+                                <Input
+                                    value={value.toFixed(2)} // Formatear a dos lugares decimales
+                                    size="small"
+                                    onChange={handleInputChange}
+                                    onBlur={handleBlur}
+                                    inputProps={{
+                                        step: '0.1',
+                                        min: 0,
+                                        max: 12,
+                                        type: 'number',
+                                        'aria-labelledby': 'input-slider',
+                                    }}
+                                />
+                            </Grid>
+                        </Grid>
+                    </DialogContent>
+                    <DialogContent hidden={!isEdit}>
                         <Grid container>
                             <Grid item xs={12} sx={{ mt: 2 }}>
                                 <Autocomplete
@@ -175,36 +281,72 @@ export const CreateOrEdit = ({ isEdit, setEdit, currentMembershipByUser, setcurr
                                     id="combo-box-demo"
                                     options={clients}
                                     getOptionLabel={(clients) => clients.full_name.toString()}
-                                    renderInput={(params) => <TextField {...params} label="Seleccionar cliente" />}
+                                    renderInput={(params) => <TextField {...params} label="Seleccionar cliente"
+                                        name='client' error={!!validClient && formSubmitted}
+                                        helperText={validClient} />}
                                     name="client"
                                     onChange={handleAutocompleteChange}
-                                // value={value}
-                                // onChange={(event, value) => console.log(value._id)}
                                 />
+                            </Grid>
+                            <Grid item xs={12} md={12} sx={{ mt: 2 }}>
+                                <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
+                                    <DemoItem components={['DatePicker']}>
+                                        <DatePicker label="Vencimiento"
+                                            name="endDate"
+                                            error={!!validEndDate && formSubmitted}
+                                            helperText={validEndDate}
+                                            value={endDate}
+                                            onChange={(newValue) => handleDateChange(newValue)}
+                                        />
+                                    </DemoItem>
+                                </LocalizationProvider>
+
                             </Grid>
                             <Grid item xs={12} sx={{ mt: 2 }}>
 
-                                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                    <DemoContainer components={['DateTimePicker']}>
-                                        <DateTimePicker label="Fecha fin"
-                                            value={selectedDateTime}
-                                            onChange={handleDateTimeChange}
-                                            name="fecha"
-                                        />
-                                    </DemoContainer>
-                                </LocalizationProvider>
-                            </Grid>
-                            <Grid item xs={12} sx={{ mt: 2 }}>
                                 <Autocomplete
                                     disablePortal
                                     id="combo-box-demo"
                                     options={memberships}
-                                    getOptionLabel={(memberships) => `${memberships.name.toString()} (${memberships.price.toString()} hs)`}
-                                    renderInput={(params) => <TextField {...params} label="Seleccionar membresía" />}
+                                    getOptionLabel={(membership) => `${membership.name.toString()} (${membership.price.toString()} hs)`}
+                                    renderInput={(params) => <TextField {...params} label="Seleccionar membresía"
+                                        name='memberships' error={!!validMembership && formSubmitted}
+                                        helperText={validMembership} />}
                                     name="memberships"
                                     onChange={handleAutocompleteMembership}
                                 />
                             </Grid>
+                            <Grid item xs={12} sx={{ mt: 4 }}>
+                                <Typography color='primary.main' sx={{ ml: 1 }}>DETALLE DE PAGO</Typography>
+
+                                <Divider />
+                            </Grid>
+
+                            <Grid item xs={12} sx={{ mt: 2 }}>
+                                <FormControl fullWidth>
+                                    <InputLabel htmlFor="outlined-adornment-amount">Total</InputLabel>
+                                    <OutlinedInput
+                                        disabled
+                                        id="outlined-adornment-amount"
+                                        startAdornment={<InputAdornment position="start">$</InputAdornment>}
+                                        label="Amount"
+                                        value={total}
+                                    />
+                                </FormControl>
+                            </Grid>
+
+                            <Grid item xs={12} sx={{ mt: 2 }}>
+                                <FormControl fullWidth>
+                                    <TextField
+                                        disabled
+                                        label="Horas"
+                                        type="text"
+                                        name="hour"
+                                        value={hours}
+                                    />
+                                </FormControl>
+                            </Grid>
+
                             <Grid item xs={12} sx={{ mt: 2 }}>
                                 <FormControl>
                                     <FormLabel id="demo-controlled-radio-buttons-group">Medio de pago</FormLabel>

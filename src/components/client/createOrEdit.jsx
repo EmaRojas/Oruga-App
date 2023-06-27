@@ -42,13 +42,14 @@ export const CreateOrEdit = ({ isEdit, setEdit, setClients, currentUser, setCurr
         const id = toast.loading("Validando formulario...")
         try {
             setFormSubmitted(true);
-
+            console.log(emailValid);
             if (!isFormValid) {
                 toast.dismiss(id);
                 return;
             }
 
             setdisabledButton(true);
+
             if (currentUser._id.length > 1) {
                 const { success } = await updateClient(currentUser._id, full_name, phone, email, company_name, description, assistance, cuit);
                 if (!success) {
@@ -68,6 +69,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setClients, currentUser, setCurr
             setCurrentUser(ClientEmpty);
             reset();
         } catch (e) {
+            setdisabledButton(false);
             toast.dismiss(id);
             console.log(e.message);
         }

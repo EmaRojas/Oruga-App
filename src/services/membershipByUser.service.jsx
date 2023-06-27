@@ -19,18 +19,17 @@ export const deleteMembershipByUser = async (id) => {
 }
 
 
-export const createMembershipByUser = async (clientID, membershipID, paymentID, startDate, endDate) => {
+export const createMembershipByUser = async (clientID, membershipID, endDate) => {
     const requestOptions = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             "clientID": clientID,
             "membershipID": membershipID,
-            "paymentID": paymentID,
-            "startDate": startDate,
             "endDate": endDate
         })
     };
     const response = await fetch(baseURL, requestOptions);
     return await response.json();
 }
+

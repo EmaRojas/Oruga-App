@@ -34,7 +34,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMemberships, currentMembershi
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        debugger
+        
         const id = toast.loading("Validando formulario...")
         try {
             setdisabledButton(true);

@@ -11,18 +11,18 @@ import { CreateOrEdit } from "./createOrEdit";
 import { ToastContainer, toast } from 'react-toastify';
 //https://github.com/gregnb/mui-datatables
 
-const MembershipByUserEmpty = { 
-    "_id":"",
-    "clientID": {
-        "full_name": "",
-    },
+const MembembershipByUserEmpty = { 
+  "_id":"",
+  "endDate":"",
+  "client":"",
+  "membership":""
 }
 
 export const TableMembershipsByUser = () => {
 
     const [membershipsByUser, setMembershipsByUser] = useState();
     const [edit, setEdit] = useState(true);
-    const [currentMembershipByUser, setCurrentMembershipByUser] = useState(MembershipByUserEmpty);
+    const [currentMembershipByUser, setCurrentMembershipByUser] = useState(MembembershipByUserEmpty);
     
     const refreshTable = async () => {
       await getAllMembershipsByUser()
@@ -49,7 +49,7 @@ export const TableMembershipsByUser = () => {
           console.log(e.message);
         });
     
-      setCurrentMembershipByUser(MembershipByUserEmpty);
+      setCurrentMembershipByUser(MembembershipByUserEmpty);
       setEdit(true);
     };
 
@@ -93,7 +93,7 @@ export const TableMembershipsByUser = () => {
         },
         {
           name: "hours",
-          label: "Consumido / Restante",
+          label: "Restante HS",
           options: {
             filter: true,
             sort: false,
@@ -104,7 +104,7 @@ export const TableMembershipsByUser = () => {
         },
         {
           name: "endDate",
-          label: "Finaliza el día",
+          label: "Vencimiento",
           options: {
             filter: true,
             sort: false,
@@ -161,16 +161,16 @@ export const TableMembershipsByUser = () => {
         onRowSelectionChange: (currentRowsSelected, allRowsSelected, rowsSelected) => {
             if (rowsSelected.length <= 1) {
                 setEdit(false)
-                //console.log(membershipsByUser[rowsSelected]);
+                console.log(membershipsByUser[rowsSelected]);
                 setCurrentMembershipByUser(membershipsByUser[rowsSelected]);
             }
             if (rowsSelected.length > 1) {
                 setEdit(true)
-                setCurrentMembershipByUser(MembershipByUserEmpty);
+                setCurrentMembershipByUser(MembembershipByUserEmpty);
             }
             if (rowsSelected.length == 0) {
                 setEdit(true)
-                setCurrentMembershipByUser(MembershipByUserEmpty);
+                setCurrentMembershipByUser(MembembershipByUserEmpty);
             }
         },
         onRowsDelete: (rowsDeleted) => {
@@ -196,7 +196,7 @@ export const TableMembershipsByUser = () => {
             <CacheProvider value={muiCache} mt={5}>
                 <ThemeProvider theme={createTheme()}>
 
-                    <MUIDataTable
+                    <MUIDataTable className="tabluppercase"
                         title={"MEMBRESÍAS POR CLIENTE"}
                         data={membershipsByUser}
                         columns={columns}
