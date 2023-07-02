@@ -22,6 +22,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setPriceRooms, currentPriceRoom,
     const [disabledButton, setdisabledButton] = useState(false);
     const [rooms, setRooms] = useState();
     const [selectRooms, setSelectRooms] = useState();
+    const [validRoom, setValidRoom] = useState('Es obligatorio');
 
     const formValidations = {
         hour: [(value) => value.length >= 1 && !isNaN(value), 'Es obligatorio. No se puede ingresar letras.'],
@@ -35,6 +36,15 @@ export const CreateOrEdit = ({ isEdit, setEdit, setPriceRooms, currentPriceRoom,
     useEffect(() => {
         getRooms();
     }, [])
+
+    const handleAutocompleteChange = (event, value) => {
+        if (value !== null) {
+            setSelectRooms(value._id);
+            setValidRoom(null);
+        } else {
+            setValidRoom('Es obligatorio');
+        }
+    };
 
     const getRooms = async () => {
         await getAllRooms()
@@ -151,7 +161,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setPriceRooms, currentPriceRoom,
                         <Grid container>
                             <> {isEdit &&
                                 <Grid visibility={!isEdit} item xs={12} sx={{ mt: 2 }}>
-                                    <Autocomplete
+                                    {/* <Autocomplete
                                         disablePortal
                                         fullWidth
                                         id="combo-box-demo"
@@ -160,7 +170,19 @@ export const CreateOrEdit = ({ isEdit, setEdit, setPriceRooms, currentPriceRoom,
                                         renderInput={(params) => <TextField {...params} label="Seleccionar sala" />}
                                         name="client"
                                         onChange={(event, value) => setSelectRooms(value._id)}
-                                    />
+                                    /> */}
+
+                                    <Autocomplete
+                                    disablePortal
+                                    id="combo-box-demo"
+                                    options={rooms}
+                                    getOptionLabel={(rooms) => rooms.name.toString()}
+                                    renderInput={(params) => <TextField {...params} label="Seleccionar sala"
+                                        name='client' error={!!validRoom && formSubmitted}
+                                        helperText={validRoom} />}
+                                    name="client"
+                                    onChange={handleAutocompleteChange}
+                                />
                                 </Grid>
                             }
 

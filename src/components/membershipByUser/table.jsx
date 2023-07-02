@@ -34,12 +34,36 @@ export const TableMembershipsByUser = () => {
             const day = dateObj.getDate();
             const month = dateObj.getMonth() + 1; // Los meses comienzan en 0, por lo que se suma 1
     
+            const totalSeconds = membership.remaining_hours; // Valor obtenido de la base de datos
+
+            // Convertir segundos a horas y minutos
+            function convertToHoursMinutes(seconds) {
+              const hours1 = Math.floor(seconds / 3600);
+              const remainingSeconds = seconds % 3600;
+              const minutes = Math.floor(remainingSeconds / 60);
+              return { hours1, minutes };
+            }
+
+            // Convertir segundos a horas y minutos
+
+            const { hours1, minutes } = convertToHoursMinutes(totalSeconds);
+            console.log(hours1, minutes);  // Output: 1 30
+            
+            //var remTime = hours1 + ':' + minutes;
+
+            let remTime;
+            if (minutes === 0) {
+              remTime = hours1.toString();
+            } else {
+              remTime = hours1.toString() + ':' + minutes.toString();
+            }
+
             return {
               ...membership,
               clientID: membership.clientID.full_name || "",
               membershipID: membership.membershipID.name,
               endDate: day + '/' + month,
-              hours: membership.membershipID.hours,
+              hours: remTime,
             };
           });
           

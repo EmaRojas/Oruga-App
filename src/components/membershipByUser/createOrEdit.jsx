@@ -10,7 +10,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { FormControlLabel, FormLabel, FormControl, Radio, RadioGroup } from '@mui/material';
 import "dayjs/locale/es";
 import dayjs from 'dayjs';
-import { createMembershipByUser, getAllMembershipsByUser } from '../../services/membershipByUser.service';
+import { createMembershipByUser, getAllMembershipsByUser, consumeHours } from '../../services/membershipByUser.service';
 import { DatePicker } from '@mui/x-date-pickers';
 import { set } from 'react-hook-form';
 
@@ -51,7 +51,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
     const handleSliderChange = (event, newValue) => {
         const intValue = Math.floor(newValue); // Parte entera
         const decimalValue = newValue % 1; // Parte decimal
-        const adjustedDecimal = Math.min(decimalValue, 0.60); // Limitar la parte decimal a 0.6 (60)
+        const adjustedDecimal = Math.min(decimalValue, 0.50); // Limitar la parte decimal a 0.6 (60)
         const adjustedValue = intValue + parseFloat(adjustedDecimal.toFixed(2));
         setValue(adjustedValue);
         console.log(value);
@@ -62,7 +62,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
         let newValue = event.target.value;
         const intValue = Math.floor(newValue); // Parte entera
         const decimalValue = newValue % 1; // Parte decimal
-        const adjustedDecimal = Math.min(decimalValue, 0.60); // Limitar la parte decimal a 0.6 (60)
+        const adjustedDecimal = Math.min(decimalValue, 0.50); // Limitar la parte decimal a 0.6 (60)
         const adjustedValue = intValue + parseFloat(adjustedDecimal.toFixed(2));
         setValue(adjustedValue);
       };
@@ -70,8 +70,8 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
       const handleBlur = () => {
         if (value < 0) {
           setValue(0);
-        } else if (value > 60) {
-          setValue(60);
+        } else if (value > 50) {
+          setValue(50);
         }
       };
 
@@ -101,8 +101,9 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
         debugger
         if (value !== null) {
             setTotal(value?.price);
-            setHours(`${value?.hours} hs`);
+            setHours(value?.hours);
             setSelectedMembership(value._id);
+
             setValidMembership(null);
         } else {
             setValidMembership('Es obligatorio');
@@ -151,7 +152,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
             setdisabledButton(true);
             setFormSubmitted(true);
 
-            if (client === '' || endDate === '' || selectedMembership === '') {
+            if (currentMembershipByUser._id.length < 1 && (client === '' || endDate === '' || selectedMembership === '')) {
                 if (endDate === '') {
                     setValidEndDate('Es obligatorio');
                 }
@@ -162,14 +163,18 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
                 return;
             }
             if (currentMembershipByUser._id.length > 1) {
-                //const { success } = await updateClient(currentMembershipByUser._id, value);
-                // if (!success) {
-                //     toast.dismiss(id);
-                //     return;
-                // }
-                // toast.update(id, { render: "Se registraron las horas", type: "success", isLoading: false, autoClose: 2000 });
+                var valueString = value.toString();
+                console.log('value string' + valueString);
+                const { success } = await consumeHours(currentMembershipByUser._id, valueString);
+                if (!success) {
+                    toast.dismiss(id);
+                    return;
+                }
+                toast.update(id, { render: "Se registraron las horas", type: "success", isLoading: false, autoClose: 2000 });
             } else {
-                const { success } = await createMembershipByUser(client, selectedMembership, endDate);
+                console.log(selectedMembership);
+                var hrs = parseInt(hours, 10);
+                const { success } = await createMembershipByUser(client, selectedMembership, endDate, hrs, total, paymentMethod);
 
                 if (!success) {
                     toast.dismiss(id);
@@ -197,12 +202,34 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
                     const day = dateObj.getDate();
                     const month = dateObj.getMonth() + 1; // Los meses comienzan en 0, por lo que se suma 1
 
+                    const totalSeconds = membership.remaining_hours; // Valor obtenido de la base de datos
+
+                    // Convertir segundos a horas y minutos
+                    function convertToHoursMinutes(seconds) {
+                      const hours1 = Math.floor(seconds / 3600);
+                      const remainingSeconds = seconds % 3600;
+                      const minutes = Math.floor(remainingSeconds / 60);
+                      return { hours1, minutes };
+                    }
+        
+                    // Convertir segundos a horas y minutos
+        
+                    const { hours1, minutes } = convertToHoursMinutes(totalSeconds);
+                    console.log(hours1, minutes);  // Output: 1 30
+                    
+                    let remTime;
+                    if (minutes === 0) {
+                      remTime = hours1.toString();
+                    } else {
+                      remTime = hours1.toString() + ':' + minutes.toString();
+                    }
+
                     return {
                         ...membership,
                         clientID: membership.clientID.full_name || "",
                         membershipID: membership.membershipID.name,
                         endDate: day + '/' + month,
-                        hours: membership.membershipID.hours,
+                        hours: remTime,
                     };
                 });
 
