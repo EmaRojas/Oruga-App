@@ -46,6 +46,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setReservations, currentReservat
     const [validEndDate, setValidEndDate] = useState('Es obligatorio');
 
     const [total, setTotal] = useState(0);
+    const [hour, setHour] = useState(0);
 
     const [paymentMethod, setPaymentMethod] = useState('Efectivo');
 
@@ -90,6 +91,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setReservations, currentReservat
             setSelectedPriceRoom(value._id);
             setSelectedRoom(value.roomID._id);
             setTotal(value.price);
+            setHour(value.hour);
 
             setValidPriceRoom(null);
 
@@ -163,7 +165,19 @@ export const CreateOrEdit = ({ isEdit, setEdit, setReservations, currentReservat
                 //console.log(selectedMembership);
                 const date = endDate.format('YYYY-MM-DD');
                 const time = endDate.format('HH:mm');
-                const { success } = await createReservation(client, selectedPriceRoom, selectedRoom, endDate, date, time, paymentMethod, total, paid );
+                var endTime = new Date(endDate);
+
+                // Sumar una hora
+                endTime.setHours(endTime.getHours() + parseInt(hour));
+
+                // Convertir la fecha a la zona horaria de Argentina (ART) manualmente
+                const fechaUtc = new Date(endDate);
+                const diferenciaHoraria = -3; // ART está UTC-3
+                const fechaArgentina = new Date(fechaUtc.getTime() + diferenciaHoraria * 60 * 60 * 1000);
+
+
+                var endTimeString = ("0" + endTime.getHours()).slice(-2) + ":" + ("0" + endTime.getMinutes()).slice(-2);
+                const { success } = await createReservation(client, selectedPriceRoom, selectedRoom, fechaArgentina, date, time, endTimeString, paymentMethod, total, parseFloat(paid) || 0);
 
                 if (!success) {
                     toast.dismiss(id);
@@ -192,9 +206,8 @@ export const CreateOrEdit = ({ isEdit, setEdit, setReservations, currentReservat
                         ...reservation,
                         clientID: reservation.clientID.full_name || "",
                         roomID: reservation.roomID.name,
-                        hours: reservation.priceRoomID.hour,
-                        total: reservation.paymentID.total,
-                        paid: reservation.paymentID.paid,
+                        total: '$ ' + reservation.paymentID.paid + ' / $ ' +reservation.paymentID.total,
+                        date: reservation.date + ' ' + reservation.time + ' - ' + reservation.endTime
                     };
                 });
 
@@ -227,7 +240,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setReservations, currentReservat
     return (
         <>
             <Button disabled={!isEdit} onClick={handleOpen}>NUEVA RESERVA</Button>
-            <Button disabled={isEdit} onClick={handleOpen}>EDITAR</Button>
+            {/* <Button disabled={isEdit} onClick={handleOpen}>EDITAR</Button> */}
             <Dialog open={modal} onClose={handleClose}>
                 <form onSubmit={handleSubmit}>
                     <DialogTitle>
@@ -322,6 +335,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setReservations, currentReservat
                                     onChange={onInputChange}
                                     error={!!paidValid && formSubmitted}
                                     helperText={paidValid}
+                                    
                                 />
                             </Grid>
 
@@ -336,7 +350,9 @@ export const CreateOrEdit = ({ isEdit, setEdit, setReservations, currentReservat
                                         onChange={handleChange}
                                     >
                                         <FormControlLabel value="Efectivo" control={<Radio />} label="Efectivo" />
-                                        <FormControlLabel value="MercadoPago" control={<Radio />} label="MercadoPago" />
+                                        <FormControlLabel value="Transferencia" control={<Radio />} label="Transferencia" />
+                                        <FormControlLabel value="Tarjeta" control={<Radio />} label="Tarjeta" />
+
                                     </RadioGroup>
                                 </FormControl>
                             </Grid>

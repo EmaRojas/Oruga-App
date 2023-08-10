@@ -5,80 +5,49 @@ import { createTheme } from "@mui/material/styles";
 import { CacheProvider } from "@emotion/react";
 import createCache from "@emotion/cache";
 import { useState } from "react";
-import { deleteMembershipByUser, getAllMembershipsByUser } from "../../services/membershipByUser.service";
 import { Button, ButtonGroup, Chip, Dialog, DialogContent, DialogTitle } from "@mui/material";
 import { CreateOrEdit } from "./createOrEdit";
 import { ToastContainer, toast } from 'react-toastify';
+import { getTodayReservations, deleteReservation } from "../../services/reservation.service";
 //https://github.com/gregnb/mui-datatables
 
-const MembembershipByUserEmpty = { 
+const ReservationEmpty = { 
   "_id":"",
-  "endDate":"",
-  "client":"",
-  "membership":""
+  "clientID": {
+      "full_name": "",
+  },
 }
 
-export const TableMembershipsByUser = () => {
+export const Table = () => {
 
-    const [membershipsByUser, setMembershipsByUser] = useState();
+    const [reservations, setReservations] = useState();
     const [edit, setEdit] = useState(true);
-    const [currentMembershipByUser, setCurrentMembershipByUser] = useState(MembembershipByUserEmpty);
+    const [currentReservation, setCurrentReservation] = useState(ReservationEmpty);
     
     const refreshTable = async () => {
-      await getAllMembershipsByUser()
-        .then(({ membershipsByUser }) => {
+      await getTodayReservations()
+        .then(({ reservations }) => {
     
           // Transformar los datos para la exportación CSV
-          const transformedMemberships = membershipsByUser.map((membership) => {
-
-            
-            const fechaUtc = new Date(membership.created);
-
-            const diferenciaHoraria = -3; // ART está UTC-3
-            const fechaArgentina = new Date(fechaUtc.getTime() + diferenciaHoraria * 60 * 60 * 1000);
-            const day = fechaArgentina.getDate();
-            const month = fechaArgentina.getMonth() + 1; // Los meses comienzan en 0, por lo que se suma 1
+          const transformedReservations = reservations.map((reservation) => {
     
-            const totalSeconds = membership.remaining_hours; // Valor obtenido de la base de datos
-
-            // Convertir segundos a horas y minutos
-            function convertToHoursMinutes(seconds) {
-              const hours1 = Math.floor(seconds / 3600);
-              const remainingSeconds = seconds % 3600;
-              const minutes = Math.floor(remainingSeconds / 60);
-              return { hours1, minutes };
-            }
-
-            // Convertir segundos a horas y minutos
-
-            const { hours1, minutes } = convertToHoursMinutes(totalSeconds);
-            console.log(hours1, minutes);  // Output: 1 30
-            
-            //var remTime = hours1 + ':' + minutes;
-
-            let remTime;
-            if (minutes === 0) {
-              remTime = hours1.toString();
-            } else {
-              remTime = hours1.toString() + ':' + minutes.toString();
-            }
-
             return {
-              ...membership,
-              clientID: membership.clientID.full_name || "",
-              membershipID: membership.membershipID.name,
-              endDate: day + '/' + month,
-              hours: remTime,
+              ...reservation,
+              clientID: reservation.clientID.full_name || "",
+              roomID: reservation.roomID.name,
+              total: '$ ' + reservation.paymentID.paid + ' / $ ' +reservation.paymentID.total,
+              date: reservation.time + ' - ' + reservation.endTime
             };
           });
           
-          setMembershipsByUser(transformedMemberships);
+          setReservations(transformedReservations);
+          console.log(reservations);
         })
         .catch((e) => {
           console.log(e.message);
         });
     
-      setCurrentMembershipByUser(MembembershipByUserEmpty);
+      setCurrentReservation(ReservationEmpty);
       setEdit(true);
     };
 
@@ -110,19 +79,19 @@ export const TableMembershipsByUser = () => {
           },
         },
         {
-          name: "membershipID",
-          label: "Membresía",
-          options: {
-            filter: true,
-            sort: false,
-            customBodyRender: (value, tableMeta) => {
-              return value || "";
+            name: "roomID",
+            label: "Sala",
+            options: {
+              filter: true,
+              sort: false,
+              customBodyRender: (value, tableMeta) => {
+                return value || "";
+              },
             },
-          },
         },
         {
-          name: "hours",
-          label: "Restante HS",
+          name: "date",
+          label: "Fecha y hora",
           options: {
             filter: true,
             sort: false,
@@ -130,17 +99,17 @@ export const TableMembershipsByUser = () => {
               return value || "";
             },
           },
-        },
-        {
-          name: "endDate",
-          label: "Creada",
-          options: {
-            filter: true,
-            sort: false,
-            customBodyRender: (value, tableMeta) => {
-              return value || "";
+      },
+      {
+            name: "total",
+            label: "Total",
+            options: {
+              filter: true,
+              sort: false,
+              customBodyRender: (value, tableMeta) => {
+                return value || "";
+              },
             },
-          },
         },
       ];
 
@@ -188,18 +157,19 @@ export const TableMembershipsByUser = () => {
             },
         },
         onRowSelectionChange: (currentRowsSelected, allRowsSelected, rowsSelected) => {
-            if (rowsSelected.length <= 1) {
+          if (rowsSelected.length <= 1) {
                 setEdit(false)
-                console.log(membershipsByUser[rowsSelected]);
-                setCurrentMembershipByUser(membershipsByUser[rowsSelected]);
+                //console.log(membershipsByUser[rowsSelected]);
+                setCurrentReservation(reservations[rowsSelected]);
+                console.log(currentReservation);
             }
             if (rowsSelected.length > 1) {
                 setEdit(true)
-                setCurrentMembershipByUser(MembembershipByUserEmpty);
+                setCurrentReservation(ReservationEmpty);
             }
             if (rowsSelected.length == 0) {
                 setEdit(true)
-                setCurrentMembershipByUser(MembembershipByUserEmpty);
+                setCurrentReservation(ReservationEmpty);
             }
         },
         onRowsDelete: (rowsDeleted) => {
@@ -207,8 +177,8 @@ export const TableMembershipsByUser = () => {
             const { data } = rowsDeleted;
 
             data.forEach(async ({ index }) => {
-                const { _id } = membershipsByUser[index];
-                await deleteMembershipByUser(_id);
+                const { _id } = reservations[index];
+                await deleteReservation(_id);
                 refreshTable();
             });
 
@@ -219,15 +189,15 @@ export const TableMembershipsByUser = () => {
     return (
         <>
             <ButtonGroup variant="outlined" aria-label="outlined button group">
-                <CreateOrEdit isEdit={edit} setEdit={setEdit} setMembershipsByUser={setMembershipsByUser} membershipsByUser={membershipsByUser} currentMembershipByUser={currentMembershipByUser} setCurrentMembershipByUser={setCurrentMembershipByUser} />
+                <CreateOrEdit isEdit={edit} setEdit={setEdit} setReservations={setReservations} reservations={reservations} currentReservation={currentReservation} setCurrentReservation={setCurrentReservation} />
             </ButtonGroup>
 
             <CacheProvider value={muiCache} mt={5}>
                 <ThemeProvider theme={createTheme()}>
 
-                    <MUIDataTable className="tabluppercase"
-                        title={"MEMBRESÍAS POR CLIENTE"}
-                        data={membershipsByUser}
+                    <MUIDataTable
+                        title={"RESERVAS DEL DÍA"}
+                        data={reservations}
                         columns={columns}
                         options={options}
                     />

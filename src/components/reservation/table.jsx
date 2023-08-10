@@ -5,11 +5,24 @@ import { createTheme } from "@mui/material/styles";
 import { CacheProvider } from "@emotion/react";
 import createCache from "@emotion/cache";
 import { useState } from "react";
-import { Button, ButtonGroup, Chip, Dialog, DialogContent, DialogTitle } from "@mui/material";
+import { Button, ButtonGroup, Chip, Dialog, DialogContent, DialogTitle, Grid } from "@mui/material";
 import { CreateOrEdit } from "./createOrEdit";
 import { ToastContainer, toast } from 'react-toastify';
-import { getAllReservations, deleteReservation } from "../../services/reservation.service";
+import { getAllReservations, getAllReservationsFilter, deleteReservation } from "../../services/reservation.service";
 //https://github.com/gregnb/mui-datatables
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DatePicker } from '@mui/x-date-pickers';
+import "dayjs/locale/es";
+import dayjs from 'dayjs';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { DemoContainer, DemoItem } from '@mui/x-date-pickers/internals/demo';
+import { SetMealRounded } from "@mui/icons-material";
+import Box from '@mui/material/Box';
+import Card from '@mui/material/Card';
+import CardActions from '@mui/material/CardActions';
+import CardContent from '@mui/material/CardContent';
+import Typography from '@mui/material/Typography';
+
 
 const ReservationEmpty = { 
   "_id":"",
@@ -23,9 +36,23 @@ export const Table = () => {
     const [reservations, setReservations] = useState();
     const [edit, setEdit] = useState(true);
     const [currentReservation, setCurrentReservation] = useState(ReservationEmpty);
-    
-    const refreshTable = async () => {
-      await getAllReservations()
+
+    const today = dayjs();
+    const tomorrow = dayjs().add(1, 'week');
+
+    const [start, setStart] = useState(today);
+    const [end, setEnd] = useState(tomorrow);
+
+    const handleDateChange = (start, end) => {
+      setStart(start);
+      console.log(start);
+      setEnd(end);
+      console.log(end);
+      refreshTableFilter(start, end);
+    };
+
+    const refreshTableFilter = async () => {
+      await getAllReservationsFilter(start, end)
         .then(({ reservations }) => {
     
           // Transformar los datos para la exportación CSV
@@ -35,10 +62,8 @@ export const Table = () => {
               ...reservation,
               clientID: reservation.clientID.full_name || "",
               roomID: reservation.roomID.name,
-              hours: reservation.priceRoomID.hour,
-              total: reservation.paymentID.total,
-              paid: reservation.paymentID.paid,
-              date: reservation.date + ' ' + reservation.time
+              total: '$ ' + reservation.paymentID.paid + ' / $ ' +reservation.paymentID.total,
+              date: reservation.date + ' ' + reservation.time + ' - ' + reservation.endTime
             };
           });
           
@@ -53,10 +78,38 @@ export const Table = () => {
       setEdit(true);
     };
 
+
+    // const refreshTable = async () => {
+    //   await getAllReservationsFilter()
+    //     .then(({ reservations }) => {
     
-    useEffect(() => {
-        refreshTable();
-    }, [])
+    //       // Transformar los datos para la exportación CSV
+    //       const transformedReservations = reservations.map((reservation) => {
+    
+    //         return {
+    //           ...reservation,
+    //           clientID: reservation.clientID.full_name || "",
+    //           roomID: reservation.roomID.name,
+    //           total: '$ ' + reservation.paymentID.paid + ' / $ ' +reservation.paymentID.total,
+    //           date: reservation.date + ' ' + reservation.time + ' - ' + reservation.endTime
+    //         };
+    //       });
+          
+    //       setReservations(transformedReservations);
+    //       console.log(reservations);
+    //     })
+    //     .catch((e) => {
+    //       console.log(e.message);
+    //     });
+    
+    //   setCurrentReservation(ReservationEmpty);
+    //   setEdit(true);
+    // };
+
+    
+     useEffect(() => {
+         refreshTableFilter();
+     }, [start, end])
 
 
     const muiCache = createCache({
@@ -66,7 +119,17 @@ export const Table = () => {
 
     const [responsive, setResponsive] = useState("vertical");
 
-
+    const cardStyle = {
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      minHeight: '130px',
+      marginLeft: '15px' // Ajusta la altura según tus necesidades
+    };
+    
+    const contentStyle = {
+      textAlign: 'center', // Otras propiedades de estilo según sea necesario
+    };
 
     const columns = [
         {
@@ -103,19 +166,8 @@ export const Table = () => {
           },
       },
         {
-            name: "hours",
-            label: "Horas",
-            options: {
-              filter: true,
-              sort: false,
-              customBodyRender: (value, tableMeta) => {
-                return value || "";
-              },
-            },
-        },
-        {
             name: "total",
-            label: "Total",
+            label: "Pagado / Total",
             options: {
               filter: true,
               sort: false,
@@ -124,18 +176,6 @@ export const Table = () => {
               },
             },
         },
-        {
-            name: "paid",
-            label: "Pagado",
-            options: {
-              filter: true,
-              sort: false,
-              customBodyRender: (value, tableMeta) => {
-                return value || "";
-              },
-            },
-        },
-
       ];
 
     const options = {
@@ -204,7 +244,7 @@ export const Table = () => {
             data.forEach(async ({ index }) => {
                 const { _id } = reservations[index];
                 await deleteReservation(_id);
-                refreshTable();
+                refreshTableFilter();
             });
 
             toast.update(id, { render: "Se eliminaron correctamente los registros!", type: "success", isLoading: false, autoClose: 2000 });
@@ -213,6 +253,128 @@ export const Table = () => {
 
     return (
         <>
+            <Grid container style={cardStyle}>
+            <form>
+              <Grid item>
+              <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
+              <DemoItem components={['DatePicker']}>
+              <DatePicker label="Inicio"
+                  name="start"
+                  value={start}
+                  onChange={(newStart) => handleDateChange(newStart, end)}
+              />
+              </DemoItem>
+            </LocalizationProvider>
+         
+              </Grid>
+              <br />
+              <Grid item>
+              <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
+              <DemoItem components={['DatePicker']}>
+              <DatePicker label="Fin"
+                  name="end"
+                  value={end}
+                  onChange={(newEnd) => handleDateChange(start, newEnd)}
+              />
+              </DemoItem>
+            </LocalizationProvider>
+              </Grid>
+              </form>
+
+            <Grid item md={1} >
+            <Card style={cardStyle}>
+            <CardContent style={contentStyle}>
+              <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
+                Reservas
+              </Typography>
+              <Typography variant="h5" component="div">
+                55
+              </Typography>
+            </CardContent>
+
+          </Card>
+            </Grid>
+            <Grid item md={1} >
+            <Card style={cardStyle}>
+            <CardContent style={contentStyle}>
+              <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
+                Reservas
+              </Typography>
+              <Typography variant="h5" component="div">
+                55
+              </Typography>
+            </CardContent>
+
+          </Card>
+            </Grid>            <Grid item md={1} >
+            <Card style={cardStyle}>
+            <CardContent style={contentStyle}>
+              <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
+                Reservas
+              </Typography>
+              <Typography variant="h5" component="div">
+                55
+              </Typography>
+            </CardContent>
+
+          </Card>
+            </Grid>            <Grid item md={1} >
+            <Card style={cardStyle}>
+            <CardContent style={contentStyle}>
+              <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
+                Reservas
+              </Typography>
+              <Typography variant="h5" component="div">
+                55
+              </Typography>
+            </CardContent>
+
+          </Card>
+            </Grid>
+            <Grid item md={1} >
+            <Card style={cardStyle}>
+            <CardContent style={contentStyle}>
+              <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
+                Reservas
+              </Typography>
+              <Typography variant="h5" component="div">
+                55
+              </Typography>
+            </CardContent>
+
+          </Card>
+            </Grid>
+            <Grid item md={1} >
+            <Card style={cardStyle}>
+            <CardContent style={contentStyle}>
+              <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
+                Reservas
+              </Typography>
+              <Typography variant="h5" component="div">
+                55
+              </Typography>
+            </CardContent>
+
+          </Card>
+            </Grid>
+            <Grid item md={1} >
+            <Card style={cardStyle}>
+            <CardContent style={contentStyle}>
+              <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
+                Reservas
+              </Typography>
+              <Typography variant="h5" component="div">
+                55
+              </Typography>
+            </CardContent>
+
+          </Card>
+            </Grid>
+              
+            </Grid>
+            <br />
+
+
             <ButtonGroup variant="outlined" aria-label="outlined button group">
                 <CreateOrEdit isEdit={edit} setEdit={setEdit} setReservations={setReservations} reservations={reservations} currentReservation={currentReservation} setCurrentReservation={setCurrentReservation} />
             </ButtonGroup>

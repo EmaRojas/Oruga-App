@@ -9,6 +9,31 @@ export const getAllReservations = async () => {
     }
 }
 
+export const getAllReservationsFilter = async (start, end) => {
+
+        const requestOptions = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                "start": start,
+                "end": end
+            })
+        };
+        const response = await fetch(baseURL + "/filter", requestOptions);
+        return await response.json();
+}
+
+
+
+export const getTodayReservations = async () => {
+    const response = await fetch(baseURL + '/today');
+    if (!response.ok) {
+        throw new Error('Data coud not be fetched!')
+    } else {
+        return response.json()
+    }
+}
+
 export const deleteReservation = async (id) => {
     const requestOptions = {
         method: 'Delete',
@@ -19,7 +44,7 @@ export const deleteReservation = async (id) => {
 }
 
 
-export const createReservation = async (clientID, priceRoomID, roomID, dateTime, date, time, means_of_payment, total, paid) => {
+export const createReservation = async (clientID, priceRoomID, roomID, fechaArgentina, date, time, endTimeString, means_of_payment, total, paid) => {
     const requestOptions = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -27,9 +52,10 @@ export const createReservation = async (clientID, priceRoomID, roomID, dateTime,
             "clientID": clientID,
             "priceRoomID": priceRoomID,
             "roomID": roomID,
-            "dateTime": dateTime,
+            "dateTime": fechaArgentina,
             "date": date,
             "time": time,
+            "endTime": endTimeString,
             "means_of_payment": means_of_payment,
             "total": total,
             "paid": paid

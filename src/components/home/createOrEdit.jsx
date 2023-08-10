@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, Grid, Input, InputAdornment, InputLabel, OutlinedInput, Slider, TextField, Typography } from '@mui/material';
-import { getAllMemberships } from '../../services/membership.service';
+import { getAllPriceRooms } from '../../services/priceRoom.service';
 import { toast } from 'react-toastify';
 import Autocomplete from '@mui/material/Autocomplete';
 import { getAll } from "../../services/client.service";
@@ -10,11 +10,12 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { FormControlLabel, FormLabel, FormControl, Radio, RadioGroup } from '@mui/material';
 import "dayjs/locale/es";
 import dayjs from 'dayjs';
-import { createMembershipByUser, getAllMembershipsByUser, consumeHours } from '../../services/membershipByUser.service';
-import { DatePicker } from '@mui/x-date-pickers';
-import { set } from 'react-hook-form';
+import { createReservation, getTodayReservations, updateReservation } from '../../services/reservation.service';
 
 import { DateTimePicker } from '@mui/x-date-pickers';
+import { set } from 'react-hook-form';
+import { useForm } from '../../hooks/useForm';
+
 
 
 const MembembershipByUserEmpty = {
@@ -25,56 +26,40 @@ const MembembershipByUserEmpty = {
 }
 
 
-export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMembershipByUser, setcurrentMembershipByUser }) => {
+export const CreateOrEdit = ({ isEdit, setEdit, setReservations, currentReservation, setCurrentReservation }) => {
 
     const [formSubmitted, setFormSubmitted] = useState(false);
     const [modal, setModal] = useState(false);
     const [disabledButton, setdisabledButton] = useState(false);
 
     const [clients, setClients] = useState({});
-    const [memberships, setMemberships] = useState({});
+    const [priceRooms, setPriceRooms] = useState({});
 
     const [client, setClient] = useState('');
     const [validClient, setValidClient] = useState('Es obligatorio');
 
-    const [selectedMembership, setSelectedMembership] = useState('');
-    const [validMembership, setValidMembership] = useState('Es obligatorio');
+    const [selectedPriceRoom, setSelectedPriceRoom] = useState('');
+    const [selectedRoom, setSelectedRoom] = useState('');
 
+    const [validPriceRoom, setValidPriceRoom] = useState('Es obligatorio');
     const [endDate, setEndDate] = useState('');
     const [validEndDate, setValidEndDate] = useState('Es obligatorio');
+
     const [total, setTotal] = useState(0);
-    const [hours, setHours] = useState(0);
 
     const [paymentMethod, setPaymentMethod] = useState('Efectivo');
 
     const [value, setValue] = React.useState(0.00);
 
-    const handleSliderChange = (event, newValue) => {
-        const intValue = Math.floor(newValue); // Parte entera
-        const decimalValue = newValue % 1; // Parte decimal
-        const adjustedDecimal = Math.min(decimalValue, 0.50); // Limitar la parte decimal a 0.6 (60)
-        const adjustedValue = intValue + parseFloat(adjustedDecimal.toFixed(2));
-        setValue(adjustedValue);
-        console.log(value);
-    };
+    const formValidations = {
+        //paid: [(value) => value.length >= 1 && !isNaN(value), 'Es obligatorio. No se puede ingresar letras.'],
+    }
 
-    const handleInputChange = (event) => {
-        console.log(event.target.value);
-        let newValue = event.target.value;
-        const intValue = Math.floor(newValue); // Parte entera
-        const decimalValue = newValue % 1; // Parte decimal
-        const adjustedDecimal = Math.min(decimalValue, 0.50); // Limitar la parte decimal a 0.6 (60)
-        const adjustedValue = intValue + parseFloat(adjustedDecimal.toFixed(2));
-        setValue(adjustedValue);
-      };
-    
-      const handleBlur = () => {
-        if (value < 0) {
-          setValue(0);
-        } else if (value > 50) {
-          setValue(50);
-        }
-      };
+    const {
+        isFormValid, paid, paidValid, onInputChange
+    } = useForm(currentReservation, formValidations);
+
+
 
     const handleChange = (event) => {
         setPaymentMethod(event.target.value);
@@ -83,7 +68,6 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
     const handleDateChange = (value) => {
         if (value !== null) {
             setEndDate(value);
-            console.log(endDate);
             setValidEndDate(null);
         } else {
             setValidEndDate('Es obligatorio');
@@ -99,18 +83,19 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
         }
     };
 
-    const handleAutocompleteMembership = (event, value) => {
+    const handleAutocompletePriceRoom = (event, value) => {
         debugger
         if (value !== null) {
-            setTotal(value?.price);
-            setHours(value?.hours);
-            setSelectedMembership(value._id);
 
-            setValidMembership(null);
+            setSelectedPriceRoom(value._id);
+            setSelectedRoom(value.roomID._id);
+            setTotal(value.price);
+
+            setValidPriceRoom(null);
+
         } else {
-            setValidMembership('Es obligatorio');
+            setValidPriceRoom('Es obligatorio');
             setTotal(0);
-            setHours(0);
         }
     };
 
@@ -126,10 +111,10 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
             })
     }
 
-    const getMemberships = async () => {
-        await getAllMemberships()
-            .then(({ memberships }) => {
-                setMemberships(memberships);
+    const getPriceRooms = async () => {
+        await getAllPriceRooms()
+            .then(({ priceRooms }) => {
+                setPriceRooms(priceRooms);
 
             })
             .catch((e) => {
@@ -139,10 +124,10 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
 
 
     useEffect(() => {
-        const tomorrow = dayjs().add(1, 'month');
-        setEndDate(tomorrow);
+        // const tomorrow = dayjs().add(1, 'month');
+        // setEndDate(tomorrow);
         getClients();
-        getMemberships();
+        getPriceRooms();
 
     }, [])
 
@@ -154,7 +139,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
             setdisabledButton(true);
             setFormSubmitted(true);
 
-            if (currentMembershipByUser._id.length < 1 && (client === '' || endDate === '' || selectedMembership === '')) {
+            if (currentReservation._id.length < 1 && (client === '' || endDate === '' || selectedPriceRoom === '')) {
                 if (endDate === '') {
                     setValidEndDate('Es obligatorio');
                 }
@@ -164,25 +149,27 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
                 toast.error("Formulario incorrecto")
                 return;
             }
-            if (currentMembershipByUser._id.length > 1) {
-                var valueString = value.toString();
-                console.log('value string' + valueString);
-                const { success } = await consumeHours(currentMembershipByUser._id, valueString);
-                if (!success) {
-                    toast.dismiss(id);
-                    return;
-                }
-                toast.update(id, { render: "Se registraron las horas", type: "success", isLoading: false, autoClose: 2000 });
-            } else {
-                console.log(selectedMembership);
-                var hrs = parseInt(hours, 10);
-                const { success } = await createMembershipByUser(client, selectedMembership, endDate, hrs, total, paymentMethod);
+            if (currentReservation._id.length > 1) {
+                const date = endDate.format('YYYY-MM-DD');
+                const time = endDate.format('HH:mm');
+                const { success } = await updateReservation(client, selectedPriceRoom, selectedRoom, endDate, date, time, paymentMethod, total, paid );
 
                 if (!success) {
                     toast.dismiss(id);
                     return;
                 }
-                toast.update(id, { render: "Se activo la membresía", type: "success", isLoading: false, autoClose: 2000 });
+                toast.update(id, { render: "Se actualizó la reserva", type: "success", isLoading: false, autoClose: 2000 });
+            } else {
+                //console.log(selectedMembership);
+                const date = endDate.format('YYYY-MM-DD');
+                const time = endDate.format('HH:mm');
+                const { success } = await createReservation(client, selectedPriceRoom, selectedRoom, endDate, date, time, paymentMethod, total, paid );
+
+                if (!success) {
+                    toast.dismiss(id);
+                    return;
+                }
+                toast.update(id, { render: "Reserva creada", type: "success", isLoading: false, autoClose: 2000 });
 
             }
 
@@ -195,47 +182,23 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
 
     const refreshList = async () => {
 
-        await getAllMembershipsByUser()
-            .then(({ membershipsByUser }) => {
+        await getTodayReservations()
+            .then(({ reservations }) => {
 
                 // Transformar los datos para la exportación CSV
-                const transformedMemberships = membershipsByUser.map((membership) => {
-                    const dateObj = new Date(membership.endDate);
-                    const day = dateObj.getDate();
-                    const month = dateObj.getMonth() + 1; // Los meses comienzan en 0, por lo que se suma 1
-
-                    const totalSeconds = membership.remaining_hours; // Valor obtenido de la base de datos
-
-                    // Convertir segundos a horas y minutos
-                    function convertToHoursMinutes(seconds) {
-                      const hours1 = Math.floor(seconds / 3600);
-                      const remainingSeconds = seconds % 3600;
-                      const minutes = Math.floor(remainingSeconds / 60);
-                      return { hours1, minutes };
-                    }
-        
-                    // Convertir segundos a horas y minutos
-        
-                    const { hours1, minutes } = convertToHoursMinutes(totalSeconds);
-                    console.log(hours1, minutes);  // Output: 1 30
-                    
-                    let remTime;
-                    if (minutes === 0) {
-                      remTime = hours1.toString();
-                    } else {
-                      remTime = hours1.toString() + ':' + minutes.toString();
-                    }
+                const transformedReservations = reservations.map((reservation) => {
 
                     return {
-                        ...membership,
-                        clientID: membership.clientID.full_name || "",
-                        membershipID: membership.membershipID.name,
-                        endDate: day + '/' + month,
-                        hours: remTime,
+                        ...reservation,
+                        clientID: reservation.clientID.full_name || "",
+                        roomID: reservation.roomID.name,
+                        hours: reservation.priceRoomID.hour,
+                        total: reservation.paymentID.total,
+                        paid: reservation.paymentID.paid,
                     };
                 });
 
-                setMembershipsByUser(transformedMemberships);
+                setReservations(transformedReservations);
             })
             .catch((e) => {
                 console.log(e.message);
@@ -247,7 +210,6 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
         setFormSubmitted(false);
         setEdit(true);
         setTotal(0);
-        setHours(0);
         refreshList();
         setModal(false);
     }
@@ -264,61 +226,17 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
 
     return (
         <>
-            <Button disabled={!isEdit} onClick={handleOpen}>ASIGNAR MEMBRESÍA</Button>
-            <Button disabled={isEdit} onClick={handleOpen}>CARGAR HORAS</Button>
+            <Button disabled={!isEdit} onClick={handleOpen}>NUEVA RESERVA</Button>
+            {/* <Button disabled={isEdit} onClick={handleOpen}>EDITAR</Button> */}
             <Dialog open={modal} onClose={handleClose}>
                 <form onSubmit={handleSubmit}>
                     <DialogTitle>
-                        <Typography hidden={!isEdit} color='primary.main' sx={{ ml: 1 }}>NUEVA MEMBRESÍA ACTIVA</Typography>
-                        <Typography hidden={isEdit} color='primary.main' sx={{ ml: 1 }}>CARGAR HORAS</Typography>
+                        <Typography hidden={!isEdit} color='primary.main' sx={{ ml: 1 }}>NUEVA RESERVA</Typography>
+                        <Typography hidden={isEdit} color='primary.main' sx={{ ml: 1 }}>EDITAR RESERVA</Typography>
                         <Divider />
                     </DialogTitle>
-                    <DialogContent hidden={isEdit}>
-                        <Grid container>
 
-                        <Grid >
-
-                        <LocalizationProvider dateAdapter={AdapterDayjs}>
-                            <DemoContainer components={['DateTimePicker']}>
-                                <DateTimePicker label="Fecha y hora"
-                                        name="endDate"
-                                        error={!!validEndDate && formSubmitted}
-                                        helperText={validEndDate}
-                                        value={endDate}
-                                        onChange={(newValue) => handleDateChange(newValue)}
-                                />
-                            </DemoContainer>
-                        </LocalizationProvider>
-                        </Grid>
-
-                            <Grid item xs={7} md={7} sx={{ mt: 2 }}>
-                                <Slider
-                                    value={value.toFixed(2)}
-                                    onChange={handleSliderChange}
-                                    min={0}
-                                    max={12}
-                                    step={0.1}
-                                    aria-labelledby="input-slider"
-                                />
-                            </Grid>
-                            <Grid item xs={4} md={4} sx={{ ml:2, mt: 2 }}>
-                                <Input
-                                    value={value.toFixed(2)} // Formatear a dos lugares decimales
-                                    size="small"
-                                    onChange={handleInputChange}
-                                    onBlur={handleBlur}
-                                    inputProps={{
-                                        step: '0.1',
-                                        min: 0,
-                                        max: 12,
-                                        type: 'number',
-                                        'aria-labelledby': 'input-slider',
-                                    }}
-                                />
-                            </Grid>
-                        </Grid>
-                    </DialogContent>
-                    <DialogContent hidden={!isEdit}>
+                    <DialogContent>
                         <Grid container>
                             <Grid item xs={12} sx={{ mt: 2 }}>
                                 <Autocomplete
@@ -333,7 +251,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
                                     onChange={handleAutocompleteChange}
                                 />
                             </Grid>
-                            <Grid item xs={12} md={12} sx={{ mt: 2 }}>
+                            {/* <Grid item xs={12} md={12} sx={{ mt: 2 }}>
                                 <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
                                     <DemoItem components={['DatePicker']}>
                                         <DatePicker label="Vencimiento"
@@ -346,19 +264,35 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
                                     </DemoItem>
                                 </LocalizationProvider>
 
+                            </Grid> */}
+
+                            <Grid item xs={12} sx={{ mt: 2 }}>
+
+                            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                <DemoContainer components={['DateTimePicker']}>
+                                    <DateTimePicker label="Fecha y hora"
+                                            name="endDate"
+                                            error={!!validEndDate && formSubmitted}
+                                            helperText={validEndDate}
+                                            value={endDate}
+                                            onChange={(newValue) => handleDateChange(newValue)}
+                                    />
+                                </DemoContainer>
+                            </LocalizationProvider>
                             </Grid>
+
                             <Grid item xs={12} sx={{ mt: 2 }}>
 
                                 <Autocomplete
                                     disablePortal
                                     id="combo-box-demo"
-                                    options={memberships}
-                                    getOptionLabel={(membership) => `${membership.name.toString()}`}
-                                    renderInput={(params) => <TextField {...params} label="Seleccionar membresía"
-                                        name='memberships' error={!!validMembership && formSubmitted}
-                                        helperText={validMembership} />}
+                                    options={priceRooms}
+                                    getOptionLabel={(priceRoom) => `${priceRoom.roomID.name.toString()} (${priceRoom.hour.toString()} hs)`}
+                                    renderInput={(params) => <TextField {...params} label="Seleccionar sala"
+                                        name='priceRooms' error={!!validPriceRoom && formSubmitted}
+                                        helperText={validPriceRoom} />}
                                     name="memberships"
-                                    onChange={handleAutocompleteMembership}
+                                    onChange={handleAutocompletePriceRoom}
                                 />
                             </Grid>
                             <Grid item xs={12} sx={{ mt: 4 }}>
@@ -366,7 +300,6 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
 
                                 <Divider />
                             </Grid>
-
                             <Grid item xs={12} sx={{ mt: 2 }}>
                                 <FormControl fullWidth>
                                     <InputLabel htmlFor="outlined-adornment-amount">Total</InputLabel>
@@ -379,17 +312,17 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
                                     />
                                 </FormControl>
                             </Grid>
-
                             <Grid item xs={12} sx={{ mt: 2 }}>
-                                <FormControl fullWidth>
-                                    <TextField
-                                        disabled
-                                        label="Horas"
-                                        type="text"
-                                        name="hour"
-                                        value={hours}
-                                    />
-                                </FormControl>
+                                <TextField
+                                    label="Pagado"
+                                    type="text"
+                                    fullWidth
+                                    name="paid"
+                                    value={paid}
+                                    onChange={onInputChange}
+                                    error={!!paidValid && formSubmitted}
+                                    helperText={paidValid}
+                                />
                             </Grid>
 
                             <Grid item xs={12} sx={{ mt: 2 }}>

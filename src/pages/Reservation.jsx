@@ -1,6 +1,7 @@
 import React from 'react';
 import { UserAuth } from '../context/AuthContext';
 import { Table } from "../components/reservation/table";
+
 import { Box, Toolbar, IconButton, Container } from "@mui/material"
 
 import '../styles/home.css'
