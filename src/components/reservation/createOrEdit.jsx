@@ -21,7 +21,6 @@ import { useForm } from '../../hooks/useForm';
 const MembembershipByUserEmpty = {
     "_id": "",
     "endDate": "",
-    "client": "",
     "membership": ""
 }
 
@@ -105,8 +104,6 @@ export const CreateOrEdit = ({ isEdit, setEdit, setReservations, currentReservat
         await getAll()
             .then(({ clients }) => {
                 setClients(clients)
-                console.log(clients);
-
             })
             .catch((e) => {
                 console.log(e.message)
@@ -125,13 +122,28 @@ export const CreateOrEdit = ({ isEdit, setEdit, setReservations, currentReservat
     }
 
 
-    useEffect(() => {
-        // const tomorrow = dayjs().add(1, 'month');
-        // setEndDate(tomorrow);
+    useEffect(() => { 
+        //setClient(currentReservation?.clientID);
+        console.log(currentReservation.roomID)
+        if (currentReservation._id.length > 1)
+        {
+            console.log('entreeee');
+            console.log(currentReservation?.priceRoomID?.price)
+            setClient(currentReservation?.clientID);
+            setTotal(currentReservation?.priceRoomID?.price)
+            setSelectedPriceRoom(currentReservation.roomID)
+            setValidClient(false);
+            
+            const tomorrow = dayjs(currentReservation.dateTime);
+         
+            setEndDate(tomorrow);
+        }
+
         getClients();
         getPriceRooms();
 
-    }, [])
+    }, [currentReservation])
+    
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -258,10 +270,11 @@ export const CreateOrEdit = ({ isEdit, setEdit, setReservations, currentReservat
                                     options={clients}
                                     getOptionLabel={(clients) => clients.full_name.toString()}
                                     renderInput={(params) => <TextField {...params} label="Seleccionar cliente"
-                                        name='client' error={!!validClient && formSubmitted}
+                                        name='client' value={client} error={!!validClient && formSubmitted}
                                         helperText={validClient} />}
                                     name="client"
                                     onChange={handleAutocompleteChange}
+                                    inputValue={client}
                                 />
                             </Grid>
                             {/* <Grid item xs={12} md={12} sx={{ mt: 2 }}>
@@ -302,10 +315,11 @@ export const CreateOrEdit = ({ isEdit, setEdit, setReservations, currentReservat
                                     options={priceRooms}
                                     getOptionLabel={(priceRoom) => `${priceRoom.roomID.name.toString()} (${priceRoom.hour.toString()} hs)`}
                                     renderInput={(params) => <TextField {...params} label="Seleccionar sala"
-                                        name='priceRooms' error={!!validPriceRoom && formSubmitted}
+                                        name='priceRooms'value={selectedPriceRoom} error={!!validPriceRoom && formSubmitted}
                                         helperText={validPriceRoom} />}
                                     name="memberships"
                                     onChange={handleAutocompletePriceRoom}
+                                    inputValue={selectedPriceRoom}
                                 />
                             </Grid>
                             <Grid item xs={12} sx={{ mt: 4 }}>
