@@ -51,8 +51,8 @@ export const Table = () => {
               return {
                 ...payment,
                 means_of_payment: payment.means_of_payment || "",
-                total: '$ ' + payment.total,
-                paid: '$ ' + payment.paid,
+                total: payment.total,
+                paid: payment.paid,
                 created: payment.created,
                 client: payment.clientInfo.full_name
               };
