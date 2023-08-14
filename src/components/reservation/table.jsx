@@ -8,7 +8,7 @@ import { useState } from "react";
 import { Button, ButtonGroup, Chip, Dialog, DialogContent, DialogTitle, Grid } from "@mui/material";
 import { CreateOrEdit } from "./createOrEdit";
 import { ToastContainer, toast } from 'react-toastify';
-import { getAllReservations, getAllReservationsFilter, deleteReservation } from "../../services/reservation.service";
+import { getAllReservations, getAllReservationsFilter, deleteReservation, getStats } from "../../services/reservation.service";
 //https://github.com/gregnb/mui-datatables
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers';
@@ -36,7 +36,7 @@ export const Table = () => {
     const [reservations, setReservations] = useState();
     const [edit, setEdit] = useState(true);
     const [currentReservation, setCurrentReservation] = useState(ReservationEmpty);
-
+    const [stats, setStats] = useState(null);
     const today = dayjs();
     const tomorrow = dayjs().add(1, 'week');
 
@@ -69,7 +69,7 @@ export const Table = () => {
           
           setReservations(transformedReservations);
           console.log(reservations);
-        })
+          })
         .catch((e) => {
           console.log(e.message);
         });
@@ -109,8 +109,17 @@ export const Table = () => {
     
      useEffect(() => {
          refreshTableFilter();
+         async function fetchData() {
+          const response = await getStats(start, end);
+          setStats(response);
+      }
+
+      fetchData();
      }, [start, end])
 
+     useEffect(() => {
+     console.log(stats);
+      }, [stats]);
 
     const muiCache = createCache({
         key: "mui-datatables",
@@ -253,125 +262,63 @@ export const Table = () => {
 
     return (
         <>
-            <Grid container style={cardStyle}>
-            <form>
-              <Grid item>
+        <Grid container style={cardStyle}>
+          <form>
+            <Grid item>
               <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
-              <DemoItem components={['DatePicker']}>
-              <DatePicker label="Inicio"
-                  name="start"
-                  value={start}
-                  onChange={(newStart) => handleDateChange(newStart, end)}
-              />
-              </DemoItem>
-            </LocalizationProvider>
-         
-              </Grid>
-              <br />
-              <Grid item>
+                <DemoItem components={['DatePicker']}>
+                  <DatePicker label="Inicio"
+                    name="start"
+                    value={start}
+                    onChange={(newStart) => handleDateChange(newStart, end)}
+                  />
+                </DemoItem>
+              </LocalizationProvider>
+
+            </Grid>
+            <br />
+            <Grid item>
               <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
-              <DemoItem components={['DatePicker']}>
-              <DatePicker label="Fin"
-                  name="end"
-                  value={end}
-                  onChange={(newEnd) => handleDateChange(start, newEnd)}
-              />
-              </DemoItem>
-            </LocalizationProvider>
-              </Grid>
-              </form>
-
-            <Grid item md={1} >
-            <Card style={cardStyle}>
-            <CardContent style={contentStyle}>
-              <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-                Reservas
-              </Typography>
-              <Typography variant="h5" component="div">
-                55
-              </Typography>
-            </CardContent>
-
-          </Card>
+                <DemoItem components={['DatePicker']}>
+                  <DatePicker label="Fin"
+                    name="end"
+                    value={end}
+                    onChange={(newEnd) => handleDateChange(start, newEnd)}
+                  />
+                </DemoItem>
+              </LocalizationProvider>
             </Grid>
-            <Grid item md={1} >
-            <Card style={cardStyle}>
-            <CardContent style={contentStyle}>
-              <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-                Reservas
-              </Typography>
-              <Typography variant="h5" component="div">
-                55
-              </Typography>
-            </CardContent>
+          </form>
 
-          </Card>
-            </Grid>            <Grid item md={1} >
-            <Card style={cardStyle}>
+          <Grid item md={1}>
+        <Card style={cardStyle}>
             <CardContent style={contentStyle}>
-              <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-                Reservas
-              </Typography>
-              <Typography variant="h5" component="div">
-                55
-              </Typography>
+                <Typography sx={{ fontSize: 13 }} color="text.secondary" gutterBottom>
+                    Reservas
+                </Typography>
+                <Typography variant="h5" style={{ fontSize: '14px' }} component="div">
+                    {stats ? stats.totalReservations : 'Cargando...'}
+                </Typography>
             </CardContent>
-
-          </Card>
-            </Grid>            <Grid item md={1} >
-            <Card style={cardStyle}>
-            <CardContent style={contentStyle}>
-              <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-                Reservas
-              </Typography>
-              <Typography variant="h5" component="div">
-                55
-              </Typography>
-            </CardContent>
-
-          </Card>
+        </Card>
+    </Grid>
+    {stats &&
+        stats.roomStats.map((roomStat, index) => (
+            <Grid item md={1} key={index}>
+                <Card style={cardStyle}>
+                    <CardContent style={contentStyle}>
+                        <Typography sx={{ fontSize: 13 }} color="text.secondary" gutterBottom>
+                            {roomStat.roomName}
+                        </Typography>
+                        <Typography variant="h5" style={{ fontSize: '14px' }} component="div">
+                            {roomStat.count}
+                        </Typography>
+                    </CardContent>
+                </Card>
             </Grid>
-            <Grid item md={1} >
-            <Card style={cardStyle}>
-            <CardContent style={contentStyle}>
-              <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-                Reservas
-              </Typography>
-              <Typography variant="h5" component="div">
-                55
-              </Typography>
-            </CardContent>
+        ))}
 
-          </Card>
-            </Grid>
-            <Grid item md={1} >
-            <Card style={cardStyle}>
-            <CardContent style={contentStyle}>
-              <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-                Reservas
-              </Typography>
-              <Typography variant="h5" component="div">
-                55
-              </Typography>
-            </CardContent>
-
-          </Card>
-            </Grid>
-            <Grid item md={1} >
-            <Card style={cardStyle}>
-            <CardContent style={contentStyle}>
-              <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-                Reservas
-              </Typography>
-              <Typography variant="h5" component="div">
-                55
-              </Typography>
-            </CardContent>
-
-          </Card>
-            </Grid>
-              
-            </Grid>
+        </Grid>
             <br />
 
 

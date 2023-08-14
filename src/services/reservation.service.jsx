@@ -23,7 +23,19 @@ export const getAllReservationsFilter = async (start, end) => {
         return await response.json();
 }
 
+export const getStats = async (start, end) => {
 
+    const requestOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            "start": start,
+            "end": end
+        })
+    };
+    const response = await fetch(baseURL + "/filter/stats", requestOptions);
+    return await response.json();
+}
 
 export const getTodayReservations = async () => {
     const response = await fetch(baseURL + '/today');

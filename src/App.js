@@ -18,6 +18,8 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Room } from './pages/Room';
 import Reservation from './pages/Reservation';
+import Usage from './pages/Usage';
+import { Payment } from './pages/Payment';
 
 function App() {
   return (
@@ -74,6 +76,22 @@ function App() {
             element={
               <ProtectedRoute>
                 <Reservation />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path='/usage'
+            element={
+              <ProtectedRoute>
+                <Usage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path='/payment'
+            element={
+              <ProtectedRoute>
+                <Payment />
               </ProtectedRoute>
             }
           />

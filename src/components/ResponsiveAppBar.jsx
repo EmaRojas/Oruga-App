@@ -117,6 +117,24 @@ function ResponsiveAppBar() {
           >
             Salas
           </Button>
+          <Button href='/reservation'
+            onClick={handleCloseNavMenu}
+           variant='text'
+          >
+            Reservas
+          </Button>
+          <Button href='/usage'
+            onClick={handleCloseNavMenu}
+           variant='text'
+          >
+            Consumos
+          </Button>
+          <Button href='/payment'
+            onClick={handleCloseNavMenu}
+           variant='text'
+          >
+            Pagos
+          </Button>
           </ButtonGroup>
           </Menu>
         </Box>
@@ -188,6 +206,18 @@ function ResponsiveAppBar() {
             sx={{ my: 2, color: 'white', display: 'block' }}
           >
             Reservas
+          </Button>
+          <Button href='/usage'
+            onClick={handleCloseNavMenu}
+            sx={{ my: 2, color: 'white', display: 'block' }}
+          >
+            Consumos
+          </Button>
+          <Button href='/payment'
+            onClick={handleCloseNavMenu}
+            sx={{ my: 2, color: 'white', display: 'block' }}
+          >
+            Pagos
           </Button>
         </Box>
 
