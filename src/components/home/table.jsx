@@ -188,14 +188,14 @@ export const Table = () => {
 
     return (
         <>
-            <ButtonGroup variant="outlined" aria-label="outlined button group">
+            {/* <ButtonGroup variant="outlined" aria-label="outlined button group">
                 <CreateOrEdit isEdit={edit} setEdit={setEdit} setReservations={setReservations} reservations={reservations} currentReservation={currentReservation} setCurrentReservation={setCurrentReservation} />
-            </ButtonGroup>
+            </ButtonGroup> */}
 
             <CacheProvider value={muiCache} mt={5}>
                 <ThemeProvider theme={createTheme()}>
 
-                    <MUIDataTable
+                    <MUIDataTable className="tabluppercase"
                         title={"RESERVAS DEL DÍA"}
                         data={reservations}
                         columns={columns}

@@ -34,8 +34,8 @@ export const Table = () => {
     const [payments, setPayments] = useState()
     const [edit, setEdit] = useState(true);
     const [currentPayment, setCurrentPayment] = useState(PaymentEmpty);
-    const today = dayjs();
-    const tomorrow = dayjs().add(1, 'week');
+    const today = dayjs().startOf('day').add(1, 'hour');
+    const tomorrow = dayjs().startOf('day').add(1, 'week').subtract(1, 'hour');
 
     const [start, setStart] = useState(today);
     const [end, setEnd] = useState(tomorrow);
@@ -48,12 +48,19 @@ export const Table = () => {
             // Transformar los datos para la exportación CSV
             const transformedPayments = payments.map((payment) => {
       
+               const createdDate = new Date(payment.created);
+
+                // Formatear la fecha en el formato deseado
+                const formattedDate = `${createdDate.getFullYear()}-${(createdDate.getMonth() + 1)
+                    .toString()
+                    .padStart(2, '0')}-${createdDate.getDate().toString().padStart(2, '0')}`;
+    
               return {
                 ...payment,
                 means_of_payment: payment.means_of_payment || "",
                 total: payment.total,
                 paid: payment.paid,
-                created: payment.created,
+                created: formattedDate,
                 client: payment.clientInfo.full_name
               };
             });
@@ -145,7 +152,7 @@ export const Table = () => {
         },
         {
             name: "created",
-            label: "Fecha y hora",
+            label: "Fecha",
             options: {
                 filter: true,
                 sort: false,
@@ -294,7 +301,7 @@ export const Table = () => {
             <br />
 
             <ButtonGroup variant="outlined" aria-label="outlined button group">
-                <CreateOrEdit isEdit={edit} setEdit={setEdit} setPayments={setPayments} payments={payments} currentPayment={currentPayment} setCurrentPayment={setCurrentPayment} />
+                <CreateOrEdit isEdit={edit} start={start} end={end} setEdit={setEdit} setPayments={setPayments} payments={payments} currentPayment={currentPayment} setCurrentPayment={setCurrentPayment} />
             </ButtonGroup>
 
             <CacheProvider value={muiCache} mt={5}>

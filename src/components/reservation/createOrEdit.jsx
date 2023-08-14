@@ -175,9 +175,12 @@ export const CreateOrEdit = ({ isEdit, setEdit, setReservations, currentReservat
                 const diferenciaHoraria = -3; // ART está UTC-3
                 const fechaArgentina = new Date(fechaUtc.getTime() + diferenciaHoraria * 60 * 60 * 1000);
 
+                const fechaUtcEnd = new Date(endTime);
+                const fechaArgentinaEnd = new Date(fechaUtcEnd.getTime() + diferenciaHoraria * 60 * 60 * 1000);
+
 
                 var endTimeString = ("0" + endTime.getHours()).slice(-2) + ":" + ("0" + endTime.getMinutes()).slice(-2);
-                const { success } = await createReservation(client, selectedPriceRoom, selectedRoom, fechaArgentina, date, time, endTimeString, paymentMethod, total, parseFloat(paid) || 0);
+                const { success } = await createReservation(client, selectedPriceRoom, selectedRoom, fechaArgentina, fechaArgentinaEnd, date, time, endTimeString, paymentMethod, total, parseFloat(paid) || 0);
 
                 if (!success) {
                     toast.dismiss(id);

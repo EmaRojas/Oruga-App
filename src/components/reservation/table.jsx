@@ -37,8 +37,8 @@ export const Table = () => {
     const [edit, setEdit] = useState(true);
     const [currentReservation, setCurrentReservation] = useState(ReservationEmpty);
     const [stats, setStats] = useState(null);
-    const today = dayjs();
-    const tomorrow = dayjs().add(1, 'week');
+    const today = dayjs().startOf('day').add(1, 'hour');
+    const tomorrow = dayjs().startOf('day').add(1, 'week').subtract(1, 'hour');
 
     const [start, setStart] = useState(today);
     const [end, setEnd] = useState(tomorrow);
@@ -329,7 +329,7 @@ export const Table = () => {
             <CacheProvider value={muiCache} mt={5}>
                 <ThemeProvider theme={createTheme()}>
 
-                    <MUIDataTable
+                    <MUIDataTable className="tabluppercase"
                         title={"RESERVAS"}
                         data={reservations}
                         columns={columns}

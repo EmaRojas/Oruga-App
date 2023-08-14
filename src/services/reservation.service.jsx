@@ -46,6 +46,15 @@ export const getTodayReservations = async () => {
     }
 }
 
+export const getNowReservations = async () => {
+    const response = await fetch(baseURL + '/current');
+    if (!response.ok) {
+        throw new Error('Data coud not be fetched!')
+    } else {
+        return response.json()
+    }
+}
+
 export const deleteReservation = async (id) => {
     const requestOptions = {
         method: 'Delete',
@@ -56,7 +65,7 @@ export const deleteReservation = async (id) => {
 }
 
 
-export const createReservation = async (clientID, priceRoomID, roomID, fechaArgentina, date, time, endTimeString, means_of_payment, total, paid) => {
+export const createReservation = async (clientID, priceRoomID, roomID, fechaArgentina, fechaArgentinaEnd, date, time, endTimeString, means_of_payment, total, paid) => {
     const requestOptions = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -65,6 +74,7 @@ export const createReservation = async (clientID, priceRoomID, roomID, fechaArge
             "priceRoomID": priceRoomID,
             "roomID": roomID,
             "dateTime": fechaArgentina,
+            "endDateTime": fechaArgentinaEnd,
             "date": date,
             "time": time,
             "endTime": endTimeString,

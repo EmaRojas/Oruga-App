@@ -193,8 +193,18 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
                 const endDateTime = dateTime.add(totalSeconds, 'second');
                 console.log(startDateTime);
                 console.log(endDateTime);
+
+                // Convertir la fecha a la zona horaria de Argentina (ART) manualmente
+                const diferenciaHoraria = -3; // ART está UTC-3
+                const fechaUtcStart = new Date(startDateTime);
+                const fechaArgentinaStart = new Date(fechaUtcStart.getTime() + diferenciaHoraria * 60 * 60 * 1000);
+
+                // Convertir la fecha a la zona horaria de Argentina (ART) manualmente
+                const fechaUtcEnd = new Date(endDateTime);
+                const fechaArgentinaEnd = new Date(fechaUtcEnd.getTime() + diferenciaHoraria * 60 * 60 * 1000);
+
                 console.log('value string' + valueString);
-                const { success } = await consumeHours(currentMembershipByUser._id, valueString, startDateTime, endDateTime);
+                const { success } = await consumeHours(currentMembershipByUser._id, valueString, fechaArgentinaStart, fechaArgentinaEnd);
                 if (!success) {
                     toast.dismiss(id);
                     return;
@@ -303,7 +313,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
                     <DialogContent hidden={isEdit}>
                         <Grid container>
 
-                        <Grid >
+                        <Grid item>
 
                         <LocalizationProvider dateAdapter={AdapterDayjs}>
                             <DemoContainer components={['DateTimePicker']}>
@@ -315,7 +325,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
                             </DemoContainer>
                         </LocalizationProvider>
                         </Grid>
-
+                        <br /> <br />
                             <Grid item xs={7} md={7} sx={{ mt: 2 }}>
                                 <Slider
                                     value={value.toFixed(2)}
@@ -326,6 +336,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
                                     aria-labelledby="input-slider"
                                 />
                             </Grid>
+                           
                             <Grid item xs={4} md={4} sx={{ ml:2, mt: 2 }}>
                                 <Input
                                     value={value.toFixed(2)} // Formatear a dos lugares decimales
@@ -428,7 +439,9 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
                                         onChange={handleChange}
                                     >
                                         <FormControlLabel value="Efectivo" control={<Radio />} label="Efectivo" />
-                                        <FormControlLabel value="MercadoPago" control={<Radio />} label="MercadoPago" />
+                                        <FormControlLabel value="Transferencia" control={<Radio />} label="Transferencia" />
+                                        <FormControlLabel value="Tarjeta" control={<Radio />} label="Tarjeta" />
+
                                     </RadioGroup>
                                 </FormControl>
                             </Grid>

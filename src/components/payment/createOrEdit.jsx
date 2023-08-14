@@ -14,7 +14,7 @@ const PaymentEmpty = {
     "created": ""
 }
 
-export const CreateOrEdit = ({ isEdit, setEdit, setPayments, currentPayment, setCurrentPayment }) => {
+export const CreateOrEdit = ({ isEdit, setEdit, start, end, setPayments, currentPayment, setCurrentPayment }) => {
 
     const [formSubmitted, setFormSubmitted] = useState(false);
     const [modal, setModal] = useState(false);
@@ -68,24 +68,48 @@ export const CreateOrEdit = ({ isEdit, setEdit, setPayments, currentPayment, set
         setModal(false);
     }
 
-    const refreshList = () => {
+    const refreshList = async () => {
+        await getAllPaymentsFilter(start, end)
+          .then(({ payments }) => {
+      
+            // Transformar los datos para la exportación CSV
+            const transformedPayments = payments.map((payment) => {
+      
+               const createdDate = new Date(payment.created);
 
-        getAll()
-            .then(({ payments }) => {
-                setPayments(payments)
+                // Formatear la fecha en el formato deseado
+                const formattedDate = `${createdDate.getFullYear()}-${(createdDate.getMonth() + 1)
+                    .toString()
+                    .padStart(2, '0')}-${createdDate.getDate().toString().padStart(2, '0')}`;
+    
+              return {
+                ...payment,
+                means_of_payment: payment.means_of_payment || "",
+                total: payment.total,
+                paid: payment.paid,
+                created: formattedDate,
+                client: payment.clientInfo.full_name
+              };
+            });
+            
+            setPayments(transformedPayments);
+            console.log(payments);
             })
-            .catch((e) => {
-                console.log(e.message)
-            })
-    }
+          .catch((e) => {
+            console.log(e.message);
+          });
+      
+        setCurrentPayment(PaymentEmpty);
+        setEdit(true);
+      };
 
     return (
         <>
-            <Button disabled={!isEdit} onClick={handleOpen}>Nuevo</Button>
-            <Button disabled={isEdit} onClick={handleOpen}>Editar</Button>
+            {/* <Button disabled={!isEdit} onClick={handleOpen}>Nuevo</Button> */}
+            <Button disabled={isEdit} onClick={handleOpen}>ACTUALIZAR</Button>
             <Dialog open={modal} onClose={handleClose}>
                 <form onSubmit={handleSubmit}>
-                    <DialogTitle><Typography color='primary.main' sx={{ ml: 1 }}>NUEVO CLIENTE</Typography></DialogTitle>
+                    <DialogTitle><Typography color='primary.main' sx={{ ml: 1 }}>ACTUALIZAR PAGO</Typography></DialogTitle>
                     <DialogContent>
 
                         <Grid container>
