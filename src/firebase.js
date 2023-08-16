@@ -7,14 +7,13 @@ import { getAuth } from "firebase/auth";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-    apiKey: "AIzaSyBfbTVmkwt5GC5O8SQC-aHraDss8G0UThs",
-    authDomain: "oruga-8e877.firebaseapp.com",
-    projectId: "oruga-8e877",
-    storageBucket: "oruga-8e877.appspot.com",
-    messagingSenderId: "184087297392",
-    appId: "1:184087297392:web:eaf8837dd61b492154e3b5",
-    measurementId: "G-08GGVN1VTQ"
-  };
+  apiKey: "AIzaSyDDxGzgL7m-N5eCF3ob2hMsMW8vNfyYisE",
+  authDomain: "oruga-coworking.firebaseapp.com",
+  projectId: "oruga-coworking",
+  storageBucket: "oruga-coworking.appspot.com",
+  messagingSenderId: "71090394979",
+  appId: "1:71090394979:web:e01a2a08dabd75bfcd2556"
+};
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
