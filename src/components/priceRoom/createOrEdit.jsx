@@ -26,7 +26,10 @@ export const CreateOrEdit = ({ isEdit, setEdit, setPriceRooms, currentPriceRoom,
 
     const formValidations = {
         hour: [(value) => value.length >= 1 && !isNaN(value), 'Es obligatorio. No se puede ingresar letras.'],
-        price: [(value) => value.length >= 1 && !isNaN(value), 'Es obligatorio. No se puede ingresar letras.'],
+        price: [
+            (value) => value.length >= 1 && !isNaN(value) && !(/[.,]/.test(value)),
+            'Es obligatorio. Solo se permiten números, sin puntos ni comas.'
+        ],
     }
 
     const {
