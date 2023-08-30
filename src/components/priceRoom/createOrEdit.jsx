@@ -67,9 +67,9 @@ export const CreateOrEdit = ({ isEdit, setEdit, setPriceRooms, currentPriceRoom,
                 return;
             }
             setdisabledButton(true);
-            
+            var priceParse = price.replace(/\./g, '');
             if (currentPriceRoom._id.length > 1) {
-                const { success } = await updatePriceRoom(currentPriceRoom._id, hour, price);
+                const { success } = await updatePriceRoom(currentPriceRoom._id, hour, priceParse);
 
                 if (!success) {
                     toast.dismiss(id);
@@ -78,7 +78,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setPriceRooms, currentPriceRoom,
                 toast.update(id, { render: "Precio modificado", type: "success", isLoading: false, autoClose: 2000 });
             } else {
                 console.log(rooms);
-                const { success } = await createPriceRoom(selectRooms, hour, price);
+                const { success } = await createPriceRoom(selectRooms, hour, priceParse);
 
                 if (!success) {
                     toast.dismiss(id);

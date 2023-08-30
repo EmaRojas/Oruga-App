@@ -47,17 +47,20 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMemberships, currentMembershi
                 toast.error("Formulario incorrecto")
                 return;
             } 
-                
+            // Eliminar el punto
+            var priceParse = price.replace(/\./g, '');
             if (currentMembership._id.length > 1) {
-                const { success } = await updateMembership(currentMembership._id, name, price,hours, type);
+            
+                const { success } = await updateMembership(currentMembership._id, name, priceParse,hours, type);
                 if (!success) {
                     toast.dismiss(id);
                     return;
                 }
                 toast.update(id, { render: "Registro modificado", type: "success", isLoading: false, autoClose: 2000 });
             } else {
-                const response = await createMembership(name, price,hours, type);
-console.log(response);
+
+                const response = await createMembership(name, priceParse,hours, type);
+
                 // if (!success) {
                 //     toast.dismiss(id);
                 //     return;
