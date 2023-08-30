@@ -440,6 +440,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
                                     >
                                         <FormControlLabel value="Efectivo" control={<Radio />} label="Efectivo" />
                                         <FormControlLabel value="Transferencia" control={<Radio />} label="Transferencia" />
+                                        <FormControlLabel value="Mercado Pago" control={<Radio />} label="Mercado Pago" />
                                         <FormControlLabel value="Tarjeta" control={<Radio />} label="Tarjeta" />
 
                                     </RadioGroup>
