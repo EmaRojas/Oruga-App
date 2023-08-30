@@ -12,7 +12,7 @@ const ClientEmpty = {
     "email": "",
     "company_name": "",
     "cuit": "",
-    "assistance": ""
+    "category": ""
 }
 
 
@@ -21,7 +21,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setClients, currentUser, setCurr
     const [formSubmitted, setFormSubmitted] = useState(false);
     const [modal, setModal] = useState(false);
     const [disabledButton, setdisabledButton] = useState(false);
-    const [assistance, setAssistance] = React.useState('Individual');
+    const [category, setCategory] = React.useState('Profesional');
 
     const formValidations = {
         full_name: [(value) => value.length >= 1, 'Es obligatorio.'],
@@ -50,14 +50,14 @@ export const CreateOrEdit = ({ isEdit, setEdit, setClients, currentUser, setCurr
             setdisabledButton(true);
 
             if (currentUser._id.length > 1) {
-                const { success } = await updateClient(currentUser._id, full_name, phone, email, company_name, assistance, cuit);
+                const { success } = await updateClient(currentUser._id, full_name, phone, email, company_name, category, cuit);
                 if (!success) {
                     toast.dismiss(id);
                     return;
                 }
                 toast.update(id, { render: "Registro modificado", type: "success", isLoading: false, autoClose: 2000 });
             } else {
-                const { success } = await createClient(full_name, phone, email, company_name, assistance, cuit);
+                const { success } = await createClient(full_name, phone, email, company_name, category, cuit);
 
                 if (!success) {
                     toast.dismiss(id);
@@ -75,7 +75,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setClients, currentUser, setCurr
     }
 
     const handleChange = (event) => {
-        setAssistance(event.target.value);
+        setCategory(event.target.value);
     };
 
 
@@ -179,16 +179,17 @@ export const CreateOrEdit = ({ isEdit, setEdit, setClients, currentUser, setCurr
                             </Grid>
                             <Grid item xs={12} sx={{ mt: 2 }}>
                                 <FormControl>
-                                    <FormLabel id="demo-controlled-radio-buttons-group">Asistencia</FormLabel>
+                                    <FormLabel id="demo-controlled-radio-buttons-group">Categoría</FormLabel>
                                     <RadioGroup
                                         row
                                         aria-labelledby="demo-controlled-radio-buttons-group"
                                         name="controlled-radio-buttons-group"
-                                        value={assistance}
+                                        value={category}
                                         onChange={handleChange}
                                     >
-                                        <FormControlLabel value="Individual" control={<Radio />} label="Individual" />
-                                        <FormControlLabel value="Colectivo" control={<Radio />} label="Colectivo" />
+                                        <FormControlLabel value="Profesional" control={<Radio />} label="Profesional" />
+                                        <FormControlLabel value="Empresa" control={<Radio />} label="Empresa" />
+                                        <FormControlLabel value="Formador" control={<Radio />} label="Formador" />
                                     </RadioGroup>
                                 </FormControl>
                             </Grid>

@@ -19,7 +19,7 @@ export const getClientById = async (id) => {
     }
 }
 
-export const createClient = async (full_name, phone, email, company_name, assistance, cuit) => {
+export const createClient = async (full_name, phone, email, company_name, category, cuit) => {
     const requestOptions = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -29,14 +29,14 @@ export const createClient = async (full_name, phone, email, company_name, assist
             "email": email,
             "company_name": company_name,
             "cuit": cuit,
-            "assistance": assistance
+            "category": category
         })
     };
     const response = await fetch(baseURL, requestOptions);
     return await response.json();
 }
 
-export const updateClient = async (id, full_name, phone, email, company_name, description, assistance, cuit) => {
+export const updateClient = async (id, full_name, phone, email, company_name, category, cuit) => {
     const requestOptions = {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -46,8 +46,7 @@ export const updateClient = async (id, full_name, phone, email, company_name, de
             "email": email,
             "company_name": company_name,
             "cuit": cuit,
-            "description": description,
-            "assistance": assistance
+            "category": category
         })
     };
     const response = await fetch(baseURL + "/" + id, requestOptions);

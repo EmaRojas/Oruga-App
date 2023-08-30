@@ -18,7 +18,7 @@ const ClientEmpty = {
     "email": "",
     "company_name": "",
     "cuit": "",
-    "assistance":""
+    "category":""
 }
 
 export const Table = () => {
