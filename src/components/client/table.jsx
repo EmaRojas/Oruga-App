@@ -18,7 +18,6 @@ const ClientEmpty = {
     "email": "",
     "company_name": "",
     "cuit": "",
-    "description": "",
     "assistance":""
 }
 

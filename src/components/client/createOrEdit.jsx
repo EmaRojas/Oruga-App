@@ -12,7 +12,6 @@ const ClientEmpty = {
     "email": "",
     "company_name": "",
     "cuit": "",
-    "description": "",
     "assistance": ""
 }
 
@@ -33,7 +32,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setClients, currentUser, setCurr
     }
 
     const {
-        full_name, phone, email, company_name, description, cuit, onInputChange,
+        full_name, phone, email, company_name, cuit, onInputChange,
         isFormValid, full_nameValid, phoneValid, emailValid, company_nameValid, cuitValid
     } = useForm(currentUser, formValidations);
 
@@ -51,14 +50,14 @@ export const CreateOrEdit = ({ isEdit, setEdit, setClients, currentUser, setCurr
             setdisabledButton(true);
 
             if (currentUser._id.length > 1) {
-                const { success } = await updateClient(currentUser._id, full_name, phone, email, company_name, description, assistance, cuit);
+                const { success } = await updateClient(currentUser._id, full_name, phone, email, company_name, assistance, cuit);
                 if (!success) {
                     toast.dismiss(id);
                     return;
                 }
                 toast.update(id, { render: "Registro modificado", type: "success", isLoading: false, autoClose: 2000 });
             } else {
-                const { success } = await createClient(full_name, phone, email, company_name, description, assistance, cuit);
+                const { success } = await createClient(full_name, phone, email, company_name, assistance, cuit);
 
                 if (!success) {
                     toast.dismiss(id);
@@ -176,18 +175,6 @@ export const CreateOrEdit = ({ isEdit, setEdit, setClients, currentUser, setCurr
                                     onChange={onInputChange}
                                     error={!!cuitValid && formSubmitted}
                                     helperText={cuitValid}
-                                />
-                            </Grid>
-                            <Grid item xs={12} sx={{ mt: 2 }}>
-                                <TextField
-                                    label="Descripción"
-                                    type="text"
-                                    fullWidth
-                                    multiline
-                                    rows={3}
-                                    name="description"
-                                    value={description}
-                                    onChange={onInputChange}
                                 />
                             </Grid>
                             <Grid item xs={12} sx={{ mt: 2 }}>

@@ -1,6 +1,6 @@
 
-const baseURL = 'https://orugacoworking.vercel.app/api/v1/client';
-
+// const baseURL = 'https://orugacoworking.vercel.app/api/v1/client';
+const baseURL = 'http://localhost:4000/api/v1/client';
 export const getAll = async () => {
     const response = await fetch(baseURL);
     if (!response.ok) {
@@ -19,7 +19,7 @@ export const getClientById = async (id) => {
     }
 }
 
-export const createClient = async (full_name, phone, email, company_name, description, assistance, cuit) => {
+export const createClient = async (full_name, phone, email, company_name, assistance, cuit) => {
     const requestOptions = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -29,7 +29,6 @@ export const createClient = async (full_name, phone, email, company_name, descri
             "email": email,
             "company_name": company_name,
             "cuit": cuit,
-            "description": description,
             "assistance": assistance
         })
     };
