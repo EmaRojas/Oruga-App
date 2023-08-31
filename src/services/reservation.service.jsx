@@ -1,5 +1,4 @@
 const baseURL = 'https://orugacoworking.vercel.app/api/v1/reservation';
-
 export const getAllReservations = async () => {
     const response = await fetch(baseURL);
     if (!response.ok) {
@@ -65,7 +64,7 @@ export const deleteReservation = async (id) => {
 }
 
 
-export const createReservation = async (clientID, priceRoomID, roomID, fechaArgentina, fechaArgentinaEnd, date, time, endTimeString, means_of_payment, total, paid) => {
+export const createReservation = async (clientID, priceRoomID, roomID, fechaArgentina, fechaArgentinaEnd, date, time, endTimeString, means_of_payment, total, paid, billing, note) => {
     const requestOptions = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -80,7 +79,9 @@ export const createReservation = async (clientID, priceRoomID, roomID, fechaArge
             "endTime": endTimeString,
             "means_of_payment": means_of_payment,
             "total": total,
-            "paid": paid
+            "paid": paid,
+            "billing": billing,
+            "note": note
         })
     };
     const response = await fetch(baseURL, requestOptions);

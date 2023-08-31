@@ -49,7 +49,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setReservations, currentReservat
     const [hour, setHour] = useState(0);
 
     const [paymentMethod, setPaymentMethod] = useState('Efectivo');
-
+    const [billing, setBilling] = useState('Factura A');
     const [value, setValue] = React.useState(0.00);
 
     const formValidations = {
@@ -57,13 +57,17 @@ export const CreateOrEdit = ({ isEdit, setEdit, setReservations, currentReservat
     }
 
     const {
-        isFormValid, paid, paidValid, onInputChange
+        isFormValid, paid, paidValid, note, onInputChange
     } = useForm(currentReservation, formValidations);
 
 
 
     const handleChange = (event) => {
         setPaymentMethod(event.target.value);
+    };
+
+    const handleChangeBilling = (event) => {
+        setBilling(event.target.value);
     };
 
     const handleDateChange = (value) => {
@@ -180,7 +184,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setReservations, currentReservat
 
 
                 var endTimeString = ("0" + endTime.getHours()).slice(-2) + ":" + ("0" + endTime.getMinutes()).slice(-2);
-                const { success } = await createReservation(client, selectedPriceRoom, selectedRoom, fechaArgentina, fechaArgentinaEnd, date, time, endTimeString, paymentMethod, total, parseFloat(paid) || 0);
+                const { success } = await createReservation(client, selectedPriceRoom, selectedRoom, fechaArgentina, fechaArgentinaEnd, date, time, endTimeString, paymentMethod, total, parseFloat(paid) || 0, billing, note);
 
                 if (!success) {
                     toast.dismiss(id);
@@ -359,6 +363,35 @@ export const CreateOrEdit = ({ isEdit, setEdit, setReservations, currentReservat
 
                                     </RadioGroup>
                                 </FormControl>
+                            </Grid>
+                            <Grid item xs={12} sx={{ mt: 2 }}>
+                                <FormControl>
+                                    <FormLabel id="demo-controlled-radio-buttons-group">Facturación</FormLabel>
+                                    <RadioGroup
+                                        row
+                                        aria-labelledby="demo-controlled-radio-buttons-group"
+                                        name="controlled-radio-buttons-group"
+                                        value={billing}
+                                        onChange={handleChangeBilling}
+                                    >
+                                        <FormControlLabel value="No factura" control={<Radio />} label="No factura" />
+                                        <FormControlLabel value="Factura A" control={<Radio />} label="Factura A" />
+                                        <FormControlLabel value="Factura B" control={<Radio />} label="Factura B" />
+                                        <FormControlLabel value="Factura C" control={<Radio />} label="Factura C" />
+                                    </RadioGroup>
+                                </FormControl>
+                            </Grid>
+                            <Grid item xs={12} sx={{ mt: 2 }}>
+                                <TextField
+                                    label="Nota"
+                                    type="text"
+                                    fullWidth
+                                    multiline
+                                    rows={2}
+                                    name="note"
+                                    value={note}
+                                    onChange={onInputChange}
+                                />
                             </Grid>
 
                         </Grid>

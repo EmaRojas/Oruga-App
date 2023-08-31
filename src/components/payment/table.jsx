@@ -248,11 +248,11 @@ export const Table = () => {
             <Grid item md={1}>
               <Card style={cardStyle}>
                 <CardContent style={contentStyle}>
-                  <Typography sx={{ fontSize: 13 }} color="text.secondary" gutterBottom>
-                    Pagos
+                  <Typography sx={{ fontSize: 13}} color="red" gutterBottom>
+                    Pendiente
                   </Typography>
-                  <Typography variant="h5" style={{ fontSize: '14px' }}>
-                    {stats.totalPayments}
+                  <Typography variant="h5" style={{ fontSize: '15px' }} color="red">
+                    $ {stats.total - stats.paid}
                   </Typography>
                 </CardContent>
               </Card>
@@ -260,10 +260,10 @@ export const Table = () => {
             <Grid item md={1}>
               <Card style={cardStyle}>
                 <CardContent style={contentStyle}>
-                  <Typography sx={{ fontSize: 13 }} color="text.secondary" gutterBottom>
+                  <Typography sx={{ fontSize: 13 }} color="green" gutterBottom>
                     Pagado
                   </Typography>
-                  <Typography variant="h5" style={{ fontSize: '14px' }}>
+                  <Typography variant="h5" style={{ fontSize: '15px' }} color="green">
                     $ {stats.paid}
                   </Typography>
                 </CardContent>
@@ -275,8 +275,20 @@ export const Table = () => {
                   <Typography sx={{ fontSize: 13 }} color="text.secondary" gutterBottom>
                     Total
                   </Typography>
-                  <Typography variant="h5" style={{ fontSize: '14px' }}>
+                  <Typography variant="h5" style={{ fontSize: '15px' }}>
                     $ {stats.total}
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item md={1}>
+              <Card style={cardStyle}>
+                <CardContent style={contentStyle}>
+                  <Typography sx={{ fontSize: 13 }} color="text.secondary" gutterBottom>
+                    Pagos
+                  </Typography>
+                  <Typography variant="h5" style={{ fontSize: '15px' }}>
+                    {stats.totalPayments}
                   </Typography>
                 </CardContent>
               </Card>
@@ -288,7 +300,7 @@ export const Table = () => {
                     <Typography sx={{ fontSize: 13 }} color="text.secondary" gutterBottom>
                       {paymentMethod}
                     </Typography>
-                    <Typography variant="h5" style={{ fontSize: '14px' }}>{count}</Typography>
+                    <Typography variant="h5" style={{ fontSize: '15px' }}>{count}</Typography>
                   </CardContent>
                 </Card>
               </Grid>
