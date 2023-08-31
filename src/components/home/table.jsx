@@ -35,7 +35,7 @@ export const Table = () => {
               ...reservation,
               clientID: reservation.clientID.full_name || "",
               roomID: reservation.roomID.name,
-              total: '$ ' + reservation.paymentID.paid + ' / $ ' +reservation.paymentID.total,
+              note: reservation.note,
               date: reservation.time + ' - ' + reservation.endTime
             };
           });
@@ -101,8 +101,8 @@ export const Table = () => {
           },
       },
       {
-            name: "total",
-            label: "Total",
+            name: "note",
+            label: "Nota",
             options: {
               filter: true,
               sort: false,
