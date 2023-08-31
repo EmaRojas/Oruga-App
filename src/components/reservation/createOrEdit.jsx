@@ -49,7 +49,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setReservations, currentReservat
     const [hour, setHour] = useState(0);
 
     const [paymentMethod, setPaymentMethod] = useState('Efectivo');
-    const [billing, setBilling] = useState('Factura A');
+    const [billing, setBilling] = useState('No factura');
     const [value, setValue] = React.useState(0.00);
 
     const formValidations = {

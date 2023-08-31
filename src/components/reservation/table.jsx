@@ -63,7 +63,9 @@ export const Table = () => {
               clientID: reservation.clientID.full_name || "",
               roomID: reservation.roomID.name,
               total: '$ ' + reservation.paymentID.paid + ' / $ ' +reservation.paymentID.total,
-              date: reservation.date + ' ' + reservation.time + ' - ' + reservation.endTime
+              date: reservation.date + ' ' + reservation.time + ' - ' + reservation.endTime,
+              billing: reservation.billing,
+              note: reservation.note
             };
           });
           
@@ -185,6 +187,28 @@ export const Table = () => {
               },
             },
         },
+        {
+          name: "billing",
+          label: "Facturación",
+          options: {
+            filter: true,
+            sort: false,
+            customBodyRender: (value, tableMeta) => {
+              return value || "";
+            },
+          },
+      },
+      {
+        name: "note",
+        label: "Nota",
+        options: {
+          filter: true,
+          sort: false,
+          customBodyRender: (value, tableMeta) => {
+            return value || "";
+          },
+        },
+      },
       ];
 
     const options = {
