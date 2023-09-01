@@ -38,7 +38,7 @@ export const createMembershipByUser = async (clientID, membershipID, endDate, ho
     return await response.json();
 }
 
-export const consumeHours = async (id, hours, startDateTime, endDateTime) => {
+export const consumeHours = async (id, hours, startDateTime, endDateTime, member) => {
     const requestOptions = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -55,7 +55,8 @@ export const consumeHours = async (id, hours, startDateTime, endDateTime) => {
             "membershipByUserID": id,
             "hours": hours,
             "startDateTime": startDateTime,
-            "endDateTime": endDateTime
+            "endDateTime": endDateTime,
+            "member": member
         })
     };
     await fetch(usageURL, requestUsageOptions);
