@@ -13,6 +13,7 @@ import dayjs from 'dayjs';
 import { createMembershipByUser, getAllMembershipsByUser, consumeHours } from '../../services/membershipByUser.service';
 import { DatePicker } from '@mui/x-date-pickers';
 import { set } from 'react-hook-form';
+import { useForm } from '../../hooks/useForm';
 
 import { DateTimePicker } from '@mui/x-date-pickers';
 
@@ -45,10 +46,16 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
     const [validEndDate, setValidEndDate] = useState('Es obligatorio');
     const [total, setTotal] = useState(0);
     const [hours, setHours] = useState(0);
+    const [member, setMember] = useState('');
+    const [billing, setBilling] = useState('No factura');
 
     const [paymentMethod, setPaymentMethod] = useState('Efectivo');
 
     const [value, setValue] = React.useState(0.00);
+
+    const handleChangeBilling = (event) => {
+        setBilling(event.target.value);
+    };
 
     const handleSliderChange = (event, newValue) => {
         const intValue = Math.floor(newValue); // Parte entera
@@ -79,6 +86,11 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
 
     const handleChange = (event) => {
         setPaymentMethod(event.target.value);
+    };
+
+    const handleMemberChange = (event) => {
+        setMember(event.target.value);
+        console.log(member);
     };
 
     const handleDateChange = (value) => {
@@ -202,8 +214,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
                 // Convertir la fecha a la zona horaria de Argentina (ART) manualmente
                 const fechaUtcEnd = new Date(endDateTime);
                 const fechaArgentinaEnd = new Date(fechaUtcEnd.getTime() + diferenciaHoraria * 60 * 60 * 1000);
-
-                console.log('value string' + valueString);
+                console.log('member:' + member);
                 const { success } = await consumeHours(currentMembershipByUser._id, valueString, fechaArgentinaStart, fechaArgentinaEnd);
                 if (!success) {
                     toast.dismiss(id);
@@ -213,7 +224,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
             } else {
                 console.log(selectedMembership);
                 var hrs = parseInt(hours, 10);
-                const { success } = await createMembershipByUser(client, selectedMembership, endDate, hrs, total, paymentMethod);
+                const { success } = await createMembershipByUser(client, selectedMembership, endDate, hrs, total, paymentMethod, billing);
 
                 if (!success) {
                     toast.dismiss(id);
@@ -352,6 +363,18 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
                                     }}
                                 />
                             </Grid>
+
+                            <Grid item xs={12} sx={{ mt: 2 }}>
+                                <FormControl fullWidth>
+                                    <TextField
+                                        label="Nombre (Opcional para membresía compartida)"
+                                        type="text"
+                                        name="member"
+                                        value={member}
+                                        onChange={handleMemberChange}
+                                    />
+                                </FormControl>
+                            </Grid>
                         </Grid>
                     </DialogContent>
                     <DialogContent hidden={!isEdit}>
@@ -443,6 +466,23 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
                                         <FormControlLabel value="Mercado Pago" control={<Radio />} label="Mercado Pago" />
                                         <FormControlLabel value="Tarjeta" control={<Radio />} label="Tarjeta" />
 
+                                    </RadioGroup>
+                                </FormControl>
+                            </Grid>
+                            <Grid item xs={12} sx={{ mt: 2 }}>
+                                <FormControl>
+                                    <FormLabel id="demo-controlled-radio-buttons-group">Facturación</FormLabel>
+                                    <RadioGroup
+                                        row
+                                        aria-labelledby="demo-controlled-radio-buttons-group"
+                                        name="controlled-radio-buttons-group"
+                                        value={billing}
+                                        onChange={handleChangeBilling}
+                                    >
+                                        <FormControlLabel value="No factura" control={<Radio />} label="No factura" />
+                                        <FormControlLabel value="Factura A" control={<Radio />} label="Factura A" />
+                                        <FormControlLabel value="Factura B" control={<Radio />} label="Factura B" />
+                                        <FormControlLabel value="Factura C" control={<Radio />} label="Factura C" />
                                     </RadioGroup>
                                 </FormControl>
                             </Grid>
