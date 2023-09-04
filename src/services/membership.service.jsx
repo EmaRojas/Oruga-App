@@ -1,5 +1,6 @@
 
 const baseURL = 'https://orugacoworking.vercel.app/api/v1/membership';
+// const baseURL = 'http://localhost:4000/api/v1/membership';
 
 export const getAllMemberships = async () => {
     const response = await fetch(baseURL);
@@ -19,12 +20,13 @@ export const getMembershipById = async (id) => {
     }
 }
 
-export const createMembership = async (name, price, hours, type) => {
+export const createMembership = async (name, roomID, price, hours, type) => {
     const requestOptions = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             "name": name,
+            "roomID": roomID,
             "price": price,
             "type": type,
             "hours": hours
@@ -34,12 +36,13 @@ export const createMembership = async (name, price, hours, type) => {
     return await response.json();
 }
 
-export const updateMembership = async (id, name, price, hours, type) => {
+export const updateMembership = async (id, name, roomID, price, hours, type) => {
     const requestOptions = {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             "name": name,
+            "roomID": roomID,
             "price": price,
             "type": type,
             "hours": hours

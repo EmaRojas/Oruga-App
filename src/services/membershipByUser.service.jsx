@@ -1,6 +1,7 @@
 const baseURL = 'https://orugacoworking.vercel.app/api/v1/membershipByUser';
 const usageURL = 'https://orugacoworking.vercel.app/api/v1/usage';
-
+// const baseURL = 'http://localhost:4000/api/v1/membershipByUser';
+// const usageURL = 'http://localhost:4000/api/v1/usage';
 export const getAllMembershipsByUser = async () => {
     const response = await fetch(baseURL);
     if (!response.ok) {
@@ -20,13 +21,14 @@ export const deleteMembershipByUser = async (id) => {
 }
 
 
-export const createMembershipByUser = async (clientID, membershipID, endDate, hours, total, paymentMethod, billing) => {
+export const createMembershipByUser = async (clientID, membershipID, room, endDate, hours, total, paymentMethod, billing) => {
     const requestOptions = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             "clientID": clientID,
             "membershipID": membershipID,
+            "roomID": room,
             "endDate": endDate,
             "hours": hours,
             "total": total,

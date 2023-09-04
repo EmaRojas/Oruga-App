@@ -66,6 +66,7 @@ export const TableMembershipsByUser = () => {
             return {
               ...membership,
               clientID: membership.clientID.full_name || "",
+              roomID: membership.roomID.name || "",
               membershipID: membership.membershipID.name,
               endDate: day + '/' + month,
               hours: remTime,
@@ -101,6 +102,17 @@ export const TableMembershipsByUser = () => {
         {
           name: "clientID",
           label: "Cliente",
+          options: {
+            filter: true,
+            sort: false,
+            customBodyRender: (value, tableMeta) => {
+              return value || "";
+            },
+          },
+        },
+        {
+          name: "roomID",
+          label: "Sala",
           options: {
             filter: true,
             sort: false,

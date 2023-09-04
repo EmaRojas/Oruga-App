@@ -48,6 +48,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
     const [hours, setHours] = useState(0);
     const [member, setMember] = useState('');
     const [billing, setBilling] = useState('No factura');
+    const [room, setRoom] = useState('');
 
     const [paymentMethod, setPaymentMethod] = useState('Efectivo');
 
@@ -124,7 +125,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
             setTotal(value?.price);
             setHours(value?.hours);
             setSelectedMembership(value._id);
-
+            setRoom(value.roomID);
             setValidMembership(null);
         } else {
             setValidMembership('Es obligatorio');
@@ -149,7 +150,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
         await getAllMemberships()
             .then(({ memberships }) => {
                 setMemberships(memberships);
-
+                console.log(memberships);
             })
             .catch((e) => {
                 console.log(e.message)
@@ -224,7 +225,9 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
             } else {
                 console.log(selectedMembership);
                 var hrs = parseInt(hours, 10);
-                const { success } = await createMembershipByUser(client, selectedMembership, endDate, hrs, total, paymentMethod, billing);
+                console.log(room);
+                debugger
+                const { success } = await createMembershipByUser(client, selectedMembership, room, endDate, hrs, total, paymentMethod, billing);
 
                 if (!success) {
                     toast.dismiss(id);
@@ -277,6 +280,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
                     return {
                         ...membership,
                         clientID: membership.clientID.full_name || "",
+                        roomID: membership.roomID.name || "",
                         membershipID: membership.membershipID.name,
                         endDate: day + '/' + month,
                         hours: remTime,
@@ -312,13 +316,13 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
 
     return (
         <>
-            <Button disabled={!isEdit} onClick={handleOpen}>ASIGNAR MEMBRESÍA</Button>
-            <Button disabled={isEdit} onClick={handleOpen}>CARGAR HORAS</Button>
+            <Button disabled={!isEdit} onClick={handleOpen}>NUEVA MEMBRESÍA</Button>
+            <Button disabled={isEdit} onClick={handleOpen}>DESCONTAR HORAS</Button>
             <Dialog open={modal} onClose={handleClose}>
                 <form onSubmit={handleSubmit}>
                     <DialogTitle>
                         <Typography hidden={!isEdit} color='primary.main' sx={{ ml: 1 }}>NUEVA MEMBRESÍA ACTIVA</Typography>
-                        <Typography hidden={isEdit} color='primary.main' sx={{ ml: 1 }}>CARGAR HORAS</Typography>
+                        <Typography hidden={isEdit} color='primary.main' sx={{ ml: 1 }}>DESCONTAR HORAS</Typography>
                         <Divider />
                     </DialogTitle>
                     <DialogContent hidden={isEdit}>
