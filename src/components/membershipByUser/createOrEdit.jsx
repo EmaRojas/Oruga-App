@@ -281,7 +281,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
                         ...membership,
                         clientID: membership.clientID.full_name || "",
                         roomID: membership.roomID.name || "",
-                        membershipID: membership.membershipID.name,
+                        membershipHours: membership.membershipID.hours,
                         endDate: day + '/' + month,
                         hours: remTime,
                     };
@@ -396,7 +396,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
                                     onChange={handleAutocompleteChange}
                                 />
                             </Grid>
-                            <Grid item xs={12} md={12} sx={{ mt: 2 }}>
+                            {/* <Grid item xs={12} md={12} sx={{ mt: 2 }}>
                                 <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
                                     <DemoItem components={['DatePicker']}>
                                         <DatePicker label="Vencimiento"
@@ -409,7 +409,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
                                     </DemoItem>
                                 </LocalizationProvider>
 
-                            </Grid>
+                            </Grid> */}
                             <Grid item xs={12} sx={{ mt: 2 }}>
 
                                 <Autocomplete

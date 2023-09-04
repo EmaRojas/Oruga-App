@@ -67,7 +67,7 @@ export const TableMembershipsByUser = () => {
               ...membership,
               clientID: membership.clientID.full_name || "",
               roomID: membership.roomID.name || "",
-              membershipID: membership.membershipID.name,
+              membershipHours: membership.membershipID.hours,
               endDate: day + '/' + month,
               hours: remTime,
             };
@@ -122,8 +122,8 @@ export const TableMembershipsByUser = () => {
           },
         },
         {
-          name: "membershipID",
-          label: "Membresía",
+          name: "membershipHours",
+          label: "Horas totales",
           options: {
             filter: true,
             sort: false,
@@ -134,7 +134,7 @@ export const TableMembershipsByUser = () => {
         },
         {
           name: "hours",
-          label: "Restante HS",
+          label: "Horas restantes",
           options: {
             filter: true,
             sort: false,

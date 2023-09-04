@@ -21,7 +21,7 @@ export const deleteMembershipByUser = async (id) => {
 }
 
 
-export const createMembershipByUser = async (clientID, membershipID, room, endDate, hours, total, paymentMethod, billing) => {
+export const createMembershipByUser = async (clientID, membershipID, room, hours, total, paymentMethod, billing) => {
     const requestOptions = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -29,7 +29,6 @@ export const createMembershipByUser = async (clientID, membershipID, room, endDa
             "clientID": clientID,
             "membershipID": membershipID,
             "roomID": room,
-            "endDate": endDate,
             "hours": hours,
             "total": total,
             "means_of_payment": paymentMethod,
