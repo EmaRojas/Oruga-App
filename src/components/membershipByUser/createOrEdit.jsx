@@ -174,7 +174,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
             setdisabledButton(true);
             setFormSubmitted(true);
 
-            if (currentMembershipByUser._id.length < 1 && (client === '' || endDate === '' || selectedMembership === '')) {
+            if (currentMembershipByUser._id.length < 1 && (client === '' || selectedMembership === '')) {
                 if (endDate === '') {
                     setValidEndDate('Es obligatorio');
                 }
@@ -227,7 +227,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
                 var hrs = parseInt(hours, 10);
                 console.log(room);
                 debugger
-                const { success } = await createMembershipByUser(client, selectedMembership, room, endDate, hrs, total, paymentMethod, billing);
+                const { success } = await createMembershipByUser(client, selectedMembership, room, hrs, total, paymentMethod, billing);
 
                 if (!success) {
                     toast.dismiss(id);
@@ -251,7 +251,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
 
                 // Transformar los datos para la exportación CSV
                 const transformedMemberships = membershipsByUser.map((membership) => {
-                    const dateObj = new Date(membership.endDate);
+                    const dateObj = new Date(membership.created);
                     const day = dateObj.getDate();
                     const month = dateObj.getMonth() + 1; // Los meses comienzan en 0, por lo que se suma 1
 
