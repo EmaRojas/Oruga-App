@@ -47,10 +47,10 @@ export const Table = () => {
 
   return (
     <Grid container style={cardStyle}>
-      <div style={localizationProviderStyle}> {/* Agregar margen inferior al LocalizationProvider */}
+      <div style={localizationProviderStyle}>
         <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
           <DemoItem components={['DatePicker']}>
-            <DatePicker label="Comprobar disponibilidad para el día:"
+            <DatePicker label="Disponibilidad del día:"
               name="date"
               value={date}
               onChange={(newDate) => handleDateChange(newDate)}
@@ -59,56 +59,68 @@ export const Table = () => {
         </LocalizationProvider>
       </div>
       
-      <Grid container spacing={2}>
-        {Object.keys(rooms).map((nombreSala) => (
-          <Grid item xs={12} sm={6} md={4} lg={3} key={nombreSala}>
-            <Card>
-              <CardContent style={{ textAlign: "center" }}>
-                <Typography variant="h5" component="div">
-                  {nombreSala}
-                </Typography>
-                <Typography variant="body2" color="textSecondary">
-                  Horarios disponibles:
-                </Typography>
-                <Grid container>
-                  <Grid item xs={6}>
-                    <List>
-                      {Object.keys(rooms[nombreSala])
-                        .filter((horaRango) => horaRango >= "08-09" && horaRango <= "15-16")
-                        .map((horaRango) => (
-                          <ListItem key={horaRango} style={{ textAlign: "center", padding: "4px 0" }}>
-                            <ListItemText
-                              primary={horaRango}
-                              style={{
-                                color: rooms[nombreSala][horaRango] === "free" ? "green" : "red",
-                              }}
-                            />
-                          </ListItem>
-                        ))}
-                    </List>
+      {Object.keys(rooms).length === 0 ? (
+        <Grid item xs={12} sm={12} md={12} lg={12} >
+        <Card>
+          <CardContent style={{ textAlign: "center" }}>
+            <Typography variant="body2" color="textSecondary">
+              Ninguna sala está reservada para esta fecha.
+            </Typography>
+          </CardContent>
+        </Card>
+        </Grid>
+      ) : (
+        <Grid container spacing={2}>
+          {Object.keys(rooms).map((nombreSala) => (
+            <Grid item xs={12} sm={6} md={4} lg={3} key={nombreSala}>
+              <Card>
+                <CardContent style={{ textAlign: "center" }}>
+                  <Typography variant="h5" component="div">
+                    {nombreSala}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    Horarios disponibles / ocupados:
+                  </Typography>
+                  <Grid container>
+                    <Grid item xs={6}>
+                      <List>
+                        {Object.keys(rooms[nombreSala])
+                          .filter((horaRango) => horaRango >= "08-09" && horaRango <= "15-16")
+                          .map((horaRango) => (
+                            <ListItem key={horaRango} style={{ textAlign: "center", padding: "4px 0" }}>
+                              <ListItemText
+                                primary={horaRango}
+                                style={{
+                                  color: rooms[nombreSala][horaRango] === "free" ? "green" : "red",
+                                }}
+                              />
+                            </ListItem>
+                          ))}
+                      </List>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <List>
+                        {Object.keys(rooms[nombreSala])
+                          .filter((horaRango) => horaRango >= "16-17" && horaRango <= "22-23")
+                          .map((horaRango) => (
+                            <ListItem key={horaRango} style={{ textAlign: "center", padding: "4px 0" }}>
+                              <ListItemText
+                                primary={horaRango}
+                                style={{
+                                  color: rooms[nombreSala][horaRango] === "free" ? "green" : "red",
+                                }}
+                              />
+                            </ListItem>
+                          ))}
+                      </List>
+                    </Grid>
                   </Grid>
-                  <Grid item xs={6}>
-                    <List>
-                      {Object.keys(rooms[nombreSala])
-                        .filter((horaRango) => horaRango >= "16-17" && horaRango <= "22-23")
-                        .map((horaRango) => (
-                          <ListItem key={horaRango} style={{ textAlign: "center", padding: "4px 0" }}>
-                            <ListItemText
-                              primary={horaRango}
-                              style={{
-                                color: rooms[nombreSala][horaRango] === "free" ? "green" : "red",
-                              }}
-                            />
-                          </ListItem>
-                        ))}
-                    </List>
-                  </Grid>
-                </Grid>
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      )}
     </Grid>
   );
 };
