@@ -79,7 +79,7 @@ export const Table = () => {
                     {nombreSala}
                   </Typography>
                   <Typography variant="body2" color="textSecondary">
-                    Horarios disponibles / ocupados:
+                    Horarios disponibles:
                   </Typography>
                   <Grid container>
                     <Grid item xs={6}>
