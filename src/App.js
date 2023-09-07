@@ -20,6 +20,7 @@ import { Room } from './pages/Room';
 import Reservation from './pages/Reservation';
 import Usage from './pages/Usage';
 import { Payment } from './pages/Payment';
+import Availability from './pages/Availability';
 
 function App() {
   return (
@@ -92,6 +93,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Payment />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path='/availability'
+            element={
+              <ProtectedRoute>
+                <Availability />
               </ProtectedRoute>
             }
           />

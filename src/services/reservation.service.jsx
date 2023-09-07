@@ -1,4 +1,5 @@
 const baseURL = 'https://orugacoworking.vercel.app/api/v1/reservation';
+// const baseURL = 'http://localhost:4000/api/v1/reservation';
 export const getAllReservations = async () => {
     const response = await fetch(baseURL);
     if (!response.ok) {
@@ -33,6 +34,19 @@ export const getStats = async (start, end) => {
         })
     };
     const response = await fetch(baseURL + "/filter/stats", requestOptions);
+    return await response.json();
+}
+
+export const getReservationsByDate = async (date) => {
+
+    const requestOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            "date": date
+        })
+    };
+    const response = await fetch(baseURL + "/by-date", requestOptions);
     return await response.json();
 }
 

@@ -135,6 +135,12 @@ function ResponsiveAppBar() {
           >
             Pagos
           </Button>
+          <Button href='/availability'
+            onClick={handleCloseNavMenu}
+           variant='text'
+          >
+            Disponibilidad
+          </Button>
           </ButtonGroup>
           </Menu>
         </Box>
@@ -218,6 +224,12 @@ function ResponsiveAppBar() {
             sx={{ my: 2, color: 'white', display: 'block' }}
           >
             Pagos
+          </Button>
+          <Button href='/availability'
+            onClick={handleCloseNavMenu}
+            sx={{ my: 2, color: 'white', display: 'block' }}
+          >
+            Disponibilidad
           </Button>
         </Box>
 
