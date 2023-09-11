@@ -15,7 +15,7 @@ import { createReservation, getAllReservations, updateReservation } from '../../
 import { DateTimePicker } from '@mui/x-date-pickers';
 import { set } from 'react-hook-form';
 import { useForm } from '../../hooks/useForm';
-
+import CustomNotification from './CustomNotification';
 
 
 const MembembershipByUserEmpty = {
@@ -44,6 +44,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setReservations, currentReservat
     const [validPriceRoom, setValidPriceRoom] = useState('Es obligatorio');
     const [endDate, setEndDate] = useState('');
     const [validEndDate, setValidEndDate] = useState('Es obligatorio');
+    const [roomName, setRoomName] = useState('');
 
     const [total, setTotal] = useState(0);
     const [hour, setHour] = useState(0);
@@ -96,6 +97,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setReservations, currentReservat
             setSelectedRoom(value.roomID._id);
             setTotal(value.price);
             setHour(value.hour);
+            setRoomName(value.roomID.name);
 
             setValidPriceRoom(null);
 
@@ -178,7 +180,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setReservations, currentReservat
                 const fechaUtc = new Date(endDate);
                 const diferenciaHoraria = -3; // ART está UTC-3
                 const fechaArgentina = new Date(fechaUtc.getTime() + diferenciaHoraria * 60 * 60 * 1000);
-
+                console.log(fechaArgentina);
                 const fechaUtcEnd = new Date(endTime);
                 const fechaArgentinaEnd = new Date(fechaUtcEnd.getTime() + diferenciaHoraria * 60 * 60 * 1000);
 
@@ -190,7 +192,19 @@ export const CreateOrEdit = ({ isEdit, setEdit, setReservations, currentReservat
                     toast.dismiss(id);
                     return;
                 }
-                toast.update(id, { render: "Reserva creada", type: "success", isLoading: false, autoClose: 2000 });
+
+                const variableSala = 'Sala 1';
+                const variableFecha = '2023-09-11';
+                const variableHoraInicio = '15:00';
+                const variableHoraFin = '17:00';
+
+                toast.update(id, {
+                    render: <CustomNotification sala={roomName} fecha={date} horaInicio={time} horaFin={endTimeString}/>,
+                    type: 'success',
+                    isLoading: false,
+                    autoClose: 5000,
+                  });
+
 
             }
 
