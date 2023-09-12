@@ -54,14 +54,14 @@ export const Table = () => {
     const refreshTableFilter = async () => {
       await getAllReservationsFilter(start, end)
         .then(({ reservations }) => {
-    
+          console.log(reservations);
           // Transformar los datos para la exportación CSV
           const transformedReservations = reservations.map((reservation) => {
-    
+            
             return {
               ...reservation,
               clientID: reservation.clientID.full_name || "",
-              roomID: reservation.roomID.name,
+              roomID: reservation.roomID ? reservation.roomID.name : "",
               total: '$ ' + reservation.paymentID.paid + ' / $ ' +reservation.paymentID.total,
               date: reservation.date + ' ' + reservation.time + ' - ' + reservation.endTime,
               billing: reservation.billing,
