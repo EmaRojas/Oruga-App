@@ -11,7 +11,8 @@ const PaymentEmpty = {
     "means_of_payment": "",
     "total": "",
     "paid": "",
-    "created": ""
+    "created": "",
+    "billing": ""
 }
 
 export const CreateOrEdit = ({ isEdit, setEdit, start, end, setPayments, currentPayment, setCurrentPayment }) => {
@@ -20,12 +21,17 @@ export const CreateOrEdit = ({ isEdit, setEdit, start, end, setPayments, current
     const [modal, setModal] = useState(false);
     const [disabledButton, setdisabledButton] = useState(false);
     const [assistance, setAssistance] = React.useState('Individual');
+    // const [billing, setBilling] = useState('No factura');
+
+    // const handleChangeBilling = (event) => {
+    //     setBilling(event.target.value);
+    // };
 
     const formValidations = {
     }
 
     const {
-        total, paid, status, created, onInputChange
+        total, paid, status, created, billing, onInputChange
     } = useForm(currentPayment, formValidations);
 
     const handleSubmit = async (e) => {
@@ -35,7 +41,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, start, end, setPayments, current
             setFormSubmitted(true);
 
             if (currentPayment._id.length > 1) {
-                const { success } = await updatePayment(currentPayment._id, paid);
+                const { success } = await updatePayment(currentPayment._id, paid, billing);
                 if (!success) {
                     toast.dismiss(id);
                     return;
@@ -133,6 +139,23 @@ export const CreateOrEdit = ({ isEdit, setEdit, start, end, setPayments, current
                                     value={paid}
                                     onChange={onInputChange}
                                 />
+                            </Grid>
+                            <Grid item xs={12} sx={{ mt: 2 }}>
+                                <FormControl>
+                                    <FormLabel id="demo-controlled-radio-buttons-group">Facturación</FormLabel>
+                                    <RadioGroup
+                                        row
+                                        aria-labelledby="demo-controlled-radio-buttons-group"
+                                        name="billing"
+                                        value={billing}
+                                        onChange={onInputChange}
+                                    >
+                                        <FormControlLabel value="No factura" control={<Radio />} label="No factura" />
+                                        <FormControlLabel value="Factura A" control={<Radio />} label="Factura A" />
+                                        <FormControlLabel value="Factura B" control={<Radio />} label="Factura B" />
+                                        <FormControlLabel value="Factura C" control={<Radio />} label="Factura C" />
+                                    </RadioGroup>
+                                </FormControl>
                             </Grid>
 
                         </Grid>

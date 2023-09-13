@@ -1,5 +1,6 @@
 
 const baseURL = 'https://orugacoworking.vercel.app/api/v1/payment';
+// const baseURL = 'http://localhost:4000/api/v1/payment';
 
 export const getAll = async () => {
     const response = await fetch(baseURL);
@@ -49,12 +50,13 @@ export const getClientById = async (id) => {
 
 
 
-export const updatePayment = async (id, paid) => {
+export const updatePayment = async (id, paid, billing) => {
     const requestOptions = {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             "paid": paid,
+            "billing": billing,
         })
     };
     const response = await fetch(baseURL + "/" + id, requestOptions);
