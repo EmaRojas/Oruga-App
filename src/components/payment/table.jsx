@@ -61,7 +61,8 @@ export const Table = () => {
                 total: payment.total,
                 paid: payment.paid,
                 created: formattedDate,
-                client: payment.clientInfo.full_name
+                client: payment.clientInfo.full_name,
+                billing: payment.billing
               };
             });
             
@@ -133,6 +134,14 @@ export const Table = () => {
                 filter: true,
                 sort: true,
             }
+        },
+        {
+          name: "billing",
+          label: "Facturación",
+          options: {
+              filter: true,
+              sort: true,
+          }
         },
         {
             name: "paid",

@@ -94,7 +94,8 @@ export const CreateOrEdit = ({ isEdit, setEdit, start, end, setPayments, current
                 total: payment.total,
                 paid: payment.paid,
                 created: formattedDate,
-                client: payment.clientInfo.full_name
+                client: payment.clientInfo.full_name,
+                billing: payment.billing
               };
             });
             
