@@ -104,7 +104,8 @@ export const CreateOrEditMembership = ({ isEdit, setEdit, setReservations, curre
 
                 if (membership && membership.membershipID.name.length >= 5) {
                     setMembershipName(membership.membershipID.name);
-                    setRoomId(membership.roomID);
+                    setRoomId(membership.roomID._id);
+                    setRoomName(membership.roomID.name);
                 } else {
                     setMembershipName('El cliente seleccionado no tiene membresía.');
                 }
@@ -247,7 +248,7 @@ export const CreateOrEditMembership = ({ isEdit, setEdit, setReservations, curre
                 const variableHoraFin = '17:00';
 
                 toast.update(id, {
-                    render: <CustomNotification sala={roomName} fecha={date} horaInicio={time} horaFin={endTimeString}/>,
+                    render: <CustomNotification sala={roomName} fecha={date} horaInicio={startHour} horaFin={endHour}/>,
                     type: 'success',
                     isLoading: false,
                     autoClose: 5000,
