@@ -10,9 +10,10 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { FormControlLabel, FormLabel, FormControl, Radio, RadioGroup } from '@mui/material';
 import "dayjs/locale/es";
 import dayjs from 'dayjs';
-import { createReservation, getAllReservations, updateReservation } from '../../services/reservation.service';
+import { createReservation, createReservationMembership, getAllReservations, updateReservation } from '../../services/reservation.service';
+import { getMembershipByEmail } from '../../services/membershipByUser.service';
 
-import { DateTimePicker } from '@mui/x-date-pickers';
+import { DatePicker, DateTimePicker, MobileTimePicker, TimePicker } from '@mui/x-date-pickers';
 import { set } from 'react-hook-form';
 import { useForm } from '../../hooks/useForm';
 import CustomNotification from './CustomNotification';
@@ -26,20 +27,29 @@ const MembembershipByUserEmpty = {
 }
 
 
-export const CreateOrEdit = ({ isEdit, setEdit, setReservations, currentReservation, setCurrentReservation }) => {
+export const CreateOrEditMembership = ({ isEdit, setEdit, setReservations, currentReservation, setCurrentReservation }) => {
 
     const [formSubmitted, setFormSubmitted] = useState(false);
     const [modal, setModal] = useState(false);
     const [disabledButton, setdisabledButton] = useState(false);
 
     const [clients, setClients] = useState({});
+    const [membership, setMembership] = useState({});
     const [priceRooms, setPriceRooms] = useState({});
+    const [startHour, setStartHour] = useState(dayjs());
+    const [validStartHour, setValidStartHour] = useState('Es obligatorio');
+    const [endDateTime, setEndDateTime] = useState(dayjs());
+    const [startDateTime, setStartDateTime] = useState(dayjs());
 
+    const [endHour, setEndHour] = useState(dayjs());
+    const [validEndHour, setValidEndHour] = useState('Es obligatorio');
     const [client, setClient] = useState('');
     const [validClient, setValidClient] = useState('Es obligatorio');
+    const [roomId, setRoomId] = useState('');
 
     const [selectedPriceRoom, setSelectedPriceRoom] = useState('');
     const [selectedRoom, setSelectedRoom] = useState('');
+    const [membershipName, setMembershipName] = useState('');
 
     const [validPriceRoom, setValidPriceRoom] = useState('Es obligatorio');
     const [endDate, setEndDate] = useState('');
@@ -80,33 +90,65 @@ export const CreateOrEdit = ({ isEdit, setEdit, setReservations, currentReservat
         }
     };
 
-    const handleAutocompleteChange = (event, value) => {
+    const [loadingMembership, setLoadingMembership] = useState(false);
+
+    const handleAutocompleteChange = async (event, value) => {
         if (value !== null) {
             setClient(value._id);
             setValidClient(null);
+            setLoadingMembership(true);
+
+            try {
+                const { memberships } = await getMembershipByEmail(value.email);
+                const membership = memberships[0];
+
+                if (membership && membership.membershipID.name.length >= 5) {
+                    setMembershipName(membership.membershipID.name);
+                    setRoomId(membership.roomID);
+                } else {
+                    setMembershipName('El cliente seleccionado no tiene membresía.');
+                }
+            } catch (e) {
+                console.log(e.message);
+            } finally {
+                setLoadingMembership(false);
+            }
         } else {
             setValidClient('Es obligatorio');
+            setMembershipName(''); // Limpiar el valor de membershipName cuando no se selecciona un cliente
         }
     };
 
-    const handleAutocompletePriceRoom = (event, value) => {
-        debugger
+    const handleStartHourChange = (value) => {
         if (value !== null) {
-
-            setSelectedPriceRoom(value._id);
-            setSelectedRoom(value.roomID._id);
-            setTotal(value.price);
-            setHour(value.hour);
-            setRoomName(value.roomID.name);
-
-            setValidPriceRoom(null);
-
+            const selectedHour = value.hour().toString().padStart(2, '0');
+            const selectedMinutes = value.minute().toString().padStart(2, '0');
+            const date = new Date(endDate);
+            setStartHour(selectedHour + ":" + selectedMinutes);
+            date.setHours(selectedHour);
+            date.setMinutes(selectedMinutes);
+            setStartDateTime(date);
+            setValidStartHour(null);
         } else {
-            setValidPriceRoom('Es obligatorio');
-            setTotal(0);
+            setValidStartHour('Es obligatorio');
         }
     };
+ const handleEndHourChange = (value) => {
+     if (value !== null) {
+         const selectedHour = value.hour().toString().padStart(2, '0');
+         const selectedMinutes = value.minute().toString().padStart(2, '0');
+         const date = new Date(endDate);
+         setEndHour(selectedHour + ":" + selectedMinutes);
+         date.setHours(selectedHour);
+         date.setMinutes(selectedMinutes);
+         setEndDateTime(date);
+         setValidEndHour(null);
+     } else {
+         setValidEndHour('Es obligatorio');
+     }
+ };
 
+ 
     const getClients = async () => {
         await getAll()
             .then(({ clients }) => {
@@ -139,6 +181,9 @@ export const CreateOrEdit = ({ isEdit, setEdit, setReservations, currentReservat
 
     }, [])
 
+
+
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -147,7 +192,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setReservations, currentReservat
             setdisabledButton(true);
             setFormSubmitted(true);
 
-            if (currentReservation._id.length < 1 && (client === '' || endDate === '' || selectedPriceRoom === '')) {
+            if (currentReservation._id.length < 1 && (client === '' || endDate === '')) {
                 if (endDate === '') {
                     setValidEndDate('Es obligatorio');
                 }
@@ -160,7 +205,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setReservations, currentReservat
             if (currentReservation._id.length > 1) {
                 const date = endDate.format('YYYY-MM-DD');
                 const time = endDate.format('HH:mm');
-                const { success } = await updateReservation(client, selectedPriceRoom, selectedRoom, endDate, date, time, paymentMethod, total, paid );
+                const { success } = await updateReservation(client, endDate, date, time, paymentMethod, total, paid );
 
                 if (!success) {
                     toast.dismiss(id);
@@ -183,10 +228,13 @@ export const CreateOrEdit = ({ isEdit, setEdit, setReservations, currentReservat
                 console.log(fechaArgentina);
                 const fechaUtcEnd = new Date(endTime);
                 const fechaArgentinaEnd = new Date(fechaUtcEnd.getTime() + diferenciaHoraria * 60 * 60 * 1000);
-
+                console.log(membership);
 
                 var endTimeString = ("0" + endTime.getHours()).slice(-2) + ":" + ("0" + endTime.getMinutes()).slice(-2);
-                const { success } = await createReservation(client, selectedPriceRoom, selectedRoom, fechaArgentina, fechaArgentinaEnd, date, time, endTimeString, paymentMethod, total, parseFloat(paid) || 0, billing, note);
+                console.log(startHour);
+                console.log(endHour);
+                console.log(roomId);
+                const { success } = await createReservationMembership(client, date, startDateTime, endDateTime, startHour, endHour, roomId, note);
 
                 if (!success) {
                     toast.dismiss(id);
@@ -262,12 +310,12 @@ export const CreateOrEdit = ({ isEdit, setEdit, setReservations, currentReservat
 
     return (
         <>
-            <Button disabled={!isEdit} onClick={handleOpen}>NUEVA RESERVA</Button>
+            <Button disabled={!isEdit} onClick={handleOpen}>NUEVA RESERVA CON MEMBRESÍA</Button>
             {/* <Button disabled={isEdit} onClick={handleOpen}>EDITAR</Button> */}
             <Dialog open={modal} onClose={handleClose}>
                 <form onSubmit={handleSubmit}>
                     <DialogTitle>
-                        <Typography hidden={!isEdit} color='primary.main' sx={{ ml: 1 }}>NUEVA RESERVA</Typography>
+                        <Typography hidden={!isEdit} color='primary.main' sx={{ ml: 1 }}>NUEVA RESERVA CON MEMBRESÍA</Typography>
                         <Typography hidden={isEdit} color='primary.main' sx={{ ml: 1 }}>EDITAR RESERVA</Typography>
                         <Divider />
                     </DialogTitle>
@@ -285,117 +333,52 @@ export const CreateOrEdit = ({ isEdit, setEdit, setReservations, currentReservat
                                         helperText={validClient} />}
                                     name="client"
                                     onChange={handleAutocompleteChange}
+                                    
                                 />
                             </Grid>
-                            {/* <Grid item xs={12} md={12} sx={{ mt: 2 }}>
-                                <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
-                                    <DemoItem components={['DatePicker']}>
-                                        <DatePicker label="Vencimiento"
+                            <Grid item xs={12} sx={{ mt: 4 }}>
+                                <Typography>{membershipName}</Typography>
+                            </Grid>
+
+                            <Grid item xs={12} md={12} sx={{ mt: 2 }}>
+
+                            <Grid item xs={12} md={12} sx={{ mt: 2 }}>
+                                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                    <DemoContainer components={['TimePicker']}>
+                                        <DatePicker label="Fecha"
                                             name="endDate"
                                             error={!!validEndDate && formSubmitted}
                                             helperText={validEndDate}
                                             value={endDate}
                                             onChange={(newValue) => handleDateChange(newValue)}
                                         />
+                                    </DemoContainer>
+                                </LocalizationProvider>
+                            </Grid>
+                            </Grid>
+                            <Grid item xs={12} md={6} sx={{ mt: 2 }}>
+                                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                    <DemoItem label="Hora Fin">
+                                        <TimePicker error={!!validStartHour && formSubmitted} onChange={(newValue) => handleStartHourChange(newValue)}
+                                            ampm={false} // Configura el formato de 24 horas
+                                            views={['hours', 'minutes']} // Muestra solo las vistas de horas y minutos
+                                            minTime={dayjs().set('hour', 7).set('minute', 59)} 
+                                            maxTime={dayjs().set('hour', 23).set('minute', 0)}
+                                        />
                                     </DemoItem>
                                 </LocalizationProvider>
-
-                            </Grid> */}
-
-                            <Grid item xs={12} sx={{ mt: 2 }}>
-
-                            <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                <DemoContainer components={['DateTimePicker']}>
-                                    <DateTimePicker label="Fecha y hora"
-                                            name="endDate"
-                                            error={!!validEndDate && formSubmitted}
-                                            helperText={validEndDate}
-                                            value={endDate}
-                                            onChange={(newValue) => handleDateChange(newValue)}
-                                    />
-                                </DemoContainer>
-                            </LocalizationProvider>
                             </Grid>
-
-                            <Grid item xs={12} sx={{ mt: 2 }}>
-
-                                <Autocomplete
-                                    disablePortal
-                                    id="combo-box-demo"
-                                    options={priceRooms}
-                                    getOptionLabel={(priceRoom) => `${priceRoom.roomID.name.toString()} (${priceRoom.hour.toString()} hs)`}
-                                    renderInput={(params) => <TextField {...params} label="Seleccionar sala"
-                                        name='priceRooms' error={!!validPriceRoom && formSubmitted}
-                                        helperText={validPriceRoom} />}
-                                    name="memberships"
-                                    onChange={handleAutocompletePriceRoom}
-                                />
-                            </Grid>
-                            <Grid item xs={12} sx={{ mt: 4 }}>
-                                <Typography color='primary.main' sx={{ ml: 1 }}>DETALLE DE PAGO</Typography>
-
-                                <Divider />
-                            </Grid>
-                            <Grid item xs={12} sx={{ mt: 2 }}>
-                                <FormControl fullWidth>
-                                    <InputLabel htmlFor="outlined-adornment-amount">Total</InputLabel>
-                                    <OutlinedInput
-                                        disabled
-                                        id="outlined-adornment-amount"
-                                        startAdornment={<InputAdornment position="start">$</InputAdornment>}
-                                        label="Amount"
-                                        value={total}
-                                    />
-                                </FormControl>
-                            </Grid>
-                            <Grid item xs={12} sx={{ mt: 2 }}>
-                                <TextField
-                                    label="Pagado"
-                                    type="text"
-                                    fullWidth
-                                    name="paid"
-                                    value={paid}
-                                    onChange={onInputChange}
-                                    error={!!paidValid && formSubmitted}
-                                    helperText={paidValid}
-                                    
-                                />
-                            </Grid>
-
-                            <Grid item xs={12} sx={{ mt: 2 }}>
-                                <FormControl>
-                                    <FormLabel id="demo-controlled-radio-buttons-group">Medio de pago</FormLabel>
-                                    <RadioGroup
-                                        row
-                                        aria-labelledby="demo-controlled-radio-buttons-group"
-                                        name="controlled-radio-buttons-group"
-                                        value={paymentMethod}
-                                        onChange={handleChange}
-                                    >
-                                        <FormControlLabel value="Efectivo" control={<Radio />} label="Efectivo" />
-                                        <FormControlLabel value="Transferencia" control={<Radio />} label="Transferencia" />
-                                        <FormControlLabel value="Mercado Pago" control={<Radio />} label="Mercado Pago" />
-                                        <FormControlLabel value="Tarjeta" control={<Radio />} label="Tarjeta" />
-
-                                    </RadioGroup>
-                                </FormControl>
-                            </Grid>
-                            <Grid item xs={12} sx={{ mt: 2 }}>
-                                <FormControl>
-                                    <FormLabel id="demo-controlled-radio-buttons-group">Facturación</FormLabel>
-                                    <RadioGroup
-                                        row
-                                        aria-labelledby="demo-controlled-radio-buttons-group"
-                                        name="controlled-radio-buttons-group"
-                                        value={billing}
-                                        onChange={handleChangeBilling}
-                                    >
-                                        <FormControlLabel value="No factura" control={<Radio />} label="No factura" />
-                                        <FormControlLabel value="Factura A" control={<Radio />} label="Factura A" />
-                                        <FormControlLabel value="Factura B" control={<Radio />} label="Factura B" />
-                                        <FormControlLabel value="Factura C" control={<Radio />} label="Factura C" />
-                                    </RadioGroup>
-                                </FormControl>
+                            <Grid item xs={12} md={6} sx={{ mt: 2 }}>
+                                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                    <DemoItem label="Hora Fin">
+                                        <TimePicker error={!!validEndHour && formSubmitted} onChange={(newValue) => handleEndHourChange(newValue)}
+                                            ampm={false} // Configura el formato de 24 horas
+                                            views={['hours', 'minutes']} // Muestra solo las vistas de horas y minutos
+                                            minTime={dayjs().set('hour', 7).set('minute', 59)} // Establece la hora mínima a las 8:00 AM
+                                            maxTime={dayjs().set('hour', 23).set('minute', 0)}
+                                        />
+                                    </DemoItem>
+                                </LocalizationProvider>
                             </Grid>
                             <Grid item xs={12} sx={{ mt: 2 }}>
                                 <TextField

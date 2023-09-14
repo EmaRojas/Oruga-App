@@ -65,3 +65,11 @@ export const consumeHours = async (id, hours, startDateTime, endDateTime, member
     return await response.json();
 }
 
+export const getMembershipByEmail = async (email) => {
+    const response = await fetch(baseURL+ '/client/' + email);
+    if (!response.ok) {
+        throw new Error('Data coud not be fetched!')
+    } else {
+        return response.json()
+    }
+}

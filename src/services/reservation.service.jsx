@@ -113,3 +113,23 @@ export const updateReservation = async (id, clientID) => {
     const response = await fetch(baseURL + "/" + id, requestOptions);
     return await response.json();
 }
+
+export const createReservationMembership = async (clientID, date, startDateTime, endDateDime, time, endtime, roomId, note) => {
+    debugger;
+     const requestOptions = {
+         method: 'POST',
+         headers: { 'Content-Type': 'application/json' },
+         body: JSON.stringify({
+             "clientID": clientID,
+             "dateTime": startDateTime,
+             "endDateTime" : endDateDime,
+             "date": date,
+             "time": time,
+             "endTime": endtime,
+             "roomID": roomId,
+             "note": note
+         })
+     };
+     const response = await fetch(baseURL + "/membership", requestOptions);
+     return await response.json();
+ }

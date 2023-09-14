@@ -7,6 +7,8 @@ import createCache from "@emotion/cache";
 import { useState } from "react";
 import { Button, ButtonGroup, Chip, Dialog, DialogContent, DialogTitle, Grid } from "@mui/material";
 import { CreateOrEdit } from "./createOrEdit";
+import { CreateOrEditMembership } from "./createOrEditMembership";
+
 import { ToastContainer, toast } from 'react-toastify';
 import { getAllReservations, getAllReservationsFilter, deleteReservation, getStats } from "../../services/reservation.service";
 //https://github.com/gregnb/mui-datatables
@@ -62,9 +64,9 @@ export const Table = () => {
               ...reservation,
               clientID: reservation.clientID.full_name || "",
               roomID: reservation.roomID ? reservation.roomID.name : "",
-              total: '$ ' + reservation.paymentID.paid + ' / $ ' +reservation.paymentID.total,
+              total: reservation.paymentID ? ('$ ' + reservation.paymentID.paid + ' / $ ' +reservation.paymentID.total) : "",
               date: reservation.date + ' ' + reservation.time + ' - ' + reservation.endTime,
-              billing: reservation.billing,
+              billing: reservation.billing ? reservation.billing : "",
               note: reservation.note
             };
           });
@@ -348,6 +350,8 @@ export const Table = () => {
 
             <ButtonGroup variant="outlined" aria-label="outlined button group">
                 <CreateOrEdit isEdit={edit} setEdit={setEdit} setReservations={setReservations} reservations={reservations} currentReservation={currentReservation} setCurrentReservation={setCurrentReservation} />
+                <CreateOrEditMembership isEdit={edit} setEdit={setEdit} setReservations={setReservations} reservations={reservations} currentReservation={currentReservation} setCurrentReservation={setCurrentReservation} />
+
             </ButtonGroup>
 
             <CacheProvider value={muiCache} mt={5}>
