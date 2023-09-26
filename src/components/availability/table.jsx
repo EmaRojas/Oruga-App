@@ -9,6 +9,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DemoItem } from '@mui/x-date-pickers/internals/demo';
 
 export const Table = () => {
+  dayjs.locale('es')
   const [rooms, setRooms] = useState({});
   const fechaHoy = dayjs().format('YYYY-MM-DD');
   const [date, setDate] = useState(dayjs(fechaHoy));

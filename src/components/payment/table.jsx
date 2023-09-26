@@ -30,7 +30,7 @@ const PaymentEmpty = {
 }
 
 export const Table = () => {
-
+    dayjs.locale('es')
     const [payments, setPayments] = useState()
     const [edit, setEdit] = useState(true);
     const [currentPayment, setCurrentPayment] = useState(PaymentEmpty);
