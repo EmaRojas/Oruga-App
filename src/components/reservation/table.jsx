@@ -16,6 +16,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers';
 import "dayjs/locale/es";
 import dayjs from 'dayjs';
+
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DemoContainer, DemoItem } from '@mui/x-date-pickers/internals/demo';
 import { SetMealRounded } from "@mui/icons-material";
@@ -34,13 +35,13 @@ const ReservationEmpty = {
 }
 
 export const Table = () => {
-
+    dayjs.locale('es')
     const [reservations, setReservations] = useState();
     const [edit, setEdit] = useState(true);
     const [currentReservation, setCurrentReservation] = useState(ReservationEmpty);
     const [stats, setStats] = useState(null);
-    const today = dayjs().startOf('day').add(1, 'hour');
-    const tomorrow = dayjs().startOf('day').add(1, 'week').subtract(1, 'hour');
+    const today = dayjs();
+    const tomorrow = dayjs().add(1, 'week');
 
     const [start, setStart] = useState(today);
     const [end, setEnd] = useState(tomorrow);
