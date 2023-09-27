@@ -36,15 +36,13 @@ export const createMembership = async (name, roomID, price, hours, type) => {
     return await response.json();
 }
 
-export const updateMembership = async (id, name, roomID, price, hours, type) => {
+export const updateMembership = async (id, name, price, hours) => {
     const requestOptions = {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             "name": name,
-            "roomID": roomID,
             "price": price,
-            "type": type,
             "hours": hours
         })
     };
