@@ -83,8 +83,9 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMemberships, currentMembershi
             // Eliminar el punto
             var priceParse = price.replace(/\./g, '');
             if (currentMembership._id.length > 1) {
-            
-                const { success } = await updateMembership(currentMembership._id, selectRooms, name, priceParse,hours, type);
+                console.log("current membership id");
+                console.log(currentMembership._id);
+                const { success } = await updateMembership(currentMembership._id, name, priceParse, hours);
                 if (!success) {
                     toast.dismiss(id);
                     return;
@@ -162,6 +163,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMemberships, currentMembershi
                                     helperText={nameValid}
                                 />
                             </Grid>
+                            <> {isEdit &&
                             <Grid item xs={12} sx={{ mt: 2 }}>
                                 <Autocomplete
                                     disablePortal
@@ -175,7 +177,8 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMemberships, currentMembershi
                                     onChange={handleAutocompleteChange}
                                 />
                             </Grid>
-
+                            }
+                            </>
                             <Grid item xs={12} sx={{ mt: 2 }}>
                                 <TextField
                                     label="Precio"
@@ -200,6 +203,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMemberships, currentMembershi
                                     helperText={hoursValid}
                                 />
                             </Grid>
+                            <> {isEdit &&
                             <Grid item xs={12} sx={{ mt: 2 }}>
                                 <FormControl>
                                     <FormLabel id="demo-controlled-radio-buttons-group">Tipo de membresía</FormLabel>
@@ -217,7 +221,8 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMemberships, currentMembershi
                                     </RadioGroup>
                                 </FormControl>
                             </Grid>
-
+                             }
+                            </>
                         </Grid>
 
 
