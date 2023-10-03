@@ -20,14 +20,13 @@ export const getMembershipById = async (id) => {
     }
 }
 
-export const createMembership = async (name, roomID, price, hours, type) => {
+export const createMembership = async (name, roomID, hours, type) => {
     const requestOptions = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             "name": name,
             "roomID": roomID,
-            "price": price,
             "type": type,
             "hours": hours
         })
@@ -36,13 +35,12 @@ export const createMembership = async (name, roomID, price, hours, type) => {
     return await response.json();
 }
 
-export const updateMembership = async (id, name, price, hours) => {
+export const updateMembership = async (id, name, hours) => {
     const requestOptions = {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             "name": name,
-            "price": price,
             "hours": hours
         })
     };

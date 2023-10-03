@@ -14,7 +14,6 @@ import { ToastContainer, toast } from 'react-toastify';
 const MembershipEmpty = { 
     "_id":"",
     "name": "",
-    "price": "",
     "hours":"",
     "type": ""
 }
@@ -54,14 +53,6 @@ export const Table = () => {
         {
             name: "name",
             label: "Nombre",
-            options: {
-                filter: true,
-                sort: false,
-            }
-        },
-        {
-            name: "price",
-            label: "Precio",
             options: {
                 filter: true,
                 sort: false,

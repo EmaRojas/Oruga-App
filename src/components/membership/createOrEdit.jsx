@@ -10,7 +10,6 @@ import Autocomplete from '@mui/material/Autocomplete';
 const MembershipEmpty = { 
     "_id":"",
     "name": "",
-    "price": "",
     "type": "",
     "hours": ""
 }
@@ -25,10 +24,12 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMemberships, currentMembershi
     const [rooms, setRooms] = useState();
     const [selectRooms, setSelectRooms] = useState();
     const [validRoom, setValidRoom] = useState('Es obligatorio');
+    const [roomName, setRoomName] = useState('');
 
     const handleAutocompleteChange = (event, value) => {
         if (value !== null) {
             setSelectRooms(value._id);
+            setRoomName(value.name);
             setValidRoom(null);
         } else {
             setValidRoom('Es obligatorio');
@@ -50,19 +51,17 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMemberships, currentMembershi
         getRooms();
     }, [])
 
+    useEffect(() => {
+      }, [roomName]);
+
 
     const formValidations = {
-        name: [(value) => value.length >= 1, 'Es obligatorio.'],
-        price: [
-            (value) => value.length >= 1 && !isNaN(value) && !(/[.,]/.test(value)),
-            'Es obligatorio. Solo se permiten números, sin puntos ni comas.'
-        ],
         hours: [(value) => !isNaN(value) && value.length >= 1, 'Es obligatorio. No se puede ingresar letras.'],
     }
 
     const {
-        name, price, hours, onInputChange,
-        isFormValid, nameValid, priceValid, hoursValid
+        hours, onInputChange,
+        isFormValid, hoursValid
     } = useForm(currentMembership, formValidations);
 
     const handleSubmit = async (e) => {
@@ -81,19 +80,20 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMemberships, currentMembershi
                 return;
             } 
             // Eliminar el punto
-            var priceParse = price.replace(/\./g, '');
             if (currentMembership._id.length > 1) {
                 console.log("current membership id");
                 console.log(currentMembership._id);
-                const { success } = await updateMembership(currentMembership._id, name, priceParse, hours);
+                const nameString = roomName + ' ' + hours + ' HS';
+                console.log("name room " + roomName);
+                const { success } = await updateMembership(currentMembership._id, nameString, hours);
                 if (!success) {
                     toast.dismiss(id);
                     return;
                 }
                 toast.update(id, { render: "Registro modificado", type: "success", isLoading: false, autoClose: 2000 });
             } else {
-
-                const response = await createMembership(name, selectRooms, priceParse,hours, type);
+                const nameString = roomName + ' ' + hours + ' HS';
+                const response = await createMembership(nameString, selectRooms,hours, type);
 
                 // if (!success) {
                 //     toast.dismiss(id);
@@ -150,19 +150,6 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMemberships, currentMembershi
                     <DialogContent>
 
                         <Grid container>
-
-                            <Grid item xs={12} sx={{ mt: 2 }}>
-                                <TextField
-                                    label="Nombre"
-                                    type="text"
-                                    fullWidth
-                                    name="name"
-                                    value={name}
-                                    onChange={onInputChange}
-                                    error={!!nameValid && formSubmitted}
-                                    helperText={nameValid}
-                                />
-                            </Grid>
                             <> {isEdit &&
                             <Grid item xs={12} sx={{ mt: 2 }}>
                                 <Autocomplete
@@ -179,18 +166,6 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMemberships, currentMembershi
                             </Grid>
                             }
                             </>
-                            <Grid item xs={12} sx={{ mt: 2 }}>
-                                <TextField
-                                    label="Precio"
-                                    type="text"
-                                    fullWidth
-                                    name="price"
-                                    value={price}
-                                    onChange={onInputChange}
-                                    error={!!priceValid && formSubmitted}
-                                    helperText={priceValid}
-                                />
-                            </Grid>
                             <Grid item xs={12} sx={{ mt: 2 }}>
                                 <TextField
                                     label="Horas"

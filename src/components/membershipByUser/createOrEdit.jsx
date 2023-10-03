@@ -45,6 +45,8 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
     const [startDateTime, setStartDateTime] = useState('');
     const [validEndDate, setValidEndDate] = useState('Es obligatorio');
     const [total, setTotal] = useState(0);
+    const [paid, setPaid] = useState(0);
+
     const [hours, setHours] = useState(0);
     const [member, setMember] = useState('');
     const [billing, setBilling] = useState('No factura');
@@ -88,7 +90,12 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
     const handleChange = (event) => {
         setPaymentMethod(event.target.value);
     };
-
+    const handleChangeTotal = (event) => {
+        setTotal(event.target.value);
+    };
+    const handleChangePaid = (event) => {
+        setPaid(event.target.value);
+    };
     const handleMemberChange = (event) => {
         setMember(event.target.value);
         console.log(member);
@@ -122,7 +129,6 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
     const handleAutocompleteMembership = (event, value) => {
         debugger
         if (value !== null) {
-            setTotal(value?.price);
             setHours(value?.hours);
             setSelectedMembership(value._id);
             setRoom(value.roomID);
@@ -227,7 +233,10 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
                 var hrs = parseInt(hours, 10);
                 console.log(room);
                 debugger
-                const { success } = await createMembershipByUser(client, selectedMembership, room, hrs, total, paymentMethod, billing);
+                var paidParse = paid.replace(/\./g, '');
+                var totalParse = total.replace(/\./g, '');
+
+                const { success } = await createMembershipByUser(client, selectedMembership, room, hrs, totalParse, paymentMethod, billing, paidParse);
 
                 if (!success) {
                     toast.dismiss(id);
@@ -299,6 +308,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
         setFormSubmitted(false);
         setEdit(true);
         setTotal(0);
+        setPaid(0);
         setHours(0);
         refreshList();
         setModal(false);
@@ -431,28 +441,24 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
                             </Grid>
 
                             <Grid item xs={12} sx={{ mt: 2 }}>
-                                <FormControl fullWidth>
-                                    <InputLabel htmlFor="outlined-adornment-amount">Total</InputLabel>
-                                    <OutlinedInput
-                                        disabled
-                                        id="outlined-adornment-amount"
-                                        startAdornment={<InputAdornment position="start">$</InputAdornment>}
-                                        label="Amount"
-                                        value={total}
-                                    />
-                                </FormControl>
+                                <TextField
+                                    label="Total"
+                                    type="text"
+                                    fullWidth
+                                    name="total"
+                                    value={total}
+                                    onChange={handleChangeTotal}
+                                />
                             </Grid>
-
                             <Grid item xs={12} sx={{ mt: 2 }}>
-                                <FormControl fullWidth>
-                                    <TextField
-                                        disabled
-                                        label="Horas"
-                                        type="text"
-                                        name="hour"
-                                        value={hours}
-                                    />
-                                </FormControl>
+                                <TextField
+                                    label="Abonado"
+                                    type="text"
+                                    fullWidth
+                                    name="paid"
+                                    value={paid}
+                                    onChange={handleChangePaid}
+                                />
                             </Grid>
 
                             <Grid item xs={12} sx={{ mt: 2 }}>
@@ -486,7 +492,6 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
                                         <FormControlLabel value="No factura" control={<Radio />} label="No factura" />
                                         <FormControlLabel value="Factura A" control={<Radio />} label="Factura A" />
                                         <FormControlLabel value="Factura B" control={<Radio />} label="Factura B" />
-                                        <FormControlLabel value="Factura C" control={<Radio />} label="Factura C" />
                                     </RadioGroup>
                                 </FormControl>
                             </Grid>

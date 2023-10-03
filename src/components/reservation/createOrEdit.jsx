@@ -393,7 +393,6 @@ export const CreateOrEdit = ({ isEdit, setEdit, setReservations, currentReservat
                                         <FormControlLabel value="No factura" control={<Radio />} label="No factura" />
                                         <FormControlLabel value="Factura A" control={<Radio />} label="Factura A" />
                                         <FormControlLabel value="Factura B" control={<Radio />} label="Factura B" />
-                                        <FormControlLabel value="Factura C" control={<Radio />} label="Factura C" />
                                     </RadioGroup>
                                 </FormControl>
                             </Grid>
