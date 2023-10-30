@@ -12,28 +12,36 @@ import "dayjs/locale/es";
 import dayjs from 'dayjs';
 import { createReservation, getAllReservations, updateReservation } from '../../services/reservation.service';
 
-import { DateTimePicker } from '@mui/x-date-pickers';
+import { DateTimePicker, TimePicker, DatePicker } from '@mui/x-date-pickers';
+
 import { set } from 'react-hook-form';
 import { useForm } from '../../hooks/useForm';
 import CustomNotification from './CustomNotification';
 
 
-const MembembershipByUserEmpty = {
+const ReservationEmpty = {
     "_id": "",
-    "endDate": "",
-    "client": "",
-    "membership": ""
-}
+    "roomID": "",
+    "priceRoomID": "",
+    "full_name" : ""
+  }
+  
 
 
 export const CreateOrEdit = ({ isEdit, setEdit, setReservations, currentReservation, setCurrentReservation }) => {
+    dayjs.locale('es')
 
     const [formSubmitted, setFormSubmitted] = useState(false);
     const [modal, setModal] = useState(false);
     const [disabledButton, setdisabledButton] = useState(false);
+    const [startDateTime, setStartDateTime] = useState(dayjs());
 
-    const [clients, setClients] = useState({});
+    const [clients, setClients] = useState([]);
     const [priceRooms, setPriceRooms] = useState({});
+    const [validStartHour, setValidStartHour] = useState('Es obligatorio');
+    const [startHour, setStartHour] = useState(dayjs());
+    const [selectedTime, setSelectedTime] = useState(dayjs());
+    const [selectedDateTime, setSelectedDateTime] = useState(dayjs());
 
     const [client, setClient] = useState('');
     const [validClient, setValidClient] = useState('Es obligatorio');
@@ -45,8 +53,10 @@ export const CreateOrEdit = ({ isEdit, setEdit, setReservations, currentReservat
     const [endDate, setEndDate] = useState('');
     const [validEndDate, setValidEndDate] = useState('Es obligatorio');
     const [roomName, setRoomName] = useState('');
-
+    const [discount, setDiscount] = useState('Ninguno');
     const [total, setTotal] = useState(0);
+    const [newTotal, setNewTotal] = useState(0);
+
     const [hour, setHour] = useState(0);
 
     const [paymentMethod, setPaymentMethod] = useState('Efectivo');
@@ -57,11 +67,59 @@ export const CreateOrEdit = ({ isEdit, setEdit, setReservations, currentReservat
         //paid: [(value) => value.length >= 1 && !isNaN(value), 'Es obligatorio. No se puede ingresar letras.'],
     }
 
+    const handleStartHourChange = (value) => {
+        if (value !== null) {
+            const selectedHour = value.hour().toString().padStart(2, '0');
+            const selectedMinutes = value.minute().toString().padStart(2, '0');
+            const date = new Date(endDate);
+            setStartHour(selectedHour + ":" + selectedMinutes);
+            date.setHours(selectedHour);
+            date.setMinutes(selectedMinutes);
+            setStartDateTime(date);
+            setValidStartHour(null);
+        } else {
+            setValidStartHour('Es obligatorio');
+        }
+    };
+
+
     const {
         isFormValid, paid, paidValid, note, onInputChange
     } = useForm(currentReservation, formValidations);
 
+        
+    // const [selectedDateTime, setSelectedDateTime] = useState(dayjs(currentReservation.dateTime) || dayjs());
+    // const [selectedTime, setSelectedTime] = useState(dayjs(currentReservation.dateTime) || dayjs());
+    const [selectedPriceRoomName, setSelectedPriceRoomName] = useState('');
 
+    const [selectedClient, setSelectedClient] = useState(currentReservation.clientID || '');
+
+    useEffect(() => {
+        // ...
+        // Inicializa el estado selectedDateTime con el valor de currentReservation.dateTime
+        if(currentReservation._id.length > 1 && currentReservation.priceRoomID) {
+            debugger
+            setSelectedDateTime(dayjs(currentReservation.dateTime).add(3, 'hour'));
+            setSelectedTime(dayjs(currentReservation.dateTime).add(3, 'hour'));
+            setSelectedPriceRoomName(currentReservation.roomID + ' (' + currentReservation.priceRoomID.hour + ' hs)');
+            setTotal(currentReservation.priceRoomID.price);
+            setSelectedRoom(currentReservation.priceRoomID.roomID);
+            setBilling(currentReservation.billing);
+            setPaymentMethod(currentReservation.paymentMethod);
+            setHour(currentReservation.priceRoomID.hour);
+            setSelectedPriceRoom(currentReservation.priceRoomID._id);
+            setNewTotal(currentReservation.paymentID.total);
+            console.log(selectedPriceRoomName);
+        } else {
+            setEdit(true);
+            setSelectedTime(dayjs());
+            setSelectedDateTime(dayjs());
+        }
+
+        console.log("dt " + selectedDateTime);
+        console.log("t " + selectedTime);
+
+    }, [currentReservation]);
 
     const handleChange = (event) => {
         setPaymentMethod(event.target.value);
@@ -72,14 +130,34 @@ export const CreateOrEdit = ({ isEdit, setEdit, setReservations, currentReservat
     };
 
     const handleDateChange = (value) => {
+        debugger
         if (value !== null) {
-            setEndDate(value);
+            setSelectedDateTime(value);
             setValidEndDate(null);
         } else {
             setValidEndDate('Es obligatorio');
         }
     };
 
+    const handleTimeChange = (value) => {
+        if (value !== null) {
+            const selectedHour = value.hour().toString().padStart(2, '0');
+            const selectedMinutes = value.minute().toString().padStart(2, '0');
+            const date = new Date(selectedDateTime);
+            setStartHour(selectedHour + ":" + selectedMinutes);
+            date.setHours(selectedHour);
+            date.setMinutes(selectedMinutes);
+            setEndDate(date);
+            setSelectedTime(dayjs(date));
+
+            setValidEndDate(null);
+        } else {
+            setValidEndDate('Es obligatorio');
+        }
+    };
+
+
+    
     const handleAutocompleteChange = (event, value) => {
         if (value !== null) {
             setClient(value._id);
@@ -96,15 +174,40 @@ export const CreateOrEdit = ({ isEdit, setEdit, setReservations, currentReservat
             setSelectedPriceRoom(value._id);
             setSelectedRoom(value.roomID._id);
             setTotal(value.price);
+            setNewTotal(value.price);
             setHour(value.hour);
             setRoomName(value.roomID.name);
-
+            setSelectedPriceRoomName(value.roomID.name + ' (' + value.hour + ' hs)')
             setValidPriceRoom(null);
+            setDiscount('Ninguno');
 
         } else {
             setValidPriceRoom('Es obligatorio');
             setTotal(0);
         }
+    }
+
+    const handleChangeDiscount = (event) => {
+        debugger
+        var valor = total;
+        setNewTotal(total);
+        if(event.target.value === '15% de recargo') {
+            setDiscount('15% de recargo');
+            valor = parseInt(total) * 1.15;
+            console.log(valor);
+            setNewTotal(parseInt(valor));
+        } 
+        if(event.target.value === '15% de descuento') {
+            setDiscount('15% de descuento');
+            valor = parseInt(total) * 0.85;
+            console.log(valor);
+            setNewTotal(parseInt(valor));
+        } 
+        if(event.target.value === 'Ninguno') {
+            setDiscount('Ninguno');
+            setNewTotal(total);
+        } 
+        
     };
 
     const getClients = async () => {
@@ -144,11 +247,12 @@ export const CreateOrEdit = ({ isEdit, setEdit, setReservations, currentReservat
 
         const id = toast.loading("Validando formulario...")
         try {
+            debugger
             setdisabledButton(true);
             setFormSubmitted(true);
 
-            if (currentReservation._id.length < 1 && (client === '' || endDate === '' || selectedPriceRoom === '')) {
-                if (endDate === '') {
+            if (currentReservation._id.length < 1 && (client === '' || selectedPriceRoom === '')) {
+                if (endDate === '' || selectedDateTime == null || selectedTime == null) {
                     setValidEndDate('Es obligatorio');
                 }
 
@@ -158,45 +262,77 @@ export const CreateOrEdit = ({ isEdit, setEdit, setReservations, currentReservat
                 return;
             }
             if (currentReservation._id.length > 1) {
-                const date = endDate.format('YYYY-MM-DD');
-                const time = endDate.format('HH:mm');
-                const { success } = await updateReservation(client, selectedPriceRoom, selectedRoom, endDate, date, time, paymentMethod, total, paid );
+                debugger
+                console.log("date " + selectedDateTime);
+                console.log("time " + selectedTime);
 
-                if (!success) {
-                    toast.dismiss(id);
-                    return;
-                }
-                toast.update(id, { render: "Se actualizó la reserva", type: "success", isLoading: false, autoClose: 2000 });
-            } else {
-                //console.log(selectedMembership);
-                const date = endDate.format('YYYY-MM-DD');
-                const time = endDate.format('HH:mm');
-                var endTime = new Date(endDate);
+                // Obtener la hora, minutos y segundos de 'nuevaHora'
+                const hora = selectedTime.hour();
+                const minutos = selectedTime.minute();
+                const segundos = selectedTime.second();
 
+                // Asignar la hora, minutos y segundos a 'fechaOriginal' mientras se conserva la fecha
+                selectedDateTime.hour(hora);
+                selectedDateTime.minute(minutos);
+                selectedDateTime.second(segundos);
+                const newDateTime = selectedDateTime.hour(hora).minute(minutos).second(segundos);
+
+                console.log(selectedDateTime);
+                const date =  dayjs(newDateTime).format('YYYY-MM-DD');
+                const time =  dayjs(newDateTime).format('HH:mm');
+                var endTime = new Date(newDateTime);
                 // Sumar una hora
                 endTime.setHours(endTime.getHours() + parseInt(hour));
 
+
                 // Convertir la fecha a la zona horaria de Argentina (ART) manualmente
-                const fechaUtc = new Date(endDate);
                 const diferenciaHoraria = -3; // ART está UTC-3
-                const fechaArgentina = new Date(fechaUtc.getTime() + diferenciaHoraria * 60 * 60 * 1000);
-                console.log(fechaArgentina);
+                const fechaUtcStart = new Date(newDateTime);
+                const fechaArgentinaStart = new Date(fechaUtcStart.getTime() + diferenciaHoraria * 60 * 60 * 1000);
+
+                // Convertir la fecha a la zona horaria de Argentina (ART) manualmente
                 const fechaUtcEnd = new Date(endTime);
                 const fechaArgentinaEnd = new Date(fechaUtcEnd.getTime() + diferenciaHoraria * 60 * 60 * 1000);
 
 
                 var endTimeString = ("0" + endTime.getHours()).slice(-2) + ":" + ("0" + endTime.getMinutes()).slice(-2);
-                const { success } = await createReservation(client, selectedPriceRoom, selectedRoom, fechaArgentina, fechaArgentinaEnd, date, time, endTimeString, paymentMethod, total, parseFloat(paid) || 0, billing, note);
+                const { success } = await updateReservation(currentReservation._id, selectedPriceRoom, selectedRoom, fechaArgentinaStart, fechaArgentinaEnd, date, time, endTimeString, paymentMethod, newTotal, parseFloat(paid) || 0, billing, note);
 
                 if (!success) {
                     toast.dismiss(id);
                     return;
                 }
 
-                const variableSala = 'Sala 1';
-                const variableFecha = '2023-09-11';
-                const variableHoraInicio = '15:00';
-                const variableHoraFin = '17:00';
+                toast.update(id, { render: "Se actualizó la reserva", type: "success", isLoading: false, autoClose: 2000 });
+                window.location.reload(false);
+            } else {
+                console.log("date " + selectedDateTime);
+                console.log("time " + selectedTime);
+
+                const date =  dayjs(selectedDateTime).format('YYYY-MM-DD');
+                const time =  dayjs(selectedTime).format('HH:mm');
+                var endTime = new Date(selectedTime);
+                // Sumar una hora
+                endTime.setHours(endTime.getHours() + parseInt(hour));
+
+
+                // Convertir la fecha a la zona horaria de Argentina (ART) manualmente
+                const diferenciaHoraria = -3; // ART está UTC-3
+                const fechaUtcStart = new Date(selectedTime);
+                const fechaArgentinaStart = new Date(fechaUtcStart.getTime() + diferenciaHoraria * 60 * 60 * 1000);
+
+                // Convertir la fecha a la zona horaria de Argentina (ART) manualmente
+                const fechaUtcEnd = new Date(endTime);
+                const fechaArgentinaEnd = new Date(fechaUtcEnd.getTime() + diferenciaHoraria * 60 * 60 * 1000);
+
+
+                var endTimeString = ("0" + endTime.getHours()).slice(-2) + ":" + ("0" + endTime.getMinutes()).slice(-2);
+                const { success } = await createReservation(client, selectedPriceRoom, selectedRoom, fechaArgentinaStart, fechaArgentinaEnd, date, time, endTimeString, paymentMethod, newTotal, parseFloat(paid) || 0, billing, note);
+
+                if (!success) {
+                    toast.dismiss(id);
+                    return;
+                }
 
                 toast.update(id, {
                     render: <CustomNotification sala={roomName} fecha={date} horaInicio={time} horaFin={endTimeString}/>,
@@ -230,7 +366,9 @@ export const CreateOrEdit = ({ isEdit, setEdit, setReservations, currentReservat
                         total: reservation.paymentID ? ('$ ' + reservation.paymentID.paid + ' / $ ' +reservation.paymentID.total) : "",
                         date: reservation.date + ' ' + reservation.time + ' - ' + reservation.endTime,
                         billing: reservation.billing ? reservation.billing : "",
-                        note: reservation.note
+                        note: reservation.note,
+                        paid: reservation.paymentID.paid,
+                        paymentMethod: reservation.paymentID.means_of_payment
                     };
                 });
 
@@ -248,6 +386,12 @@ export const CreateOrEdit = ({ isEdit, setEdit, setReservations, currentReservat
         setTotal(0);
         refreshList();
         setModal(false);
+        setSelectedDateTime(null);
+        setSelectedTime(null);
+        setCurrentReservation(ReservationEmpty);
+        setSelectedPriceRoomName('');
+        setPaymentMethod('Efectivo');
+        setDiscount('Ninguno');
     }
 
     const handleOpen = () => {
@@ -263,7 +407,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setReservations, currentReservat
     return (
         <>
             <Button disabled={!isEdit} onClick={handleOpen}>NUEVA RESERVA</Button>
-            {/* <Button disabled={isEdit} onClick={handleOpen}>EDITAR</Button> */}
+            <Button disabled={isEdit} onClick={handleOpen}>EDITAR</Button>
             <Dialog open={modal} onClose={handleClose}>
                 <form onSubmit={handleSubmit}>
                     <DialogTitle>
@@ -274,12 +418,13 @@ export const CreateOrEdit = ({ isEdit, setEdit, setReservations, currentReservat
 
                     <DialogContent>
                         <Grid container>
+                        <> {isEdit &&
                             <Grid item xs={12} sx={{ mt: 2 }}>
                                 <Autocomplete
                                     disablePortal
                                     id="combo-box-demo"
                                     options={clients}
-                                    getOptionLabel={(clients) => clients.full_name.toString()}
+                                    getOptionLabel={(clients) => clients?.full_name.toString()}
                                     renderInput={(params) => <TextField {...params} label="Seleccionar cliente"
                                         name='client' error={!!validClient && formSubmitted}
                                         helperText={validClient} />}
@@ -287,55 +432,97 @@ export const CreateOrEdit = ({ isEdit, setEdit, setReservations, currentReservat
                                     onChange={handleAutocompleteChange}
                                 />
                             </Grid>
-                            {/* <Grid item xs={12} md={12} sx={{ mt: 2 }}>
-                                <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
-                                    <DemoItem components={['DatePicker']}>
-                                        <DatePicker label="Vencimiento"
+                        }
+                        </>
+
+                            <Grid item xs={12} md={6} >
+
+                            <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
+                                <DemoContainer components={['DatePicker']}>
+                                    <DatePicker label="Fecha y hora"
                                             name="endDate"
                                             error={!!validEndDate && formSubmitted}
                                             helperText={validEndDate}
-                                            value={endDate}
-                                            onChange={(newValue) => handleDateChange(newValue)}
-                                        />
-                                    </DemoItem>
-                                </LocalizationProvider>
-
-                            </Grid> */}
-
-                            <Grid item xs={12} sx={{ mt: 2 }}>
-
-                            <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                <DemoContainer components={['DateTimePicker']}>
-                                    <DateTimePicker label="Fecha y hora"
-                                            name="endDate"
-                                            error={!!validEndDate && formSubmitted}
-                                            helperText={validEndDate}
-                                            value={endDate}
+                                            value={selectedDateTime} // Usa selectedDateTime en lugar de endDate
                                             onChange={(newValue) => handleDateChange(newValue)}
                                     />
                                 </DemoContainer>
                             </LocalizationProvider>
                             </Grid>
+                            <Grid item xs={12} md={6}>
+                                <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
+                                <DemoContainer components={['TimePicker']}>
+                                        <TimePicker error={!!validStartHour && formSubmitted} 
+                                            ampm={false} // Configura el formato de 24 horas
+                                            views={['hours', 'minutes']} // Muestra solo las vistas de horas y minutos
+                                            minTime={dayjs().set('hour', 7).set('minute', 59)} 
+                                            maxTime={dayjs().set('hour', 23).set('minute', 0)}
+                                            value={selectedTime} // Usa selectedDateTime en lugar de endDate
+                                            onChange={(newValue) => handleTimeChange(newValue)}
+                                        />
+                                    </DemoContainer>
+                                </LocalizationProvider>
+                            </Grid>
+                            {/* <Grid item xs={12} sx={{ mt: 2 }}>
+
+                                <Autocomplete
+                                disablePortal
+                                id="combo-box-demo"
+                                options={priceRooms}
+                                getOptionLabel={getOptionLabel}
+                                renderInput={(params) => <TextField {...params} label="Seleccionar sala"
+                                    name='priceRooms' error={!!validPriceRoom && formSubmitted}
+                                    helperText={validPriceRoom} />}
+                                name="memberships"
+                                onChange={handleAutocompletePriceRoom}
+                                value={selectedRoomName2 || null}
+                                />
+                            </Grid> */}
+                            <> {!isEdit &&
+                                <Grid item xs={12} sx={{ mt: 2 }}>
+                                <Typography variant="subtitle1">Sala seleccionada: {selectedPriceRoomName}</Typography>
+                            </Grid>
+                            }
+                            </>
 
                             <Grid item xs={12} sx={{ mt: 2 }}>
 
-                                <Autocomplete
-                                    disablePortal
-                                    id="combo-box-demo"
-                                    options={priceRooms}
-                                    getOptionLabel={(priceRoom) => `${priceRoom.roomID.name.toString()} (${priceRoom.hour.toString()} hs)`}
-                                    renderInput={(params) => <TextField {...params} label="Seleccionar sala"
-                                        name='priceRooms' error={!!validPriceRoom && formSubmitted}
-                                        helperText={validPriceRoom} />}
-                                    name="memberships"
-                                    onChange={handleAutocompletePriceRoom}
-                                />
+                            <Autocomplete
+                                disablePortal
+                                id="combo-box-demo"
+                                options={priceRooms}
+                                getOptionLabel={(priceRoom) => `${priceRoom.roomID.name.toString()} (${priceRoom.hour.toString()} hs)`}
+                                renderInput={(params) => <TextField {...params} label="Seleccionar sala"
+                                    name='priceRooms' error={!!validPriceRoom && formSubmitted}
+                                    helperText={validPriceRoom} />}
+                                name="memberships"
+                                onChange={handleAutocompletePriceRoom}
+                            />
                             </Grid>
                             <Grid item xs={12} sx={{ mt: 4 }}>
                                 <Typography color='primary.main' sx={{ ml: 1 }}>DETALLE DE PAGO</Typography>
 
                                 <Divider />
                             </Grid>
+                            <> {isEdit &&
+                            <Grid item xs={12} sx={{ mt: 2 }}>
+                                <FormControl>
+                                    <FormLabel id="demo-controlled-radio-buttons-group">Descuento o recargo</FormLabel>
+                                    <RadioGroup
+                                        row
+                                        aria-labelledby="demo-controlled-radio-buttons-group"
+                                        name="controlled-radio-buttons-group"
+                                        value={discount}
+                                        onChange={handleChangeDiscount}
+                                    >
+                                        <FormControlLabel value="Ninguno" control={<Radio />} label="Ninguno" />
+                                        <FormControlLabel value="15% de recargo" control={<Radio />} label="15% de recargo" />
+                                        <FormControlLabel value="15% de descuento" control={<Radio />} label="15% de descuento" />
+                                    </RadioGroup>
+                                </FormControl>
+                            </Grid>
+                            }
+                            </>
                             <Grid item xs={12} sx={{ mt: 2 }}>
                                 <FormControl fullWidth>
                                     <InputLabel htmlFor="outlined-adornment-amount">Total</InputLabel>
@@ -344,7 +531,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setReservations, currentReservat
                                         id="outlined-adornment-amount"
                                         startAdornment={<InputAdornment position="start">$</InputAdornment>}
                                         label="Amount"
-                                        value={total}
+                                        value={newTotal}
                                     />
                                 </FormControl>
                             </Grid>

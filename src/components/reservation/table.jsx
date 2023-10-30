@@ -27,11 +27,12 @@ import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 
 
-const ReservationEmpty = { 
-  "_id":"",
-  "clientID": {
-      "full_name": "",
-  },
+const ReservationEmpty = {
+  "_id": "",
+  "roomID": "",
+  "priceRoomID": "",
+  "full_name" : "",
+  "billing": "No factura"
 }
 
 export const Table = () => {
@@ -40,7 +41,7 @@ export const Table = () => {
     const [edit, setEdit] = useState(true);
     const [currentReservation, setCurrentReservation] = useState(ReservationEmpty);
     const [stats, setStats] = useState(null);
-    const today = dayjs();
+    const today = dayjs().startOf('day');
     const tomorrow = dayjs().add(1, 'week');
 
     const [start, setStart] = useState(today);
@@ -53,7 +54,7 @@ export const Table = () => {
       console.log(end);
       refreshTableFilter(start, end);
     };
-
+    debugger
     const refreshTableFilter = async () => {
       await getAllReservationsFilter(start, end)
         .then(({ reservations }) => {
@@ -63,12 +64,14 @@ export const Table = () => {
             
             return {
               ...reservation,
-              clientID: reservation.clientID.full_name || "",
+              clientID: reservation.clientID?.full_name || "",
               roomID: reservation.roomID ? reservation.roomID.name : "",
               total: reservation.paymentID ? ('$ ' + reservation.paymentID.paid + ' / $ ' +reservation.paymentID.total) : "",
               date: reservation.date + ' ' + reservation.time + ' - ' + reservation.endTime,
               billing: reservation.billing ? reservation.billing : "",
-              note: reservation.note
+              note: reservation.note,
+              paid: reservation.paymentID?.paid,
+              paymentMethod: reservation.paymentID?.means_of_payment
             };
           });
           

@@ -19,11 +19,10 @@ import { useForm } from '../../hooks/useForm';
 import CustomNotification from './CustomNotification';
 
 
-const MembembershipByUserEmpty = {
+const ReservationEmpty = {
     "_id": "",
-    "endDate": "",
-    "client": "",
-    "membership": ""
+    "roomID": "",
+    "priceRoomID": ""
 }
 
 
@@ -204,8 +203,8 @@ export const CreateOrEditMembership = ({ isEdit, setEdit, setReservations, curre
                 return;
             }
             if (currentReservation._id.length > 1) {
-                const date = endDate.format('YYYY-MM-DD');
-                const time = endDate.format('HH:mm');
+                const date = dayjs(endDate).format('YYYY-MM-DD');
+                const time = dayjs(endDate).format('HH:mm');
                 const { success } = await updateReservation(client, endDate, date, time, paymentMethod, total, paid );
 
                 if (!success) {
@@ -215,8 +214,8 @@ export const CreateOrEditMembership = ({ isEdit, setEdit, setReservations, curre
                 toast.update(id, { render: "Se actualizó la reserva", type: "success", isLoading: false, autoClose: 2000 });
             } else {
                 //console.log(selectedMembership);
-                const date = endDate.format('YYYY-MM-DD');
-                const time = endDate.format('HH:mm');
+                const date = dayjs(endDate).format('YYYY-MM-DD');
+                const time = dayjs(endDate).format('HH:mm');
                 var endTime = new Date(endDate);
 
                 // Sumar una hora
@@ -359,7 +358,7 @@ export const CreateOrEditMembership = ({ isEdit, setEdit, setReservations, curre
                             </Grid>
                             <Grid item xs={12} md={6} sx={{ mt: 2 }}>
                                 <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                    <DemoItem label="Hora Fin">
+                                    <DemoItem label="Hora inicio">
                                         <TimePicker error={!!validStartHour && formSubmitted} onChange={(newValue) => handleStartHourChange(newValue)}
                                             ampm={false} // Configura el formato de 24 horas
                                             views={['hours', 'minutes']} // Muestra solo las vistas de horas y minutos
@@ -371,7 +370,7 @@ export const CreateOrEditMembership = ({ isEdit, setEdit, setReservations, curre
                             </Grid>
                             <Grid item xs={12} md={6} sx={{ mt: 2 }}>
                                 <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                    <DemoItem label="Hora Fin">
+                                    <DemoItem label="Hora fin">
                                         <TimePicker error={!!validEndHour && formSubmitted} onChange={(newValue) => handleEndHourChange(newValue)}
                                             ampm={false} // Configura el formato de 24 horas
                                             views={['hours', 'minutes']} // Muestra solo las vistas de horas y minutos

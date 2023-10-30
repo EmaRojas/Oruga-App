@@ -102,12 +102,23 @@ export const createReservation = async (clientID, priceRoomID, roomID, fechaArge
     return await response.json();
 }
 
-export const updateReservation = async (id, clientID) => {
+export const updateReservation = async (id, priceRoomID, roomID, fechaArgentina, fechaArgentinaEnd, date, time, endTimeString, means_of_payment, total, paid, billing, note) => {
     const requestOptions = {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-            "clientID": clientID
+            "priceRoomID": priceRoomID,
+            "roomID": roomID,
+            "dateTime": fechaArgentina,
+            "endDateTime": fechaArgentinaEnd,
+            "date": date,
+            "time": time,
+            "endTime": endTimeString,
+            "means_of_payment": means_of_payment,
+            "total": total,
+            "paid": paid,
+            "billing": billing,
+            "note": note
         })
     };
     const response = await fetch(baseURL + "/" + id, requestOptions);
