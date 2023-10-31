@@ -143,7 +143,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMemberships, currentMembershi
     return (
         <>
             <Button disabled={!isEdit} onClick={handleOpen}>Nuevo</Button>
-            <Button disabled={isEdit} onClick={handleOpen}>Editar</Button>
+            {/* <Button disabled={isEdit} onClick={handleOpen}>Editar</Button> */}
             <Dialog open={modal} onClose={handleClose}>
                 <form onSubmit={handleSubmit}>
                     <DialogTitle><Typography color='primary.main' sx={{ ml: 1 }}>NUEVA MEMBRESÍA</Typography></DialogTitle>

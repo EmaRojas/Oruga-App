@@ -41,7 +41,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, start, end, setPayments, current
             setFormSubmitted(true);
 
             if (currentPayment._id.length > 1) {
-                const { success } = await updatePayment(currentPayment._id, paid, billing);
+                const { success } = await updatePayment(currentPayment._id, total, paid, billing);
                 if (!success) {
                     toast.dismiss(id);
                     return;
