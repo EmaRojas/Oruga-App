@@ -233,8 +233,8 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
                 var hrs = parseInt(hours, 10);
                 console.log(room);
                 debugger
-                var paidParse = paid.replace(/\./g, '');
-                var totalParse = total.replace(/\./g, '');
+                var paidParse = paid.toString().replace(/\./g, '');
+                var totalParse = total.toString().replace(/\./g, '');
 
                 const { success } = await createMembershipByUser(client, selectedMembership, room, hrs, totalParse, paymentMethod, billing, paidParse);
 

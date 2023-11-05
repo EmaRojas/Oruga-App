@@ -11,7 +11,7 @@ import { FormControlLabel, FormLabel, FormControl, Radio, RadioGroup } from '@mu
 import "dayjs/locale/es";
 import dayjs from 'dayjs';
 import { createReservation, createReservationMembership, getAllReservations, updateReservation } from '../../services/reservation.service';
-import { getMembershipByEmail } from '../../services/membershipByUser.service';
+import { getMembershipByEmail, consumeHours } from '../../services/membershipByUser.service';
 
 import { DatePicker, DateTimePicker, MobileTimePicker, TimePicker } from '@mui/x-date-pickers';
 import { set } from 'react-hook-form';
@@ -49,6 +49,7 @@ export const CreateOrEditMembership = ({ isEdit, setEdit, setReservations, curre
     const [selectedPriceRoom, setSelectedPriceRoom] = useState('');
     const [selectedRoom, setSelectedRoom] = useState('');
     const [membershipName, setMembershipName] = useState('');
+    const [membershipId, setMembershipId] = useState('');
 
     const [validPriceRoom, setValidPriceRoom] = useState('Es obligatorio');
     const [endDate, setEndDate] = useState('');
@@ -105,6 +106,7 @@ export const CreateOrEditMembership = ({ isEdit, setEdit, setReservations, curre
                     setMembershipName(membership.membershipID.name);
                     setRoomId(membership.roomID._id);
                     setRoomName(membership.roomID.name);
+                    setMembershipId(membership._id);
                 } else {
                     setMembershipName('El cliente seleccionado no tiene membresía.');
                 }
@@ -213,6 +215,7 @@ export const CreateOrEditMembership = ({ isEdit, setEdit, setReservations, curre
                 }
                 toast.update(id, { render: "Se actualizó la reserva", type: "success", isLoading: false, autoClose: 2000 });
             } else {
+                debugger
                 //console.log(selectedMembership);
                 const date = dayjs(endDate).format('YYYY-MM-DD');
                 const time = dayjs(endDate).format('HH:mm');
@@ -234,7 +237,24 @@ export const CreateOrEditMembership = ({ isEdit, setEdit, setReservations, curre
                 console.log(startHour);
                 console.log(endHour);
                 console.log(roomId);
+
                 const { success } = await createReservationMembership(client, date, startDateTime, endDateTime, startHour, endHour, roomId, note);
+
+                // Supongamos que tienes dos objetos Dayjs: startTime y endTime
+                const startTime = dayjs(startDateTime);
+                const endTime2 = dayjs(endDateTime);
+
+                // Calcular la diferencia de tiempo en minutos
+                const differenceInMinutes = endTime2.diff(startTime, 'minute');
+
+                // Convertir los minutos a horas y minutos
+                const hours = Math.floor(differenceInMinutes / 60);
+                const minutes = differenceInMinutes % 60;
+
+                // Formato para expresar la diferencia en el formato que mencionaste (X.Y)
+                const formattedDifference = parseFloat(`${hours}.${minutes}`).toFixed(1);
+                var member = "";
+                const { success2 } = await consumeHours(membershipId, formattedDifference, startDateTime, endDateTime, member);
 
                 if (!success) {
                     toast.dismiss(id);

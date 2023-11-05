@@ -50,11 +50,12 @@ export const getClientById = async (id) => {
 
 
 
-export const updatePayment = async (id, paid, billing) => {
+export const updatePayment = async (id, total, paid, billing) => {
     const requestOptions = {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+            "total": total,
             "paid": paid,
             "billing": billing,
         })
