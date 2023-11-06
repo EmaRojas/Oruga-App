@@ -6,7 +6,7 @@ import { CacheProvider } from "@emotion/react";
 import createCache from "@emotion/cache";
 import { useState } from "react";
 import { deleteMembershipByUser, getAllMembershipsByUser } from "../../services/membershipByUser.service";
-import { Button, ButtonGroup, Chip, Dialog, DialogContent, DialogTitle } from "@mui/material";
+import { Button, ButtonGroup, Chip, Dialog, DialogContent, DialogTitle, Grid, Card, CardContent, Typography } from "@mui/material";
 import { CreateOrEdit } from "./createOrEdit";
 import { ToastContainer, toast } from 'react-toastify';
 //https://github.com/gregnb/mui-datatables
@@ -23,7 +23,35 @@ export const TableMembershipsByUser = () => {
     const [membershipsByUser, setMembershipsByUser] = useState();
     const [edit, setEdit] = useState(true);
     const [currentMembershipByUser, setCurrentMembershipByUser] = useState(MembembershipByUserEmpty);
-    
+
+    const [sumTotal, setSumTotal] = useState(0);
+    const [sumPaid, setSumPaid] = useState(0);
+    const [count, setCount] = useState(0);
+    const [diffence, setDiffence] = useState(0);
+
+    useEffect(() => {
+      const fetchMembershipTotals = async () => {
+        try {
+          debugger
+          const response = await fetch('https://orugacoworking.vercel.app/api/v1/membershipByUser/totals'); // Reemplaza 'http://your-api-url' por la URL de tu API
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+  
+          const data = await response.json();
+          setSumTotal(data.total);
+          setSumPaid(data.paid);
+          setCount(data.count);
+          setDiffence(data.total - data.paid);
+        } catch (error) {
+          console.error('There was a problem fetching the data:', error);
+          // Puedes manejar el error mostrando un mensaje al usuario o realizando alguna otra acción apropiada.
+        }
+      };
+  
+      fetchMembershipTotals();
+    }, []); 
+
     const refreshTable = async () => {
       await getAllMembershipsByUser()
         .then(({ membershipsByUser }) => {
@@ -87,7 +115,7 @@ export const TableMembershipsByUser = () => {
 
     
     useEffect(() => {
-        refreshTable();
+        refreshTable();        
     }, [])
 
 
@@ -219,8 +247,72 @@ export const TableMembershipsByUser = () => {
         }
     };
 
+    const cardStyle = {
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      minHeight: '130px',
+      marginLeft: '15px' // Ajusta la altura según tus necesidades
+    };
+    
+    const contentStyle = {
+      textAlign: 'center', // Otras propiedades de estilo según sea necesario
+    };
+
     return (
         <>
+            <Grid container style={cardStyle}>
+            <Grid item md={2}>
+              <Card style={cardStyle}>
+                <CardContent style={contentStyle}>
+                  <Typography sx={{ fontSize: 13}} gutterBottom>
+                    Membresías activas
+                  </Typography>
+                  <Typography variant="h5" style={{ fontSize: '15px' }}>
+                    {count}
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item md={2}>
+              <Card style={cardStyle}>
+                <CardContent style={contentStyle}>
+                  <Typography sx={{ fontSize: 13}} color="red" gutterBottom>
+                    Pendiente
+                  </Typography>
+                  <Typography variant="h5" color="red" style={{ fontSize: '15px' }}>
+                    $ {diffence}
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item md={2}>
+              <Card style={cardStyle}>
+                <CardContent style={contentStyle}>
+                  <Typography sx={{ fontSize: 13}} color="green" gutterBottom>
+                    Pagado
+                  </Typography>
+                  <Typography variant="h5" style={{ fontSize: '15px' }} color="green">
+                    $ {sumPaid}
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item md={2}>
+              <Card style={cardStyle}>
+                <CardContent style={contentStyle}>
+                  <Typography sx={{ fontSize: 13}} gutterBottom>
+                    Total
+                  </Typography>
+                  <Typography variant="h5" style={{ fontSize: '15px' }}>
+                    $ {sumTotal}
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+            </Grid>
+      <br />
+        
             <ButtonGroup variant="outlined" aria-label="outlined button group">
                 <CreateOrEdit isEdit={edit} setEdit={setEdit} setMembershipsByUser={setMembershipsByUser} membershipsByUser={membershipsByUser} currentMembershipByUser={currentMembershipByUser} setCurrentMembershipByUser={setCurrentMembershipByUser} />
             </ButtonGroup>
