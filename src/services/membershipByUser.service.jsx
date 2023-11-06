@@ -75,3 +75,18 @@ export const getMembershipByEmail = async (email) => {
         return response.json()
     }
 }
+
+
+export const updateMembershipByUser = async (id, total, billing, paid) => {
+    const requestOptions = {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            "total": total,
+            "billing": billing,
+            "paid": paid
+        })
+    };
+    const response = await fetch(baseURL + "/" + id, requestOptions);
+    return await response.json();
+}

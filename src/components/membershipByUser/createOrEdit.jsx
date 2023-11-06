@@ -10,7 +10,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { FormControlLabel, FormLabel, FormControl, Radio, RadioGroup } from '@mui/material';
 import "dayjs/locale/es";
 import dayjs from 'dayjs';
-import { createMembershipByUser, getAllMembershipsByUser, consumeHours } from '../../services/membershipByUser.service';
+import { createMembershipByUser, getAllMembershipsByUser, consumeHours, updateMembershipByUser } from '../../services/membershipByUser.service';
 import { DatePicker } from '@mui/x-date-pickers';
 import { set } from 'react-hook-form';
 import { useForm } from '../../hooks/useForm';
@@ -40,13 +40,14 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
 
     const [selectedMembership, setSelectedMembership] = useState('');
     const [validMembership, setValidMembership] = useState('Es obligatorio');
+    const [membershipString, setMembershipString] = useState('');
 
     const [endDate, setEndDate] = useState('');
     const [startDateTime, setStartDateTime] = useState('');
     const [validEndDate, setValidEndDate] = useState('Es obligatorio');
     const [total, setTotal] = useState(0);
-    const [paid, setPaid] = useState(0);
-
+    // const [paid, setPaid] = useState(0);
+    const [remainingHours, setRemainingHours] = useState(0);
     const [hours, setHours] = useState(0);
     const [member, setMember] = useState('');
     const [billing, setBilling] = useState('No factura');
@@ -55,6 +56,31 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
     const [paymentMethod, setPaymentMethod] = useState('Efectivo');
 
     const [value, setValue] = React.useState(0.00);
+    const formValidations = {
+        //paid: [(value) => value.length >= 1 && !isNaN(value), 'Es obligatorio. No se puede ingresar letras.'],
+    }
+
+    const {
+        isFormValid, paid, paidValid, onInputChange
+    } = useForm(currentMembershipByUser, formValidations);
+
+
+    useEffect(() => {
+        // ...
+        // Inicializa el estado selectedDateTime con el valor de currentReservation.dateTime
+        if(currentMembershipByUser._id.length > 1) {
+            debugger
+            setTotal(currentMembershipByUser.total);
+            setBilling(currentMembershipByUser.billing);
+            setPaymentMethod(currentMembershipByUser.paymentID.means_of_payment);
+            setRemainingHours(currentMembershipByUser.hours);
+            setMembershipString(currentMembershipByUser.roomID + ' ' + currentMembershipByUser.membershipHours + 'HS de ' + currentMembershipByUser.clientID);
+
+        } else {
+            setEdit(true);
+        }
+
+    }, [currentMembershipByUser]);
 
     const handleChangeBilling = (event) => {
         setBilling(event.target.value);
@@ -93,9 +119,17 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
     const handleChangeTotal = (event) => {
         setTotal(event.target.value);
     };
-    const handleChangePaid = (event) => {
-        setPaid(event.target.value);
+
+    const handleRemainingHours = (event) => {
+        setRemainingHours(event.target.value);
     };
+
+    const handleHours = (event) => {
+        setHours(event.target.value);
+    };
+    // const handleChangePaid = (event) => {
+    //     setPaid(event.target.value);
+    // };
     const handleMemberChange = (event) => {
         setMember(event.target.value);
         console.log(member);
@@ -191,52 +225,55 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
                 return;
             }
             if (currentMembershipByUser._id.length > 1) {
+                debugger
+                // const dateTime = dayjs(startDateTime);
+                // var valueString = value.toString();
+                // // Convertir horas y minutos a segundos
+                // function convertToSeconds(hours, minutes) {
+                //     const totalSeconds = (hours * 3600) + (minutes * 60);
+                //     return totalSeconds;
+                // }
 
-                const dateTime = dayjs(startDateTime);
-                var valueString = value.toString();
-                // Convertir horas y minutos a segundos
-                function convertToSeconds(hours, minutes) {
-                    const totalSeconds = (hours * 3600) + (minutes * 60);
-                    return totalSeconds;
-                }
+                // const decimalNumber = parseFloat(valueString);
 
-                const decimalNumber = parseFloat(valueString);
+                // const integerPart = Math.floor(decimalNumber);
 
-                const integerPart = Math.floor(decimalNumber);
+                // const decimalPart = (decimalNumber % 1).toFixed(2);
+                // const decimalDigits = decimalPart.substring(2);
 
-                const decimalPart = (decimalNumber % 1).toFixed(2);
-                const decimalDigits = decimalPart.substring(2);
+                // const totalSeconds = convertToSeconds(integerPart, decimalDigits);
 
-                const totalSeconds = convertToSeconds(integerPart, decimalDigits);
+                // const endDateTime = dateTime.add(totalSeconds, 'second');
+                // console.log(startDateTime);
+                // console.log(endDateTime);
 
-                const endDateTime = dateTime.add(totalSeconds, 'second');
-                console.log(startDateTime);
-                console.log(endDateTime);
+                // // Convertir la fecha a la zona horaria de Argentina (ART) manualmente
+                // const diferenciaHoraria = -3; // ART está UTC-3
+                // const fechaUtcStart = new Date(startDateTime);
+                // const fechaArgentinaStart = new Date(fechaUtcStart.getTime() + diferenciaHoraria * 60 * 60 * 1000);
 
-                // Convertir la fecha a la zona horaria de Argentina (ART) manualmente
-                const diferenciaHoraria = -3; // ART está UTC-3
-                const fechaUtcStart = new Date(startDateTime);
-                const fechaArgentinaStart = new Date(fechaUtcStart.getTime() + diferenciaHoraria * 60 * 60 * 1000);
+                // // Convertir la fecha a la zona horaria de Argentina (ART) manualmente
+                // const fechaUtcEnd = new Date(endDateTime);
+                // const fechaArgentinaEnd = new Date(fechaUtcEnd.getTime() + diferenciaHoraria * 60 * 60 * 1000);
+                // console.log('member:' + member);
+                // const { success } = await consumeHours(currentMembershipByUser._id, valueString, fechaArgentinaStart, fechaArgentinaEnd, member);
+               
+                const { success } = await updateMembershipByUser(currentMembershipByUser._id, total, billing, parseFloat(paid) || 0);
 
-                // Convertir la fecha a la zona horaria de Argentina (ART) manualmente
-                const fechaUtcEnd = new Date(endDateTime);
-                const fechaArgentinaEnd = new Date(fechaUtcEnd.getTime() + diferenciaHoraria * 60 * 60 * 1000);
-                console.log('member:' + member);
-                const { success } = await consumeHours(currentMembershipByUser._id, valueString, fechaArgentinaStart, fechaArgentinaEnd, member);
-                if (!success) {
-                    toast.dismiss(id);
-                    return;
-                }
+                // if (!success2) {
+                //     toast.dismiss(id);
+                //     return;
+                // }
                 toast.update(id, { render: "Se registraron las horas", type: "success", isLoading: false, autoClose: 2000 });
             } else {
                 console.log(selectedMembership);
                 var hrs = parseInt(hours, 10);
                 console.log(room);
                 debugger
-                var paidParse = paid.toString().replace(/\./g, '');
-                var totalParse = total.toString().replace(/\./g, '');
+                // var paidParse = paid.toString().replace(/\./g, '');
+                // var totalParse = total.toString().replace(/\./g, '');
 
-                const { success } = await createMembershipByUser(client, selectedMembership, room, hrs, totalParse, paymentMethod, billing, paidParse);
+                const { success } = await createMembershipByUser(client, selectedMembership, room, hrs, parseFloat(total) || 0, paymentMethod, billing, parseFloat(paid) || 0);
 
                 if (!success) {
                     toast.dismiss(id);
@@ -293,6 +330,8 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
                         membershipHours: membership.membershipID.hours,
                         endDate: day + '/' + month,
                         hours: remTime,
+                        totalPaidString: '$' + membership.paid + ' / $ ' + membership.total,
+                        totalRemainingString: remTime + ' / ' + membership.membershipID.hours,
                     };
                 });
 
@@ -308,10 +347,14 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
         setFormSubmitted(false);
         setEdit(true);
         setTotal(0);
-        setPaid(0);
+        // setPaid(0);
         setHours(0);
         refreshList();
         setModal(false);
+        setPaymentMethod("Efectivo");
+        setBilling("No factura");
+        setRemainingHours(0);
+        
     }
 
     const handleOpen = () => {
@@ -327,15 +370,15 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
     return (
         <>
             <Button disabled={!isEdit} onClick={handleOpen}>NUEVA MEMBRESÍA</Button>
-            <Button disabled={isEdit} onClick={handleOpen}>DESCONTAR HORAS</Button>
+            <Button disabled={isEdit} onClick={handleOpen}>EDITAR </Button>
             <Dialog open={modal} onClose={handleClose}>
                 <form onSubmit={handleSubmit}>
                     <DialogTitle>
                         <Typography hidden={!isEdit} color='primary.main' sx={{ ml: 1 }}>NUEVA MEMBRESÍA ACTIVA</Typography>
-                        <Typography hidden={isEdit} color='primary.main' sx={{ ml: 1 }}>DESCONTAR HORAS</Typography>
+                        <Typography hidden={isEdit} color='primary.main' sx={{ ml: 1 }}>Membresía {membershipString}</Typography>
                         <Divider />
                     </DialogTitle>
-                    <DialogContent hidden={isEdit}>
+                    {/* <DialogContent hidden={isEdit}>
                         <Grid container>
 
                         <Grid item>
@@ -390,9 +433,15 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
                                 </FormControl>
                             </Grid>
                         </Grid>
-                    </DialogContent>
-                    <DialogContent hidden={!isEdit}>
+                    </DialogContent> */}
+                    <DialogContent>
                         <Grid container>
+
+                        <> {isEdit &&
+
+                <Grid container>
+
+
                             <Grid item xs={12} sx={{ mt: 2 }}>
                                 <Autocomplete
                                     disablePortal
@@ -406,20 +455,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
                                     onChange={handleAutocompleteChange}
                                 />
                             </Grid>
-                            {/* <Grid item xs={12} md={12} sx={{ mt: 2 }}>
-                                <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
-                                    <DemoItem components={['DatePicker']}>
-                                        <DatePicker label="Vencimiento"
-                                            name="endDate"
-                                            error={!!validEndDate && formSubmitted}
-                                            helperText={validEndDate}
-                                            value={endDate}
-                                            onChange={(newValue) => handleDateChange(newValue)}
-                                        />
-                                    </DemoItem>
-                                </LocalizationProvider>
 
-                            </Grid> */}
                             <Grid item xs={12} sx={{ mt: 2 }}>
 
                                 <Autocomplete
@@ -434,12 +470,33 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
                                     onChange={handleAutocompleteMembership}
                                 />
                             </Grid>
+                            </Grid>
+
+                            }
+                            </>
+                            {/* <> {!isEdit &&
+
+                            <Grid container>
+
+                            <Grid item xs={12} sx={{ mt: 2 }}>
+                                <TextField
+                                    label="Horas restantes"
+                                    type="text"
+                                    fullWidth
+                                    name="remainingHours"
+                                    value={remainingHours}
+                                    onChange={handleRemainingHours}
+                                />
+                            </Grid>
+                            </Grid>
+
+                        }
+                            </> */}
                             <Grid item xs={12} sx={{ mt: 4 }}>
                                 <Typography color='primary.main' sx={{ ml: 1 }}>DETALLE DE PAGO</Typography>
 
                                 <Divider />
                             </Grid>
-
                             <Grid item xs={12} sx={{ mt: 2 }}>
                                 <TextField
                                     label="Total"
@@ -450,17 +507,18 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
                                     onChange={handleChangeTotal}
                                 />
                             </Grid>
+
                             <Grid item xs={12} sx={{ mt: 2 }}>
                                 <TextField
                                     label="Abonado"
                                     type="text"
                                     fullWidth
                                     name="paid"
+                                    onChange={onInputChange}
                                     value={paid}
-                                    onChange={handleChangePaid}
                                 />
                             </Grid>
-
+                            <> {isEdit &&
                             <Grid item xs={12} sx={{ mt: 2 }}>
                                 <FormControl>
                                     <FormLabel id="demo-controlled-radio-buttons-group">Medio de pago</FormLabel>
@@ -479,6 +537,8 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
                                     </RadioGroup>
                                 </FormControl>
                             </Grid>
+                            }
+                            </>
                             <Grid item xs={12} sx={{ mt: 2 }}>
                                 <FormControl>
                                     <FormLabel id="demo-controlled-radio-buttons-group">Facturación</FormLabel>

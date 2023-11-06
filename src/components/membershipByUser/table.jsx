@@ -70,6 +70,8 @@ export const TableMembershipsByUser = () => {
               membershipHours: membership.membershipID.hours,
               endDate: day + '/' + month,
               hours: remTime,
+              totalPaidString: '$' + membership.paid + ' / $ ' + membership.total,
+              totalRemainingString: remTime + ' / ' + membership.membershipID.hours,
             };
           });
           
@@ -122,8 +124,8 @@ export const TableMembershipsByUser = () => {
           },
         },
         {
-          name: "membershipHours",
-          label: "Horas totales",
+          name: "totalRemainingString",
+          label: "Horas disponibles",
           options: {
             filter: true,
             sort: false,
@@ -133,19 +135,8 @@ export const TableMembershipsByUser = () => {
           },
         },
         {
-          name: "hours",
-          label: "Horas restantes",
-          options: {
-            filter: true,
-            sort: false,
-            customBodyRender: (value, tableMeta) => {
-              return value || "";
-            },
-          },
-        },
-        {
-          name: "endDate",
-          label: "Creada",
+          name: "totalPaidString",
+          label: "Pagado",
           options: {
             filter: true,
             sort: false,
