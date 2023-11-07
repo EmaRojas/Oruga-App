@@ -331,8 +331,8 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
                         membershipHours: membership.membershipID.hours,
                         endDate: day + '/' + month,
                         hours: remTime,
-                        totalPaidString: '$' + membership.paid + ' / $ ' + membership.total,
-                        totalRemainingString: remTime + ' / ' + membership.membershipID.hours,
+                        totalRemainingString: remTime + ' de ' + membership.membershipID.hours + 'hs',
+                        pendingString: '$ ' + (membership.total - membership.paid) + ' de $ ' + membership.total
                     };
                 });
 

@@ -99,7 +99,8 @@ export const TableMembershipsByUser = () => {
               endDate: day + '/' + month,
               hours: remTime,
               totalPaidString: '$' + membership.paid + ' / $ ' + membership.total,
-              totalRemainingString: remTime + ' / ' + membership.membershipID.hours,
+              totalRemainingString: remTime + ' de ' + membership.membershipID.hours + 'hs',
+              pendingString: '$ ' + (membership.total - membership.paid) + ' de $ ' + membership.total
             };
           });
           
@@ -163,8 +164,8 @@ export const TableMembershipsByUser = () => {
           },
         },
         {
-          name: "totalPaidString",
-          label: "Pagado",
+          name: "pendingString",
+          label: "Pendiente",
           options: {
             filter: true,
             sort: false,
