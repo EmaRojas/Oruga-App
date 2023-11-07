@@ -177,6 +177,8 @@ export const TableMembershipsByUser = () => {
 
     const options = {
         filterType: "dropdown",
+        page: 0, // Página inicial (por defecto es la primera, página 0)
+        rowsPerPage: 5,
         responsive,
         textLabels: {
             body: {
