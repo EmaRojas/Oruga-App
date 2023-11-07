@@ -241,6 +241,7 @@ export const TableMembershipsByUser = () => {
                 const { _id } = membershipsByUser[index];
                 await deleteMembershipByUser(_id);
                 refreshTable();
+                window.location.reload();
             });
 
             toast.update(id, { render: "Se eliminaron correctamente los registros!", type: "success", isLoading: false, autoClose: 2000 });

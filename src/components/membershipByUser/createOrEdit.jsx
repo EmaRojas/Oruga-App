@@ -260,11 +260,11 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
                
                 const { success } = await updateMembershipByUser(currentMembershipByUser._id, total, billing, parseFloat(paid) || 0);
 
-                // if (!success2) {
-                //     toast.dismiss(id);
-                //     return;
-                // }
-                toast.update(id, { render: "Se registraron las horas", type: "success", isLoading: false, autoClose: 2000 });
+                if (!success) {
+                    toast.dismiss(id);
+                    return;
+                }
+                toast.update(id, { render: "Membresía actualizada", type: "success", isLoading: false, autoClose: 2000 });
             } else {
                 console.log(selectedMembership);
                 var hrs = parseInt(hours, 10);
@@ -284,6 +284,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
             }
 
             reset();
+            window.location.reload();
         } catch (e) {
             toast.dismiss(id);
             console.log(e.message);
