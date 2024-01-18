@@ -261,7 +261,7 @@ export const Table = () => {
                     Pendiente
                   </Typography>
                   <Typography variant="h5" style={{ fontSize: '15px' }} color="red">
-                    $ {stats.total - stats.paid}
+                    $ {Math.floor(stats.total - stats.paid)}
                   </Typography>
                 </CardContent>
               </Card>
@@ -273,7 +273,7 @@ export const Table = () => {
                     Pagado
                   </Typography>
                   <Typography variant="h5" style={{ fontSize: '15px' }} color="green">
-                    $ {stats.paid}
+                    $ {Math.floor(stats.paid)}
                   </Typography>
                 </CardContent>
               </Card>
@@ -285,7 +285,7 @@ export const Table = () => {
                     Total
                   </Typography>
                   <Typography variant="h5" style={{ fontSize: '15px' }}>
-                    $ {stats.total}
+                    $ {Math.floor(stats.total)}
                   </Typography>
                 </CardContent>
               </Card>
