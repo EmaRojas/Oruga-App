@@ -345,6 +345,8 @@ export const CreateOrEdit = ({ isEdit, setEdit, setReservations, currentReservat
             }
 
             reset();
+            window.location.reload();
+
         } catch (e) {
             toast.dismiss(id);
             console.log(e.message);
@@ -368,7 +370,8 @@ export const CreateOrEdit = ({ isEdit, setEdit, setReservations, currentReservat
                         billing: reservation.billing ? reservation.billing : "",
                         note: reservation.note,
                         paid: reservation.paymentID.paid,
-                        paymentMethod: reservation.paymentID.means_of_payment
+                        paymentMethod: reservation.paymentID.means_of_payment,
+                        statusEmoji: reservation.paymentID ? "🔑 Reserva" : "⭐ Membresía"
                     };
                 });
 

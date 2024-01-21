@@ -298,7 +298,9 @@ export const CreateOrEditMembership = ({ isEdit, setEdit, setReservations, curre
                         total: reservation.paymentID ? ('$ ' + reservation.paymentID.paid + ' / $ ' +reservation.paymentID.total) : "",
                         date: reservation.date + ' ' + reservation.time + ' - ' + reservation.endTime,
                         billing: reservation.billing ? reservation.billing : "",
-                        note: reservation.note
+                        note: reservation.note,
+                        statusEmoji: reservation.paymentID ? "🔑 Reserva" : "⭐ Membresía"
+
                     };
                 });
 
