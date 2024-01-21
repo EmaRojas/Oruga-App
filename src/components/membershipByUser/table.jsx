@@ -33,7 +33,7 @@ export const TableMembershipsByUser = () => {
       const fetchMembershipTotals = async () => {
         try {
           debugger
-          const response = await fetch('https://orugacoworking.vercel.app/api/v1/membershipByUser/totals'); // Reemplaza 'http://your-api-url' por la URL de tu API
+          const response = await fetch('http://localhost:4000/api/v1/membershipByUser/totals'); // Reemplaza 'http://your-api-url' por la URL de tu API
           if (!response.ok) {
             throw new Error('Network response was not ok');
           }
@@ -90,16 +90,15 @@ export const TableMembershipsByUser = () => {
             } else {
               remTime = hours1.toString() + ':' + minutes.toString();
             }
-
             return {
               ...membership,
-              clientID: membership.clientID.full_name || "",
-              roomID: membership.roomID.name || "",
-              membershipHours: membership.membershipID.hours,
+              clientID: membership.clientID ? membership.clientID.full_name : "",
+              roomID: membership.roomID ? membership.roomID.name : "",
+              membershipHours: membership.membershipID ? membership.membershipID.hours : "",
               endDate: day + '/' + month,
               hours: remTime,
               totalPaidString: '$' + membership.paid + ' / $ ' + membership.total,
-              totalRemainingString: remTime + ' de ' + membership.membershipID.hours + 'hs',
+              totalRemainingString: membership.membershipID ? remTime + ' de ' + membership.membershipID.hours + 'hs' : "",
               pendingString: '$ ' + (membership.total - membership.paid) + ' de $ ' + membership.total
             };
           });
@@ -240,14 +239,24 @@ export const TableMembershipsByUser = () => {
             const id = toast.loading("Eliminando...")
             const { data } = rowsDeleted;
 
-            data.forEach(async ({ index }) => {
+            const confirmAction = window.confirm("¿Estás seguro de que deseas eliminar esta membresía?");
+
+            if (confirmAction) {
+              data.forEach(async ({ index }) => {
                 const { _id } = membershipsByUser[index];
                 await deleteMembershipByUser(_id);
                 refreshTable();
                 window.location.reload();
-            });
+            });            
+           
+              toast.update(id, { render: "Membresía eliminada", type: "success", isLoading: false, autoClose: 2000 });
+            } else {
+              // El usuario ha cancelado la acción, puedes manejar esto según tus necesidades
+              console.log("Activación de membresía cancelada por el usuario");
+              refreshTable();
+              window.location.reload(); // Otras acciones que puedas querer realizar en caso de cancelación
+            }
 
-            toast.update(id, { render: "Se eliminaron correctamente los registros!", type: "success", isLoading: false, autoClose: 2000 });
         }
     };
 

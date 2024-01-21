@@ -71,7 +71,8 @@ export const Table = () => {
               billing: reservation.billing ? reservation.billing : "",
               note: reservation.note,
               paid: reservation.paymentID?.paid,
-              paymentMethod: reservation.paymentID?.means_of_payment
+              paymentMethod: reservation.paymentID?.means_of_payment,
+              statusEmoji: reservation.paymentID ? "🔑 Reserva" : "⭐ Membresía"
             };
           });
           
@@ -215,6 +216,14 @@ export const Table = () => {
           },
         },
       },
+      {
+        name: "statusEmoji",
+        label: "Tipo",
+        options: {
+          filter: true,
+          sort: true,
+        }
+      }
       ];
 
     const options = {
@@ -280,14 +289,25 @@ export const Table = () => {
             const id = toast.loading("Eliminando...")
             const { data } = rowsDeleted;
 
+            const confirmAction = window.confirm("¿Estás seguro de que deseas eliminar esta reserva?");
+
+            if (confirmAction) {
+
             data.forEach(async ({ index }) => {
                 const { _id } = reservations[index];
                 await deleteReservation(_id);
                 refreshTableFilter();
             });
 
-            toast.update(id, { render: "Se eliminaron correctamente los registros!", type: "success", isLoading: false, autoClose: 2000 });
-        }
+            toast.update(id, { render: "Reserva eliminada", type: "success", isLoading: false, autoClose: 2000 });
+          } else {
+            // El usuario ha cancelado la acción, puedes manejar esto según tus necesidades
+            console.log("Activación de membresía cancelada por el usuario");
+            refreshTableFilter();
+            window.location.reload(); // Otras acciones que puedas querer realizar en caso de cancelación
+          }
+
+      }
     };
 
     return (

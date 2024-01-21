@@ -133,12 +133,23 @@ export const Table = () => {
         onRowsDelete: (rowsDeleted) => {
             const id = toast.loading("Eliminando...")
             const { data } = rowsDeleted;
+            const confirmAction = window.confirm("¿Estás seguro de que deseas eliminar la membresía? Se eliminarán membresías de usuario asociadas.");
 
-            data.forEach(async ({ index }) => {
-                const { _id } = memberships[index];
-                await deleteMembership(_id);
-                refreshTable();
-            });
+            if (confirmAction) {
+                data.forEach(async ({ index }) => {
+                    const { _id } = memberships[index];
+                    await deleteMembership(_id);
+                    refreshTable();
+                });            
+            
+              toast.update(id, { render: "Eliminado correctamente", type: "success", isLoading: false, autoClose: 2000 });
+            } else {
+              // El usuario ha cancelado la acción, puedes manejar esto según tus necesidades
+              console.log("Eliminación cancelada por el usuario");
+              refreshTable(); // Otras acciones que puedas querer realizar en caso de cancelación
+            }
+
+
 
             toast.update(id, { render: "Se eliminaron correctamente los registros!", type: "success", isLoading: false, autoClose: 2000 });
         }

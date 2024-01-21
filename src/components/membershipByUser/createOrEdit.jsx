@@ -226,37 +226,6 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
             }
             if (currentMembershipByUser._id.length > 1) {
                 debugger
-                // const dateTime = dayjs(startDateTime);
-                // var valueString = value.toString();
-                // // Convertir horas y minutos a segundos
-                // function convertToSeconds(hours, minutes) {
-                //     const totalSeconds = (hours * 3600) + (minutes * 60);
-                //     return totalSeconds;
-                // }
-
-                // const decimalNumber = parseFloat(valueString);
-
-                // const integerPart = Math.floor(decimalNumber);
-
-                // const decimalPart = (decimalNumber % 1).toFixed(2);
-                // const decimalDigits = decimalPart.substring(2);
-
-                // const totalSeconds = convertToSeconds(integerPart, decimalDigits);
-
-                // const endDateTime = dateTime.add(totalSeconds, 'second');
-                // console.log(startDateTime);
-                // console.log(endDateTime);
-
-                // // Convertir la fecha a la zona horaria de Argentina (ART) manualmente
-                // const diferenciaHoraria = -3; // ART está UTC-3
-                // const fechaUtcStart = new Date(startDateTime);
-                // const fechaArgentinaStart = new Date(fechaUtcStart.getTime() + diferenciaHoraria * 60 * 60 * 1000);
-
-                // // Convertir la fecha a la zona horaria de Argentina (ART) manualmente
-                // const fechaUtcEnd = new Date(endDateTime);
-                // const fechaArgentinaEnd = new Date(fechaUtcEnd.getTime() + diferenciaHoraria * 60 * 60 * 1000);
-                // console.log('member:' + member);
-                // const { success } = await consumeHours(currentMembershipByUser._id, valueString, fechaArgentinaStart, fechaArgentinaEnd, member);
                
                 const { success } = await updateMembershipByUser(currentMembershipByUser._id, total, billing, parseFloat(paid) || 0);
 
@@ -273,14 +242,22 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
                 // var paidParse = paid.toString().replace(/\./g, '');
                 // var totalParse = total.toString().replace(/\./g, '');
 
-                const { success } = await createMembershipByUser(client, selectedMembership, room, hrs, parseFloat(total) || 0, paymentMethod, billing, parseFloat(paid) || 0);
+                const confirmAction = window.confirm("¿Estás seguro de que deseas crear la membresía? Revisa si los datos son correctos.");
 
-                if (!success) {
+                if (confirmAction) {
+                  const { success } = await createMembershipByUser(client, selectedMembership, room, hrs, parseFloat(total) || 0, paymentMethod, billing, parseFloat(paid) || 0);
+                
+                  if (!success) {
                     toast.dismiss(id);
                     return;
+                  }
+                
+                  toast.update(id, { render: "Se activó la membresía", type: "success", isLoading: false, autoClose: 2000 });
+                } else {
+                  // El usuario ha cancelado la acción, puedes manejar esto según tus necesidades
+                  console.log("Activación de membresía cancelada por el usuario");
+                  toast.dismiss(id); // Otras acciones que puedas querer realizar en caso de cancelación
                 }
-                toast.update(id, { render: "Se activo la membresía", type: "success", isLoading: false, autoClose: 2000 });
-
             }
 
             reset();

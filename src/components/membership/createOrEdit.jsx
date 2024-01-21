@@ -151,19 +151,31 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMemberships, currentMembershi
 
                         <Grid container>
                             <> {isEdit &&
-                            <Grid item xs={12} sx={{ mt: 2 }}>
-                                <Autocomplete
-                                    disablePortal
-                                    id="combo-box-demo"
-                                    options={rooms}
-                                    getOptionLabel={(rooms) => rooms.name.toString()}
-                                    renderInput={(params) => <TextField {...params} label="Seleccionar sala"
-                                        name='client' error={!!validRoom && formSubmitted}
-                                        helperText={validRoom} />}
-                                    name="client"
-                                    onChange={handleAutocompleteChange}
-                                />
-                            </Grid>
+                                <Grid item xs={12} sx={{ mt: 2 }}>
+                                    {rooms && rooms.length > 0 ? (
+                                        <Autocomplete
+                                            disablePortal
+                                            id="combo-box-demo"
+                                            options={rooms}
+                                            getOptionLabel={(room) => room.name.toString()}
+                                            renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    label="Seleccionar sala"
+                                                    name="client"
+                                                    error={!!validRoom && formSubmitted}
+                                                    helperText={validRoom}
+                                                />
+                                            )}
+                                            name="client"
+                                            onChange={handleAutocompleteChange}
+                                        />
+                                    ) : (
+                                        <Typography variant="body2" color="textSecondary">
+                                            No hay salas disponibles.
+                                        </Typography>
+                                    )}
+                                </Grid>
                             }
                             </>
                             <Grid item xs={12} sx={{ mt: 2 }}>

@@ -62,7 +62,8 @@ export const Table = () => {
                 paid: payment.paid,
                 created: formattedDate,
                 client: payment.clientInfo.full_name,
-                billing: payment.billing
+                billing: payment.billing,
+                statusEmoji: (payment.reservationInfo ? "🔑 Reserva" : "") + (payment.membershipInfo ? "⭐ Membresía" : "")
               };
             });
             
@@ -167,6 +168,14 @@ export const Table = () => {
                 sort: false,
             }
         },
+        {
+          name: "statusEmoji",
+          label: "Tipo",
+          options: {
+            filter: true,
+            sort: true,
+          }
+        }
   
     ];
 
@@ -329,7 +338,7 @@ export const Table = () => {
                 <ThemeProvider theme={createTheme()}>
 
                     <MUIDataTable className="tabluppercase"
-                        title={"CLIENTES"}
+                        title={"PAGOS"}
                         data={payments}
                         columns={columns}
                         options={options}
