@@ -138,7 +138,7 @@ export const Table = () => {
             if (confirmAction) {
                 data.forEach(async ({ index }) => {
                     const { _id } = memberships[index];
-                    await deleteMembership(_id);
+                    // await deleteMembership(_id);
                     refreshTable();
                 });            
             

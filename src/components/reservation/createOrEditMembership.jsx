@@ -238,7 +238,7 @@ export const CreateOrEditMembership = ({ isEdit, setEdit, setReservations, curre
                 console.log(endHour);
                 console.log(roomId);
 
-                const { success } = await createReservationMembership(client, date, startDateTime, endDateTime, startHour, endHour, roomId, note);
+                const { success } = await createReservationMembership(client, date, startDateTime, endDateTime, startHour, endHour, roomId, note, membershipId);
 
                 // Supongamos que tienes dos objetos Dayjs: startTime y endTime
                 const startTime = dayjs(startDateTime);
