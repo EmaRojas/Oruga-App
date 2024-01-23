@@ -33,7 +33,7 @@ export const TableMembershipsByUser = () => {
       const fetchMembershipTotals = async () => {
         try {
           debugger
-          const response = await fetch('http://localhost:4000/api/v1/membershipByUser/totals'); // Reemplaza 'http://your-api-url' por la URL de tu API
+          const response = await fetch('https://orugacoworking.vercel.app/api/v1/membershipByUser/totals'); // Reemplaza 'http://your-api-url' por la URL de tu API
           if (!response.ok) {
             throw new Error('Network response was not ok');
           }
