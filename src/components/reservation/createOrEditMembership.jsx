@@ -34,6 +34,8 @@ export const CreateOrEditMembership = ({ isEdit, setEdit, setReservations, curre
 
     const [clients, setClients] = useState({});
     const [membership, setMembership] = useState({});
+    const [memberships2, setMemberships2] = useState({});
+
     const [priceRooms, setPriceRooms] = useState({});
     const [startHour, setStartHour] = useState(dayjs());
     const [validStartHour, setValidStartHour] = useState('Es obligatorio');
@@ -49,7 +51,11 @@ export const CreateOrEditMembership = ({ isEdit, setEdit, setReservations, curre
     const [selectedPriceRoom, setSelectedPriceRoom] = useState('');
     const [selectedRoom, setSelectedRoom] = useState('');
     const [membershipName, setMembershipName] = useState('');
+    const [remaining, setRemaining] = useState('');
+    const [remainingPost, setRemainingPost] = useState('');
+
     const [membershipId, setMembershipId] = useState('');
+    const [clientEmail, setClientEmail] = useState('');
 
     const [validPriceRoom, setValidPriceRoom] = useState('Es obligatorio');
     const [endDate, setEndDate] = useState('');
@@ -103,12 +109,40 @@ export const CreateOrEditMembership = ({ isEdit, setEdit, setReservations, curre
                 const membership = memberships[0];
 
                 if (membership && membership.membershipID.name.length >= 5) {
+
+                    const totalSeconds = membership.remaining_hours;
+                    // Convertir segundos a horas y minutos
+                    function convertToHoursMinutes(seconds) {
+                        const hours1 = Math.floor(seconds / 3600);
+                        const remainingSeconds = seconds % 3600;
+                        const minutes = Math.floor(remainingSeconds / 60);
+                        return { hours1, minutes };
+                    }
+
+                    // Convertir segundos a horas y minutos
+
+                    const { hours1, minutes } = convertToHoursMinutes(totalSeconds);
+                    console.log(hours1, minutes);  // Output: 1 30
+
+                    //var remTime = hours1 + ':' + minutes;
+
+                    let remTime;
+                    if (minutes === 0) {
+                        remTime = hours1.toString();
+                    } else {
+                        remTime = hours1.toString() + ':' + minutes.toString();
+                    }
+
+                    setClientEmail(value.email);
                     setMembershipName(membership.membershipID.name);
+                    setRemaining(remTime);
                     setRoomId(membership.roomID._id);
                     setRoomName(membership.roomID.name);
                     setMembershipId(membership._id);
                 } else {
                     setMembershipName('El cliente seleccionado no tiene membresía.');
+                    setRemaining('');
+
                 }
             } catch (e) {
                 console.log(e.message);
@@ -183,9 +217,6 @@ export const CreateOrEditMembership = ({ isEdit, setEdit, setReservations, curre
 
     }, [])
 
-
-
-
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -220,7 +251,7 @@ export const CreateOrEditMembership = ({ isEdit, setEdit, setReservations, curre
                 const date = dayjs(endDate).format('YYYY-MM-DD');
                 const time = dayjs(endDate).format('HH:mm');
                 var endTime = new Date(endDate);
-
+                setRemaining('');
                 // Sumar una hora
                 endTime.setHours(endTime.getHours() + parseInt(hour));
 
@@ -256,27 +287,63 @@ export const CreateOrEditMembership = ({ isEdit, setEdit, setReservations, curre
                 var member = "";
                 const { success2 } = await consumeHours(membershipId, formattedDifference, startDateTime, endDateTime, member);
 
-                if (!success) {
-                    toast.dismiss(id);
-                    return;
+                const membershipsResponse = await getMembershipByEmail(clientEmail);
+                console.log(membershipsResponse.memberships);
+                let membership2;
+                
+                if (membershipsResponse.memberships && membershipsResponse.memberships.length > 0) {
+                    membership2 = membershipsResponse.memberships[0];
                 }
 
-                const variableSala = 'Sala 1';
-                const variableFecha = '2023-09-11';
-                const variableHoraInicio = '15:00';
-                const variableHoraFin = '17:00';
+                if (membership2 && membership2.membershipID.name.length >= 5) {
+                    const totalSeconds2 = membership2.remaining_hours;
+                    // Convertir segundos a horas y minutos
+                    function convertToHoursMinutes(seconds) {
+                        const hours1 = Math.floor(seconds / 3600);
+                        const remainingSeconds = seconds % 3600;
+                        const minutes = Math.floor(remainingSeconds / 60);
+                        return { hours1, minutes };
+                    }
 
-                toast.update(id, {
-                    render: <CustomNotification sala={roomName} fecha={date} horaInicio={startHour} horaFin={endHour}/>,
-                    type: 'success',
-                    isLoading: false,
-                    autoClose: 5000,
-                  });
+                    // Convertir segundos a horas y minutos
+
+                    const { hours1, minutes } = convertToHoursMinutes(totalSeconds2);
+                    console.log(hours1, minutes);  // Output: 1 30
+
+                    //var remTime = hours1 + ':' + minutes;
+
+                    let remTime;
+                    if (minutes === 0) {
+                        remTime = hours1.toString();
+                    } else {
+                        remTime = hours1.toString() + ':' + minutes.toString();
+                    }
+
+                    if (!success) {
+                        toast.dismiss(id);
+                        return;
+                    }
+    
+                    toast.update(id, {
+                        render: <CustomNotification sala={roomName} fecha={date} horaInicio={startHour} horaFin={endHour} remaining={remTime}/>,
+                        type: 'success',
+                        isLoading: false,
+                        autoClose: 5000,
+                      });
+
+                    console.log(remainingPost);
+                }
+
+
 
 
             }
 
             reset();
+            // Esperar 5 segundos y luego recargar la página
+            setTimeout(() => {
+                window.location.reload();
+            }, 5000);
         } catch (e) {
             toast.dismiss(id);
             console.log(e.message);
@@ -358,8 +425,11 @@ export const CreateOrEditMembership = ({ isEdit, setEdit, setReservations, curre
                                     
                                 />
                             </Grid>
+
                             <Grid item xs={12} sx={{ mt: 4 }}>
-                                <Typography>{membershipName}</Typography>
+                                <Typography>
+                                    {membershipName} {remaining && parseInt(remaining) > 1 && `- Horas disponibles: ${remaining}`}
+                                </Typography>
                             </Grid>
 
                             <Grid item xs={12} md={12} sx={{ mt: 2 }}>

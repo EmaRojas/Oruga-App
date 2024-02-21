@@ -345,7 +345,10 @@ export const CreateOrEdit = ({ isEdit, setEdit, setReservations, currentReservat
             }
 
             reset();
-            window.location.reload();
+            // Esperar 5 segundos y luego recargar la página
+            setTimeout(() => {
+                window.location.reload();
+            }, 5000);
 
         } catch (e) {
             toast.dismiss(id);

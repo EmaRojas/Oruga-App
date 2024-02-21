@@ -28,7 +28,10 @@ export const CreateOrEdit = ({ isEdit, setEdit, setClients, currentUser, setCurr
         phone: [(value) => value.length >= 1 && !isNaN(value), 'Es obligatorio. No se puede ingresar letras.'],
         company_name: [(value) => value.length >= 1 && isNaN(value), 'Es obligatorio. No se puede ingresar número.'],
         cuit: [(value) => value.length >= 8 && !isNaN(value), 'Es obligatorio. No se puede ingresar letras.'],
-        email: [(value) => value.length >= 2 && value.includes('@'), 'Es Obligatorio. El correo debe de tener una @'],
+        email: [
+            (value) => value.length >= 2 && value.includes('@') && !value.includes(' '), 
+            'Es Obligatorio. El correo debe de tener una @ y no debe contener espacios'
+        ],
     }
 
     const {

@@ -3,13 +3,15 @@ import { Toast } from 'react-toastify';
 import Button from '@mui/material/Button';
 import { FileCopy as FileCopyIcon } from '@mui/icons-material';
 
-const CustomNotification = ({ sala, fecha, horaInicio, horaFin }) => {
+const CustomNotification = ({ sala, fecha, horaInicio, horaFin, remaining }) => {
+  debugger
   const emojiReserva = "✅";
   const emojiSala = "🚪";
   const emojiFecha = "📅";
   const emojiHora = "🕒";
-
-  const textToCopy = `${emojiReserva} Reserva creada!\n${emojiSala} Sala: ${sala}\n${emojiFecha} Fecha: ${fecha}\n${emojiHora} Hora: ${horaInicio} - ${horaFin}`;
+  const emojiRestantes = "⏳";
+  const textToCopy = `${emojiReserva} Reserva creada!\n${emojiSala} Sala: ${sala}\n${emojiFecha} Fecha: ${fecha}\n${emojiHora} Hora: ${horaInicio} - ${horaFin}${remaining && parseInt(remaining) > 1 ? `\n${emojiRestantes} Horas restantes: ${remaining}` : ''}`;  
+  // const textToCopy = `${emojiReserva} Reserva creada!\n${emojiSala} Sala: ${sala}\n${emojiFecha} Fecha: ${fecha}\n${emojiHora} Hora: ${horaInicio} - ${horaFin}`;
   const textAreaRef = useRef(null);
 
   const copyToClipboard = () => {
