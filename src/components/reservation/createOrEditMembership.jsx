@@ -140,7 +140,7 @@ export const CreateOrEditMembership = ({ isEdit, setEdit, setReservations, curre
                     setRoomName(membership.roomID.name);
                     setMembershipId(membership._id);
                 } else {
-                    setMembershipName('El cliente seleccionado no tiene membresía.');
+                    setMembershipName('El cliente seleccionado no tiene una membresía activa.');
                     setRemaining('');
 
                 }
@@ -269,7 +269,6 @@ export const CreateOrEditMembership = ({ isEdit, setEdit, setReservations, curre
                 console.log(endHour);
                 console.log(roomId);
 
-                const { success } = await createReservationMembership(client, date, startDateTime, endDateTime, startHour, endHour, roomId, note, membershipId);
 
                 // Supongamos que tienes dos objetos Dayjs: startTime y endTime
                 const startTime = dayjs(startDateTime);
@@ -285,7 +284,7 @@ export const CreateOrEditMembership = ({ isEdit, setEdit, setReservations, curre
                 // Formato para expresar la diferencia en el formato que mencionaste (X.Y)
                 const formattedDifference = parseFloat(`${hours}.${minutes}`).toFixed(1);
                 var member = "";
-                const { success2 } = await consumeHours(membershipId, formattedDifference, startDateTime, endDateTime, member);
+                const { success } = await consumeHours(membershipId, formattedDifference, startDateTime, endDateTime, member);
 
                 const membershipsResponse = await getMembershipByEmail(clientEmail);
                 console.log(membershipsResponse.memberships);
@@ -320,18 +319,21 @@ export const CreateOrEditMembership = ({ isEdit, setEdit, setReservations, curre
                     }
 
                     if (!success) {
-                        toast.dismiss(id);
+                        toast.update(id, { render: "El cliente no tiene las horas suficientes para esta reserva.", type: "success", isLoading: false, autoClose: 2000 });
                         return;
+                    } else {
+                        const { success2 } = await createReservationMembership(client, date, startDateTime, endDateTime, startHour, endHour, roomId, note, membershipId);
+                        toast.update(id, {
+                            render: <CustomNotification sala={roomName} fecha={date} horaInicio={startHour} horaFin={endHour} remaining={remTime}/>,
+                            type: 'success',
+                            isLoading: false,
+                            autoClose: 5000,
+                          });
+    
+                        console.log(remainingPost);
                     }
     
-                    toast.update(id, {
-                        render: <CustomNotification sala={roomName} fecha={date} horaInicio={startHour} horaFin={endHour} remaining={remTime}/>,
-                        type: 'success',
-                        isLoading: false,
-                        autoClose: 5000,
-                      });
 
-                    console.log(remainingPost);
                 }
 
 

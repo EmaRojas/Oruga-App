@@ -248,7 +248,8 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
                   const { success } = await createMembershipByUser(client, selectedMembership, room, hrs, parseFloat(total) || 0, paymentMethod, billing, parseFloat(paid) || 0);
                 
                   if (!success) {
-                    toast.dismiss(id);
+                    //toast.dismiss(id);
+                    toast.update(id, { render: "Ya existe una membresía activa para este cliente, debe finalizarla para crear otra.", type: "success", isLoading: false, autoClose: 2000 });
                     return;
                   }
                 
