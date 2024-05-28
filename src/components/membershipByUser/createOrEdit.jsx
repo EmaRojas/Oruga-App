@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, Grid, Input, InputAdornment, InputLabel, OutlinedInput, Slider, TextField, Typography } from '@mui/material';
-import { getAllMemberships } from '../../services/membership.service';
 import { toast } from 'react-toastify';
 import Autocomplete from '@mui/material/Autocomplete';
 import { getAll } from "../../services/client.service";
 import { DemoContainer, DemoItem } from '@mui/x-date-pickers/internals/demo';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { FormControlLabel, FormLabel, FormControl, Radio, RadioGroup } from '@mui/material';
+import { FormControlLabel, FormLabel, FormControl, Radio, RadioGroup, Select, MenuItem } from '@mui/material';
 import "dayjs/locale/es";
 import dayjs from 'dayjs';
 import { createMembershipByUser, getAllMembershipsByUser, consumeHours, updateMembershipByUser } from '../../services/membershipByUser.service';
@@ -22,11 +21,13 @@ const MembembershipByUserEmpty = {
     "_id": "",
     "endDate": "",
     "client": "",
-    "membership": ""
+    "membership": "",
+    "billing": "No factura",
+    "paymentMethod": "Efectivo"
 }
 
 
-export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMembershipByUser, setcurrentMembershipByUser }) => {
+export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMembershipByUser, setCurrentMembershipByUser }) => {
 
     const [formSubmitted, setFormSubmitted] = useState(false);
     const [modal, setModal] = useState(false);
@@ -45,15 +46,10 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
     const [endDate, setEndDate] = useState('');
     const [startDateTime, setStartDateTime] = useState('');
     const [validEndDate, setValidEndDate] = useState('Es obligatorio');
-    const [total, setTotal] = useState(0);
     // const [paid, setPaid] = useState(0);
     const [remainingHours, setRemainingHours] = useState(0);
-    const [hours, setHours] = useState(0);
     const [member, setMember] = useState('');
-    const [billing, setBilling] = useState('No factura');
-    const [room, setRoom] = useState('');
 
-    const [paymentMethod, setPaymentMethod] = useState('Efectivo');
 
     const [value, setValue] = React.useState(0.00);
     const formValidations = {
@@ -61,95 +57,8 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
     }
 
     const {
-        isFormValid, paid, paidValid, onInputChange
+        isFormValid, total, paid, paymentMethod, billing, room, hours, paidValid, onInputChange
     } = useForm(currentMembershipByUser, formValidations);
-
-
-    useEffect(() => {
-        // ...
-        // Inicializa el estado selectedDateTime con el valor de currentReservation.dateTime
-        if(currentMembershipByUser._id.length > 1) {
-            debugger
-            setTotal(currentMembershipByUser.total);
-            setBilling(currentMembershipByUser.billing);
-            setPaymentMethod(currentMembershipByUser.paymentID.means_of_payment);
-            setRemainingHours(currentMembershipByUser.hours);
-            setMembershipString(currentMembershipByUser.roomID + ' ' + currentMembershipByUser.membershipHours + 'HS de ' + currentMembershipByUser.clientID);
-
-        } else {
-            setEdit(true);
-        }
-
-    }, [currentMembershipByUser]);
-
-    const handleChangeBilling = (event) => {
-        setBilling(event.target.value);
-    };
-
-    const handleSliderChange = (event, newValue) => {
-        const intValue = Math.floor(newValue); // Parte entera
-        const decimalValue = newValue % 1; // Parte decimal
-        const adjustedDecimal = Math.min(decimalValue, 0.50); // Limitar la parte decimal a 0.6 (60)
-        const adjustedValue = intValue + parseFloat(adjustedDecimal.toFixed(2));
-        setValue(adjustedValue);
-        console.log(value);
-    };
-
-    const handleInputChange = (event) => {
-        console.log(event.target.value);
-        let newValue = event.target.value;
-        const intValue = Math.floor(newValue); // Parte entera
-        const decimalValue = newValue % 1; // Parte decimal
-        const adjustedDecimal = Math.min(decimalValue, 0.50); // Limitar la parte decimal a 0.6 (60)
-        const adjustedValue = intValue + parseFloat(adjustedDecimal.toFixed(2));
-        setValue(adjustedValue);
-      };
-    
-      const handleBlur = () => {
-        if (value < 0) {
-          setValue(0);
-        } else if (value > 50) {
-          setValue(50);
-        }
-      };
-
-    const handleChange = (event) => {
-        setPaymentMethod(event.target.value);
-    };
-    const handleChangeTotal = (event) => {
-        setTotal(event.target.value);
-    };
-
-    const handleRemainingHours = (event) => {
-        setRemainingHours(event.target.value);
-    };
-
-    const handleHours = (event) => {
-        setHours(event.target.value);
-    };
-    // const handleChangePaid = (event) => {
-    //     setPaid(event.target.value);
-    // };
-    const handleMemberChange = (event) => {
-        setMember(event.target.value);
-        console.log(member);
-    };
-
-    const handleDateChange = (value) => {
-        if (value !== null) {
-            setEndDate(value);
-            console.log(endDate);
-            setValidEndDate(null);
-        } else {
-            setValidEndDate('Es obligatorio');
-        }
-    };
-
-    const handleStartDateTimeChange = (value) => {
-            setStartDateTime(value);
-            console.log(startDateTime);
-    };
-
 
     const handleAutocompleteChange = (event, value) => {
         if (value !== null) {
@@ -160,19 +69,6 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
         }
     };
 
-    const handleAutocompleteMembership = (event, value) => {
-        debugger
-        if (value !== null) {
-            setHours(value?.hours);
-            setSelectedMembership(value._id);
-            setRoom(value.roomID);
-            setValidMembership(null);
-        } else {
-            setValidMembership('Es obligatorio');
-            setTotal(0);
-            setHours(0);
-        }
-    };
 
     const getClients = async () => {
         await getAll()
@@ -186,23 +82,11 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
             })
     }
 
-    const getMemberships = async () => {
-        await getAllMemberships()
-            .then(({ memberships }) => {
-                setMemberships(memberships);
-                console.log(memberships);
-            })
-            .catch((e) => {
-                console.log(e.message)
-            })
-    }
-
 
     useEffect(() => {
         const tomorrow = dayjs().add(1, 'month');
         setEndDate(tomorrow);
         getClients();
-        getMemberships();
 
     }, [])
 
@@ -214,11 +98,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
             setdisabledButton(true);
             setFormSubmitted(true);
 
-            if (currentMembershipByUser._id.length < 1 && (client === '' || selectedMembership === '')) {
-                if (endDate === '') {
-                    setValidEndDate('Es obligatorio');
-                }
-
+            if (currentMembershipByUser._id.length < 1 && (client === '')) {
                 toast.dismiss(id);
                 setdisabledButton(false);
                 toast.error("Formulario incorrecto")
@@ -227,7 +107,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
             if (currentMembershipByUser._id.length > 1) {
                 debugger
                
-                const { success } = await updateMembershipByUser(currentMembershipByUser._id, total, billing, parseFloat(paid) || 0);
+                const { success } = await updateMembershipByUser(currentMembershipByUser._id, total, billing, parseFloat(paid) || 0, room, paymentMethod);
 
                 if (!success) {
                     toast.dismiss(id);
@@ -238,14 +118,11 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
                 console.log(selectedMembership);
                 var hrs = parseInt(hours, 10);
                 console.log(room);
-                debugger
-                // var paidParse = paid.toString().replace(/\./g, '');
-                // var totalParse = total.toString().replace(/\./g, '');
 
                 const confirmAction = window.confirm("¿Estás seguro de que deseas crear la membresía? Revisa si los datos son correctos.");
 
                 if (confirmAction) {
-                  const { success } = await createMembershipByUser(client, selectedMembership, room, hrs, parseFloat(total) || 0, paymentMethod, billing, parseFloat(paid) || 0);
+                  const { success } = await createMembershipByUser(client, room, hrs, parseFloat(total) || 0, billing, parseFloat(paid) || 0, paymentMethod);
                 
                   if (!success) {
                     //toast.dismiss(id);
@@ -260,7 +137,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
                   toast.dismiss(id); // Otras acciones que puedas querer realizar en caso de cancelación
                 }
             }
-
+            setCurrentMembershipByUser(MembembershipByUserEmpty);
             reset();
             window.location.reload();
         } catch (e) {
@@ -280,36 +157,39 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
                     const day = dateObj.getDate();
                     const month = dateObj.getMonth() + 1; // Los meses comienzan en 0, por lo que se suma 1
 
-                    const totalSeconds = membership.remaining_hours; // Valor obtenido de la base de datos
 
                     // Convertir segundos a horas y minutos
                     function convertToHoursMinutes(seconds) {
-                      const hours1 = Math.floor(seconds / 3600);
-                      const remainingSeconds = seconds % 3600;
-                      const minutes = Math.floor(remainingSeconds / 60);
-                      return { hours1, minutes };
+                        const hours1 = Math.floor(seconds / 3600);
+                        const remainingSeconds = seconds % 3600;
+                        const minutes = Math.floor(remainingSeconds / 60);
+        
+                        let remTime;
+                        if (minutes === 0) {
+                        remTime = hours1.toString();
+                        } else {
+                        remTime = hours1.toString() + ':' + minutes.toString();
+                        }
+        
+                        return remTime;
+        
                     }
         
                     // Convertir segundos a horas y minutos
+                    const totalSeconds = membership.total_hours; // Valor obtenido de la base de datos
+                    const remainingSeconds = membership.remaining_hours;
         
-                    const { hours1, minutes } = convertToHoursMinutes(totalSeconds);
-                    console.log(hours1, minutes);  // Output: 1 30
-                    
-                    let remTime;
-                    if (minutes === 0) {
-                      remTime = hours1.toString();
-                    } else {
-                      remTime = hours1.toString() + ':' + minutes.toString();
-                    }
+                    const totalSecsToHours = convertToHoursMinutes(totalSeconds);
+                    const remainingSecsToHours = convertToHoursMinutes(remainingSeconds);
 
                     return {
                         ...membership,
                         clientID: membership.clientID.full_name || "",
-                        roomID: membership.roomID.name || "",
-                        membershipHours: membership.membershipID.hours,
+                        roomID: membership.room,
+                        membershipHours: membership.hours,
                         endDate: day + '/' + month,
-                        hours: remTime,
-                        totalRemainingString: remTime + ' de ' + membership.membershipID.hours + 'hs',
+                        hours: remainingSecsToHours,
+                        totalRemainingString: remainingSecsToHours + ' de ' + totalSecsToHours + 'hs',
                         pendingString: '$ ' + (membership.total - membership.paid) + ' de $ ' + membership.total
                     };
                 });
@@ -325,14 +205,12 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
         setdisabledButton(false);
         setFormSubmitted(false);
         setEdit(true);
-        setTotal(0);
         // setPaid(0);
-        setHours(0);
         refreshList();
         setModal(false);
-        setPaymentMethod("Efectivo");
-        setBilling("No factura");
         setRemainingHours(0);
+        setCurrentMembershipByUser(MembembershipByUserEmpty);
+
         
     }
 
@@ -357,68 +235,13 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
                         <Typography hidden={isEdit} color='primary.main' sx={{ ml: 1 }}>Membresía {membershipString}</Typography>
                         <Divider />
                     </DialogTitle>
-                    {/* <DialogContent hidden={isEdit}>
-                        <Grid container>
-
-                        <Grid item>
-
-                        <LocalizationProvider dateAdapter={AdapterDayjs}>
-                            <DemoContainer components={['DateTimePicker']}>
-                                <DateTimePicker label="Fecha y hora"
-                                        name="startDateTime"
-                                        value={startDateTime}
-                                        onChange={(newValue) => handleStartDateTimeChange(newValue)}
-                                />
-                            </DemoContainer>
-                        </LocalizationProvider>
-                        </Grid>
-                        <br /> <br />
-                            <Grid item xs={7} md={7} sx={{ mt: 2 }}>
-                                <Slider
-                                    value={value.toFixed(2)}
-                                    onChange={handleSliderChange}
-                                    min={0}
-                                    max={12}
-                                    step={0.1}
-                                    aria-labelledby="input-slider"
-                                />
-                            </Grid>
-                           
-                            <Grid item xs={4} md={4} sx={{ ml:2, mt: 2 }}>
-                                <Input
-                                    value={value.toFixed(2)} // Formatear a dos lugares decimales
-                                    size="small"
-                                    onChange={handleInputChange}
-                                    onBlur={handleBlur}
-                                    inputProps={{
-                                        step: '0.1',
-                                        min: 0,
-                                        max: 12,
-                                        type: 'number',
-                                        'aria-labelledby': 'input-slider',
-                                    }}
-                                />
-                            </Grid>
-
-                            <Grid item xs={12} sx={{ mt: 2 }}>
-                                <FormControl fullWidth>
-                                    <TextField
-                                        label="Nombre (Opcional para membresía compartida)"
-                                        type="text"
-                                        name="member"
-                                        value={member}
-                                        onChange={handleMemberChange}
-                                    />
-                                </FormControl>
-                            </Grid>
-                        </Grid>
-                    </DialogContent> */}
+ 
                     <DialogContent>
                         <Grid container>
 
                         <> {isEdit &&
 
-                <Grid container>
+                    <Grid container>
 
 
                             <Grid item xs={12} sx={{ mt: 2 }}>
@@ -436,41 +259,42 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
                             </Grid>
 
                             <Grid item xs={12} sx={{ mt: 2 }}>
+                                        <InputLabel id="demo-simple-select-label">Sala</InputLabel>
+                                        <Select
+                                            labelId="demo-simple-select-label"
+                                            type="text"
+                                            fullWidth
+                                            name="room"
+                                            onChange={onInputChange}
+                                            value={room}
+                                        >
+                                            <MenuItem value={"Alocasia"}>Alocasia</MenuItem>
+                                            <MenuItem value={"Bromelia"}>Bromelia</MenuItem>
+                                            <MenuItem value={"Peperomia"}>Peperomia</MenuItem>
+                                            <MenuItem value={"Begonia"}>Begonia</MenuItem>
+                                            <MenuItem value={"Calathea"}>Calathea</MenuItem>
+                                            <MenuItem value={"Pothus"}>Pothus</MenuItem>
+                                            <MenuItem value={"Pandurata"}>Pandurata</MenuItem>
 
-                                <Autocomplete
-                                    disablePortal
-                                    id="combo-box-demo"
-                                    options={memberships}
-                                    getOptionLabel={(membership) => `${membership.name.toString()}`}
-                                    renderInput={(params) => <TextField {...params} label="Seleccionar membresía"
-                                        name='memberships' error={!!validMembership && formSubmitted}
-                                        helperText={validMembership} />}
-                                    name="memberships"
-                                    onChange={handleAutocompleteMembership}
+                                        </Select>
+                            </Grid>
+
+                            <Grid item xs={12} sx={{ mt: 2 }}>
+                                <TextField
+                                    label="Horas"
+                                    type="text"
+                                    fullWidth
+                                    name="hours"
+                                    onChange={onInputChange}
+                                    value={hours}
+                                    defaultValue={0}
                                 />
                             </Grid>
                             </Grid>
 
                             }
                             </>
-                            {/* <> {!isEdit &&
 
-                            <Grid container>
-
-                            <Grid item xs={12} sx={{ mt: 2 }}>
-                                <TextField
-                                    label="Horas restantes"
-                                    type="text"
-                                    fullWidth
-                                    name="remainingHours"
-                                    value={remainingHours}
-                                    onChange={handleRemainingHours}
-                                />
-                            </Grid>
-                            </Grid>
-
-                        }
-                            </> */}
                             <Grid item xs={12} sx={{ mt: 4 }}>
                                 <Typography color='primary.main' sx={{ ml: 1 }}>DETALLE DE PAGO</Typography>
 
@@ -482,8 +306,9 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
                                     type="text"
                                     fullWidth
                                     name="total"
+                                    onChange={onInputChange}
                                     value={total}
-                                    onChange={handleChangeTotal}
+                                    defaultValue={0}
                                 />
                             </Grid>
 
@@ -495,18 +320,20 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
                                     name="paid"
                                     onChange={onInputChange}
                                     value={paid}
+                                    defaultValue={0}
                                 />
                             </Grid>
-                            <> {isEdit &&
+                            
                             <Grid item xs={12} sx={{ mt: 2 }}>
                                 <FormControl>
                                     <FormLabel id="demo-controlled-radio-buttons-group">Medio de pago</FormLabel>
                                     <RadioGroup
                                         row
                                         aria-labelledby="demo-controlled-radio-buttons-group"
-                                        name="controlled-radio-buttons-group"
+                                        name="paymentMethod"
                                         value={paymentMethod}
-                                        onChange={handleChange}
+                                        onChange={onInputChange}
+                                        defaultValue="Efectivo" 
                                     >
                                         <FormControlLabel value="Efectivo" control={<Radio />} label="Efectivo" />
                                         <FormControlLabel value="Transferencia" control={<Radio />} label="Transferencia" />
@@ -516,17 +343,17 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
                                     </RadioGroup>
                                 </FormControl>
                             </Grid>
-                            }
-                            </>
+                            
                             <Grid item xs={12} sx={{ mt: 2 }}>
                                 <FormControl>
                                     <FormLabel id="demo-controlled-radio-buttons-group">Facturación</FormLabel>
                                     <RadioGroup
                                         row
                                         aria-labelledby="demo-controlled-radio-buttons-group"
-                                        name="controlled-radio-buttons-group"
+                                        name="billing"
                                         value={billing}
-                                        onChange={handleChangeBilling}
+                                        onChange={onInputChange}
+                                        defaultValue="No factura" 
                                     >
                                         <FormControlLabel value="No factura" control={<Radio />} label="No factura" />
                                         <FormControlLabel value="Factura A" control={<Radio />} label="Factura A" />

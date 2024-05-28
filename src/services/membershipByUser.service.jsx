@@ -21,20 +21,18 @@ export const deleteMembershipByUser = async (id) => {
 }
 
 
-export const createMembershipByUser = async (clientID, membershipID, room, hours, total, paymentMethod, billing, paid) => {
+export const createMembershipByUser = async (clientID, room, hours, total, billing, paid, paymentMethod) => {
     const requestOptions = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             "clientID": clientID,
-            "membershipID": membershipID,
-            "roomID": room,
+            "room": room,
             "hours": hours,
             "total": total,
-            "means_of_payment": paymentMethod,
+            "paymentMethod": paymentMethod,
             "billing": billing,
             "paid": paid
-
         })
     };
     const response = await fetch(baseURL, requestOptions);
@@ -77,14 +75,16 @@ export const getMembershipByEmail = async (email) => {
 }
 
 
-export const updateMembershipByUser = async (id, total, billing, paid) => {
+export const updateMembershipByUser = async (id, total, billing, paid, room, paymentMethod) => {
     const requestOptions = {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             "total": total,
             "billing": billing,
-            "paid": paid
+            "paid": paid,
+            "room": room,
+            "paymentMethod": paymentMethod
         })
     };
     const response = await fetch(baseURL + "/" + id, requestOptions);

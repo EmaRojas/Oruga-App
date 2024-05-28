@@ -16,9 +16,7 @@ import { Membership } from './pages/Membership';
 //https://fkhadra.github.io/react-toastify/introduction
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { Room } from './pages/Room';
 import Reservation from './pages/Reservation';
-import Usage from './pages/Usage';
 import { Payment } from './pages/Payment';
 import Availability from './pages/Availability';
 
@@ -65,26 +63,10 @@ function App() {
             }
           />
           <Route
-            path='/room'
-            element={
-              <ProtectedRoute>
-                <Room />
-              </ProtectedRoute>
-            }
-          />
-          <Route
             path='/reservation'
             element={
               <ProtectedRoute>
                 <Reservation />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path='/usage'
-            element={
-              <ProtectedRoute>
-                <Usage />
               </ProtectedRoute>
             }
           />

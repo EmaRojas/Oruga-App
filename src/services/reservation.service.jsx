@@ -78,20 +78,20 @@ export const deleteReservation = async (id) => {
 }
 
 
-export const createReservation = async (clientID, priceRoomID, roomID, fechaArgentina, fechaArgentinaEnd, date, time, endTimeString, means_of_payment, total, paid, billing, note) => {
+export const createReservation = async (clientID, room, fechaArgentina, fechaArgentinaEnd, date, dateString, time, endTimeString, paymentMethod, total, paid, billing, note) => {
     const requestOptions = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             "clientID": clientID,
-            "priceRoomID": priceRoomID,
-            "roomID": roomID,
-            "dateTime": fechaArgentina,
+            "room": room,
+            "startDateTime": fechaArgentina,
             "endDateTime": fechaArgentinaEnd,
             "date": date,
+            "dateString": dateString,
             "time": time,
             "endTime": endTimeString,
-            "means_of_payment": means_of_payment,
+            "paymentMethod": paymentMethod,
             "total": total,
             "paid": paid,
             "billing": billing,
@@ -102,19 +102,19 @@ export const createReservation = async (clientID, priceRoomID, roomID, fechaArge
     return await response.json();
 }
 
-export const updateReservation = async (id, priceRoomID, roomID, fechaArgentina, fechaArgentinaEnd, date, time, endTimeString, means_of_payment, total, paid, billing, note) => {
+export const updateReservation = async (id, room, fechaArgentina, fechaArgentinaEnd, date, dateString, time, endTimeString, paymentMethod, total, paid, billing, note) => {
     const requestOptions = {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-            "priceRoomID": priceRoomID,
-            "roomID": roomID,
-            "dateTime": fechaArgentina,
+            "room": room,
+            "startDateTime": fechaArgentina,
             "endDateTime": fechaArgentinaEnd,
             "date": date,
+            "dateString": dateString,
             "time": time,
             "endTime": endTimeString,
-            "means_of_payment": means_of_payment,
+            "paymentMethod": paymentMethod,
             "total": total,
             "paid": paid,
             "billing": billing,
@@ -125,22 +125,66 @@ export const updateReservation = async (id, priceRoomID, roomID, fechaArgentina,
     return await response.json();
 }
 
-export const createReservationMembership = async (clientID, date, startDateTime, endDateDime, time, endtime, roomId, note) => {
-    debugger;
-     const requestOptions = {
-         method: 'POST',
-         headers: { 'Content-Type': 'application/json' },
-         body: JSON.stringify({
-             "clientID": clientID,
-             "dateTime": startDateTime,
-             "endDateTime" : endDateDime,
-             "date": date,
-             "time": time,
-             "endTime": endtime,
-             "roomID": roomId,
-             "note": note
-         })
-     };
-     const response = await fetch(baseURL + "/membership", requestOptions);
-     return await response.json();
- }
+// export const createReservationMembership = async (clientID, date, startDateTime, endDateDime, time, endtime, roomId, note, membershipId) => {
+//     debugger;
+//      const requestOptions = {
+//          method: 'POST',
+//          headers: { 'Content-Type': 'application/json' },
+//          body: JSON.stringify({
+//              "clientID": clientID,
+//              "dateTime": startDateTime,
+//              "endDateTime" : endDateDime,
+//              "date": date,
+//              "time": time,
+//              "endTime": endtime,
+//              "roomID": roomId,
+//              "note": note,
+//              "membershipId": membershipId
+//          })
+//      };
+//      const response = await fetch(baseURL + "/membership", requestOptions);
+//      return await response.json();
+//  }
+
+export const createReservationMembership = async (clientID, membershipID, room, fechaArgentina, fechaArgentinaEnd, date, dateString, time, endTimeString, paymentMethod, total, paid, billing, note) => {
+    const requestOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            "clientID": clientID,
+            "membershipID": membershipID,
+            "room": room,
+            "startDateTime": fechaArgentina,
+            "endDateTime": fechaArgentinaEnd,
+            "date": date,
+            "dateString": dateString,
+            "time": time,
+            "endTime": endTimeString,
+            "paymentMethod": paymentMethod,
+            "total": total,
+            "paid": paid,
+            "billing": billing,
+            "note": note
+        })
+    };
+    const response = await fetch(baseURL + '/createMembership', requestOptions);
+    return await response.json();
+}
+
+export const updateReservationMembership = async (id, fechaArgentina, fechaArgentinaEnd, date, dateString, time, endTimeString, note) => {
+    const requestOptions = {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            "startDateTime": fechaArgentina,
+            "endDateTime": fechaArgentinaEnd,
+            "date": date,
+            "dateString": dateString,
+            "time": time,
+            "endTime": endTimeString,
+            "note": note
+        })
+    };
+    const response = await fetch(baseURL + "/membership/" + id, requestOptions);
+    return await response.json();
+}

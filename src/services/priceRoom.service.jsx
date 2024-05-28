@@ -1,5 +1,6 @@
 
-const baseURL = 'https://orugacoworking.vercel.app/api/v1/priceRoom';
+// const baseURL = 'https://orugacoworking.vercel.app/api/v1/priceRoom';
+const baseURL = 'http://localhost:4000/api/v1/priceRoom';
 
 export const getAllPriceRooms = async () => {
     const response = await fetch(baseURL);

@@ -18,7 +18,7 @@ const Signin = () => {
   useEffect(() => {
 
     if(user) {
-      navigate('/home')
+      navigate('/reservation')
     }   
  },[]);
 
@@ -27,7 +27,7 @@ const Signin = () => {
     setError('')
     try {
       await signIn(email, password)
-      navigate('/home')
+      navigate('/reservation')
     } catch (e) {
       setError(e.message)
       console.log(e.message)
@@ -39,7 +39,7 @@ const Signin = () => {
     setError('')
     try {
       await signInWithGoogle()
-      navigate('/home')
+      navigate('/reservation')
     } catch (e) {
       setError(e.message)
       console.log(e.message)

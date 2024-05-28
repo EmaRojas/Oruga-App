@@ -43,6 +43,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setClients, currentUser, setCurr
         e.preventDefault();
         const id = toast.loading("Validando formulario...")
         try {
+            debugger
             setFormSubmitted(true);
             console.log(emailValid);
             if (!isFormValid) {

@@ -8,7 +8,7 @@ import { useState } from "react";
 import { Button, ButtonGroup, Chip, Dialog, DialogContent, DialogTitle, Grid } from "@mui/material";
 import { CreateOrEdit } from "./createOrEdit";
 import { CreateOrEditMembership } from "./createOrEditMembership";
-
+import '../style.css';
 import { ToastContainer, toast } from 'react-toastify';
 import { getAllReservations, getAllReservationsFilter, deleteReservation, getStats } from "../../services/reservation.service";
 //https://github.com/gregnb/mui-datatables
@@ -29,10 +29,10 @@ import Typography from '@mui/material/Typography';
 
 const ReservationEmpty = {
   "_id": "",
-  "roomID": "",
-  "priceRoomID": "",
-  "full_name" : "",
-  "billing": "No factura"
+  "room": "",
+  "note": "",
+  "billing": "No factura",
+  "paymentMethod": "Efectivo"
 }
 
 export const Table = () => {
@@ -65,14 +65,18 @@ export const Table = () => {
             return {
               ...reservation,
               clientID: reservation.clientID?.full_name || "",
-              roomID: reservation.roomID ? reservation.roomID.name : "",
-              total: reservation.paymentID ? ('$ ' + reservation.paymentID.paid + ' / $ ' +reservation.paymentID.total) : "",
-              date: reservation.date + ' ' + reservation.time + ' - ' + reservation.endTime,
+              room: reservation.room,
+              totalString: ('$ ' + reservation.paid + ' / $ ' +reservation.total),
+              dateString: reservation.dateString + ' ' + reservation.time + ' - ' + reservation.endTime,
+              date: reservation.date,
+              startDateTime: reservation.startDateTime,
+              endDateTime: reservation.endDateTime,
               billing: reservation.billing ? reservation.billing : "",
               note: reservation.note,
-              paid: reservation.paymentID?.paid,
-              paymentMethod: reservation.paymentID?.means_of_payment,
-              statusEmoji: reservation.paymentID ? "🔑 Reserva" : "⭐ Membresía"
+              total: reservation.total,
+              paid: reservation.paid,
+              paymentMethod: reservation.paymentMethod ? reservation.paymentMethod : "",
+              statusEmoji: reservation.membershipID ? "⭐ Membresía" : "🔑 Reserva"
             };
           });
           
@@ -162,7 +166,7 @@ export const Table = () => {
           },
         },
         {
-            name: "roomID",
+            name: "room",
             label: "Sala",
             options: {
               filter: true,
@@ -173,7 +177,7 @@ export const Table = () => {
             },
         },
         {
-          name: "date",
+          name: "dateString",
           label: "Fecha y hora",
           options: {
             filter: true,
@@ -184,7 +188,7 @@ export const Table = () => {
           },
       },
         {
-            name: "total",
+            name: "totalString",
             label: "Pagado / Total",
             options: {
               filter: true,

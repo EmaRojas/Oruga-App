@@ -11,11 +11,13 @@ import { CreateOrEdit } from "./createOrEdit";
 import { ToastContainer, toast } from 'react-toastify';
 //https://github.com/gregnb/mui-datatables
 
-const MembembershipByUserEmpty = { 
-  "_id":"",
-  "endDate":"",
-  "client":"",
-  "membership":""
+const MembembershipByUserEmpty = {
+  "_id": "",
+  "endDate": "",
+  "client": "",
+  "membership": "",
+  "billing": "No factura",
+  "paymentMethod": "Efectivo"
 }
 
 export const TableMembershipsByUser = () => {
@@ -67,39 +69,43 @@ export const TableMembershipsByUser = () => {
             const day = fechaArgentina.getDate();
             const month = fechaArgentina.getMonth() + 1; // Los meses comienzan en 0, por lo que se suma 1
     
-            const totalSeconds = membership.remaining_hours; // Valor obtenido de la base de datos
 
             // Convertir segundos a horas y minutos
             function convertToHoursMinutes(seconds) {
               const hours1 = Math.floor(seconds / 3600);
               const remainingSeconds = seconds % 3600;
               const minutes = Math.floor(remainingSeconds / 60);
-              return { hours1, minutes };
+
+              let remTime;
+              if (minutes === 0) {
+                remTime = hours1.toString();
+              } else {
+                remTime = hours1.toString() + ':' + minutes.toString();
+              }
+
+              return remTime;
+
             }
 
             // Convertir segundos a horas y minutos
+            const totalSeconds = membership.total_hours; // Valor obtenido de la base de datos
+            const remainingSeconds = membership.remaining_hours;
 
-            const { hours1, minutes } = convertToHoursMinutes(totalSeconds);
-            console.log(hours1, minutes);  // Output: 1 30
+            const totalSecsToHours = convertToHoursMinutes(totalSeconds);
+            const remainingSecsToHours = convertToHoursMinutes(remainingSeconds);
             
-            //var remTime = hours1 + ':' + minutes;
-
-            let remTime;
-            if (minutes === 0) {
-              remTime = hours1.toString();
-            } else {
-              remTime = hours1.toString() + ':' + minutes.toString();
-            }
             return {
               ...membership,
               clientID: membership.clientID ? membership.clientID.full_name : "",
-              roomID: membership.roomID ? membership.roomID.name : "",
-              membershipHours: membership.membershipID ? membership.membershipID.hours : "",
+              roomID: membership.room,
+              membershipHours: totalSecsToHours,
               endDate: day + '/' + month,
-              hours: remTime,
+              hours: totalSecsToHours,
               totalPaidString: '$' + membership.paid + ' / $ ' + membership.total,
-              totalRemainingString: membership.membershipID ? remTime + ' de ' + membership.membershipID.hours + 'hs' : "",
-              pendingString: '$ ' + (membership.total - membership.paid) + ' de $ ' + membership.total
+              totalRemainingString: remainingSecsToHours + ' de ' + totalSecsToHours + 'hs',
+              pendingString: '$ ' + (membership.total - membership.paid) + ' de $ ' + membership.total,
+              billing: membership.billing,
+              paymentMethod: membership.paymentMethod
             };
           });
           
@@ -165,6 +171,28 @@ export const TableMembershipsByUser = () => {
         {
           name: "pendingString",
           label: "Pendiente",
+          options: {
+            filter: true,
+            sort: false,
+            customBodyRender: (value, tableMeta) => {
+              return value || "";
+            },
+          },
+        },
+        {
+          name: "billing",
+          label: "Factura",
+          options: {
+            filter: true,
+            sort: false,
+            customBodyRender: (value, tableMeta) => {
+              return value || "";
+            },
+          },
+        },
+        {
+          name: "paymentMethod",
+          label: "Medio de pago",
           options: {
             filter: true,
             sort: false,
@@ -274,7 +302,7 @@ export const TableMembershipsByUser = () => {
 
     return (
         <>
-            <Grid container style={cardStyle}>
+            {/* <Grid container style={cardStyle}>
             <Grid item md={2}>
               <Card style={cardStyle}>
                 <CardContent style={contentStyle}>
@@ -324,7 +352,7 @@ export const TableMembershipsByUser = () => {
               </Card>
             </Grid>
             </Grid>
-      <br />
+      <br /> */}
         
             <ButtonGroup variant="outlined" aria-label="outlined button group">
                 <CreateOrEdit isEdit={edit} setEdit={setEdit} setMembershipsByUser={setMembershipsByUser} membershipsByUser={membershipsByUser} currentMembershipByUser={currentMembershipByUser} setCurrentMembershipByUser={setCurrentMembershipByUser} />

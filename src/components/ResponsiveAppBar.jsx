@@ -92,12 +92,18 @@ function ResponsiveAppBar() {
         aria-label="vertical contained button group"
         variant="text"
       >
-               <Button
+               {/* <Button
             href='/home'
             onClick={handleCloseNavMenu}
             variant="text"
           >
             Home
+          </Button> */}
+          <Button href='/reservation'
+            onClick={handleCloseNavMenu}
+           variant='text'
+          >
+            Reservas
           </Button>
           <Button href='/client'
             onClick={handleCloseNavMenu}
@@ -111,36 +117,14 @@ function ResponsiveAppBar() {
           >
             Membresías
           </Button>
-          <Button href='/room'
-            onClick={handleCloseNavMenu}
-           variant='text'
-          >
-            Salas
-          </Button>
-          <Button href='/reservation'
-            onClick={handleCloseNavMenu}
-           variant='text'
-          >
-            Reservas
-          </Button>
-          <Button href='/usage'
-            onClick={handleCloseNavMenu}
-           variant='text'
-          >
-            Consumos
-          </Button>
-          <Button href='/payment'
-            onClick={handleCloseNavMenu}
-           variant='text'
-          >
-            Pagos
-          </Button>
-          <Button href='/availability'
+
+
+          {/* <Button href='/availability'
             onClick={handleCloseNavMenu}
            variant='text'
           >
             Disponibilidad
-          </Button>
+          </Button> */}
           </ButtonGroup>
           </Menu>
         </Box>
@@ -182,12 +166,18 @@ function ResponsiveAppBar() {
         
 
         <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-          <Button
+          {/* <Button
             href='/home'
             onClick={handleCloseNavMenu}
             sx={{ my: 2, color: 'white', display: 'block' }}
           >
             Home
+          </Button> */}
+          <Button href='/reservation'
+            onClick={handleCloseNavMenu}
+            sx={{ my: 2, color: 'white', display: 'block' }}
+          >
+            Reservas
           </Button>
           <Button href='/client'
             onClick={handleCloseNavMenu}
@@ -201,36 +191,12 @@ function ResponsiveAppBar() {
           >
             Membresías
           </Button>
-          <Button href='/room'
-            onClick={handleCloseNavMenu}
-            sx={{ my: 2, color: 'white', display: 'block' }}
-          >
-            Salas
-          </Button>
-          <Button href='/reservation'
-            onClick={handleCloseNavMenu}
-            sx={{ my: 2, color: 'white', display: 'block' }}
-          >
-            Reservas
-          </Button>
-          <Button href='/usage'
-            onClick={handleCloseNavMenu}
-            sx={{ my: 2, color: 'white', display: 'block' }}
-          >
-            Consumos
-          </Button>
-          <Button href='/payment'
-            onClick={handleCloseNavMenu}
-            sx={{ my: 2, color: 'white', display: 'block' }}
-          >
-            Pagos
-          </Button>
-          <Button href='/availability'
+          {/* <Button href='/availability'
             onClick={handleCloseNavMenu}
             sx={{ my: 2, color: 'white', display: 'block' }}
           >
             Disponibilidad
-          </Button>
+          </Button> */}
         </Box>
 
         <Box sx={{ flexGrow: 0 }}>

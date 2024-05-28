@@ -1,19 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, Grid, Input, InputAdornment, InputLabel, OutlinedInput, Slider, TextField, Typography } from '@mui/material';
-import { getAllPriceRooms } from '../../services/priceRoom.service';
+import Box, { BoxProps } from '@mui/material/Box';
 import { toast } from 'react-toastify';
 import Autocomplete from '@mui/material/Autocomplete';
 import { getAll } from "../../services/client.service";
 import { DemoContainer, DemoItem } from '@mui/x-date-pickers/internals/demo';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { FormControlLabel, FormLabel, FormControl, Radio, RadioGroup } from '@mui/material';
-import "dayjs/locale/es";
+import { FormControlLabel, FormLabel, FormControl, Radio, RadioGroup, MenuItem, Select } from '@mui/material';
 import dayjs from 'dayjs';
-import { createReservation, createReservationMembership, getAllReservations, updateReservation } from '../../services/reservation.service';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+import 'dayjs/locale/es'; // Asegúrate de importar el locale que necesitas
+import { createReservation, createReservationMembership, getAllReservations, updateReservation, updateReservationMembership } from '../../services/reservation.service';
 import { getMembershipByEmail, consumeHours } from '../../services/membershipByUser.service';
 
-import { DatePicker, DateTimePicker, MobileTimePicker, TimePicker } from '@mui/x-date-pickers';
+import { DateTimePicker, TimePicker, DatePicker } from '@mui/x-date-pickers';
+
 import { set } from 'react-hook-form';
 import { useForm } from '../../hooks/useForm';
 import CustomNotification from './CustomNotification';
@@ -21,170 +24,80 @@ import CustomNotification from './CustomNotification';
 
 const ReservationEmpty = {
     "_id": "",
-    "roomID": "",
-    "priceRoomID": ""
+    "room": "",
+    "note": "",
+    "billing": "No factura",
+    "paymentMethod": "Efectivo"
 }
 
+function Item(props: BoxProps) {
+    const { sx, ...other } = props;
+    return (
+      <Box
+        sx={{
+          bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#101010' : '#fff'),
+          color: (theme) => (theme.palette.mode === 'dark' ? 'grey.300' : 'grey.800'),
+          border: '1px solid',
+          borderColor: (theme) =>
+            theme.palette.mode === 'dark' ? 'grey.800' : 'grey.300',
+          p: 1,
+          borderRadius: 2,
+          fontSize: '0.825rem',
+          fontWeight: '500',
+          ...sx,
+        }}
+        {...other}
+      />
+    );
+  }
 
 export const CreateOrEditMembership = ({ isEdit, setEdit, setReservations, currentReservation, setCurrentReservation }) => {
+    dayjs.extend(utc);
+    dayjs.extend(timezone);
+    dayjs.tz.setDefault('America/Buenos_Aires');
 
     const [formSubmitted, setFormSubmitted] = useState(false);
     const [modal, setModal] = useState(false);
     const [disabledButton, setdisabledButton] = useState(false);
-
-    const [clients, setClients] = useState({});
-    const [membership, setMembership] = useState({});
-    const [memberships2, setMemberships2] = useState({});
-
-    const [priceRooms, setPriceRooms] = useState({});
-    const [startHour, setStartHour] = useState(dayjs());
-    const [validStartHour, setValidStartHour] = useState('Es obligatorio');
-    const [endDateTime, setEndDateTime] = useState(dayjs());
-    const [startDateTime, setStartDateTime] = useState(dayjs());
-
-    const [endHour, setEndHour] = useState(dayjs());
-    const [validEndHour, setValidEndHour] = useState('Es obligatorio');
+    const [clients, setClients] = useState([]);
     const [client, setClient] = useState('');
     const [validClient, setValidClient] = useState('Es obligatorio');
-    const [roomId, setRoomId] = useState('');
-
-    const [selectedPriceRoom, setSelectedPriceRoom] = useState('');
-    const [selectedRoom, setSelectedRoom] = useState('');
-    const [membershipName, setMembershipName] = useState('');
-    const [remaining, setRemaining] = useState('');
-    const [remainingPost, setRemainingPost] = useState('');
-
-    const [membershipId, setMembershipId] = useState('');
-    const [clientEmail, setClientEmail] = useState('');
-
-    const [validPriceRoom, setValidPriceRoom] = useState('Es obligatorio');
-    const [endDate, setEndDate] = useState('');
     const [validEndDate, setValidEndDate] = useState('Es obligatorio');
-    const [roomName, setRoomName] = useState('');
-
-    const [total, setTotal] = useState(0);
-    const [hour, setHour] = useState(0);
-
-    const [paymentMethod, setPaymentMethod] = useState('Efectivo');
-    const [billing, setBilling] = useState('No factura');
-    const [value, setValue] = React.useState(0.00);
+    const [membership, setMembership] = useState(null);
+    const [selectedClientTotalHours, setSelectedClientTotalHours] = useState('');
+    const [selectedClientRemainingHours, setSelectedClientRemainingHours] = useState('');
 
     const formValidations = {
-        //paid: [(value) => value.length >= 1 && !isNaN(value), 'Es obligatorio. No se puede ingresar letras.'],
+        // note: [(value) => value.length >= 1, 'Es obligatorio.'],
+        // room: [(value) => value.length >= 1, 'Es obligatorio.'],
+
     }
-
     const {
-        isFormValid, paid, paidValid, note, onInputChange
+        startDateTime, date, endDateTime, paid, total, room, paymentMethod, billing, paidValid, note, onInputChange,
+        isFormValid, noteValid, roomValid
     } = useForm(currentReservation, formValidations);
-
-
-
-    const handleChange = (event) => {
-        setPaymentMethod(event.target.value);
-    };
-
-    const handleChangeBilling = (event) => {
-        setBilling(event.target.value);
-    };
-
-    const handleDateChange = (value) => {
-        if (value !== null) {
-            setEndDate(value);
-            setValidEndDate(null);
-        } else {
-            setValidEndDate('Es obligatorio');
-        }
-    };
-
-    const [loadingMembership, setLoadingMembership] = useState(false);
 
     const handleAutocompleteChange = async (event, value) => {
         if (value !== null) {
+            debugger
             setClient(value._id);
-            setValidClient(null);
-            setLoadingMembership(true);
+            const { memberships } = await getMembershipByEmail(value.email);
+            console.log("xd");
 
-            try {
-                const { memberships } = await getMembershipByEmail(value.email);
-                const membership = memberships[0];
-
-                if (membership && membership.membershipID.name.length >= 5) {
-
-                    const totalSeconds = membership.remaining_hours;
-                    // Convertir segundos a horas y minutos
-                    function convertToHoursMinutes(seconds) {
-                        const hours1 = Math.floor(seconds / 3600);
-                        const remainingSeconds = seconds % 3600;
-                        const minutes = Math.floor(remainingSeconds / 60);
-                        return { hours1, minutes };
-                    }
-
-                    // Convertir segundos a horas y minutos
-
-                    const { hours1, minutes } = convertToHoursMinutes(totalSeconds);
-                    console.log(hours1, minutes);  // Output: 1 30
-
-                    //var remTime = hours1 + ':' + minutes;
-
-                    let remTime;
-                    if (minutes === 0) {
-                        remTime = hours1.toString();
-                    } else {
-                        remTime = hours1.toString() + ':' + minutes.toString();
-                    }
-
-                    setClientEmail(value.email);
-                    setMembershipName(membership.membershipID.name);
-                    setRemaining(remTime);
-                    setRoomId(membership.roomID._id);
-                    setRoomName(membership.roomID.name);
-                    setMembershipId(membership._id);
-                } else {
-                    setMembershipName('El cliente seleccionado no tiene una membresía activa.');
-                    setRemaining('');
-
-                }
-            } catch (e) {
-                console.log(e.message);
-            } finally {
-                setLoadingMembership(false);
+            if(memberships) {
+                setMembership(memberships[0]);
+                setSelectedClientTotalHours(convertToHoursMinutes(memberships[0].total_hours));
+                setSelectedClientRemainingHours(convertToHoursMinutes(memberships[0].remaining_hours));
             }
+            setValidClient(null);
         } else {
+            setMembership(null);
+
             setValidClient('Es obligatorio');
-            setMembershipName(''); // Limpiar el valor de membershipName cuando no se selecciona un cliente
+
         }
     };
 
-    const handleStartHourChange = (value) => {
-        if (value !== null) {
-            const selectedHour = value.hour().toString().padStart(2, '0');
-            const selectedMinutes = value.minute().toString().padStart(2, '0');
-            const date = new Date(endDate);
-            setStartHour(selectedHour + ":" + selectedMinutes);
-            date.setHours(selectedHour);
-            date.setMinutes(selectedMinutes);
-            setStartDateTime(date);
-            setValidStartHour(null);
-        } else {
-            setValidStartHour('Es obligatorio');
-        }
-    };
- const handleEndHourChange = (value) => {
-     if (value !== null) {
-         const selectedHour = value.hour().toString().padStart(2, '0');
-         const selectedMinutes = value.minute().toString().padStart(2, '0');
-         const date = new Date(endDate);
-         setEndHour(selectedHour + ":" + selectedMinutes);
-         date.setHours(selectedHour);
-         date.setMinutes(selectedMinutes);
-         setEndDateTime(date);
-         setValidEndHour(null);
-     } else {
-         setValidEndHour('Es obligatorio');
-     }
- };
-
- 
     const getClients = async () => {
         await getAll()
             .then(({ clients }) => {
@@ -197,155 +110,155 @@ export const CreateOrEditMembership = ({ isEdit, setEdit, setReservations, curre
             })
     }
 
-    const getPriceRooms = async () => {
-        await getAllPriceRooms()
-            .then(({ priceRooms }) => {
-                setPriceRooms(priceRooms);
-
-            })
-            .catch((e) => {
-                console.log(e.message)
-            })
-    }
-
-
     useEffect(() => {
-        // const tomorrow = dayjs().add(1, 'month');
-        // setEndDate(tomorrow);
         getClients();
-        getPriceRooms();
-
     }, [])
+
+    function convertToHoursMinutes(seconds) {
+        const hours1 = Math.floor(seconds / 3600);
+        const remainingSeconds = seconds % 3600;
+        const minutes = Math.floor(remainingSeconds / 60);
+
+        let remTime;
+        if (minutes === 0) {
+            remTime = hours1.toString();
+        } else {
+            remTime = hours1.toString() + ':' + minutes.toString();
+        }
+        return remTime;
+    }
+            
+
+    
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         const id = toast.loading("Validando formulario...")
         try {
-            setdisabledButton(true);
             setFormSubmitted(true);
+            if (!isFormValid) {
+                toast.dismiss(id);
+                return;
+            }
 
-            if (currentReservation._id.length < 1 && (client === '' || endDate === '')) {
-                if (endDate === '') {
-                    setValidEndDate('Es obligatorio');
-                }
+            setdisabledButton(true);
 
+
+            if (currentReservation._id.length < 1 && (client === '')) {
                 toast.dismiss(id);
                 setdisabledButton(false);
                 toast.error("Formulario incorrecto")
                 return;
             }
             if (currentReservation._id.length > 1) {
-                const date = dayjs(endDate).format('YYYY-MM-DD');
-                const time = dayjs(endDate).format('HH:mm');
-                const { success } = await updateReservation(client, endDate, date, time, paymentMethod, total, paid );
+                debugger
+
+                const dateString = dayjs(date).format('DD [de] MMMM');
+                const startTimeString = dayjs(startDateTime).format('HH:mm');
+                const endTimeString = dayjs(endDateTime).format('HH:mm');
+
+                // Suponiendo que startDateTime y endDateTime son strings en un formato compatible con Day.js, como 'YYYY-MM-DDTHH:mm:ss'
+                const startDateTimeDayjs = dayjs(startDateTime);
+                const endDateTimeDayjs = dayjs(endDateTime);
+                const dateDayJs = dayjs(date);
+
+                // Obtener la hora, minutos y segundos de 'nuevaHora'
+                const hora = startDateTimeDayjs.hour();
+                const minutos = startDateTimeDayjs.minute();
+                const segundos = startDateTimeDayjs.second();
+
+
+                // Asignar la hora, minutos y segundos a 'fechaOriginal' mientras se conserva la fecha
+                dateDayJs.hour(hora);
+                dateDayJs.minute(minutos);
+                dateDayJs.second(segundos);
+                const newDateTime = dateDayJs.hour(hora).minute(minutos).second(segundos);
+
+                // Obtener la hora, minutos y segundos de 'nuevaHora'
+                const newEndDateTime = dateDayJs;
+                const horaEnd = endDateTimeDayjs.hour();
+                const minutosEnd = endDateTimeDayjs.minute();
+                const segundosEnd = endDateTimeDayjs.second();
+
+                // Asignar la hora, minutos y segundos a 'fechaOriginal' mientras se conserva la fecha
+                newEndDateTime.hour(horaEnd);
+                newEndDateTime.minute(minutosEnd);
+                newEndDateTime.second(segundosEnd);
+                const finalEndDateTime = newEndDateTime.hour(horaEnd).minute(minutosEnd).second(segundosEnd);
+
+                const { success } = await updateReservationMembership(currentReservation._id, newDateTime, finalEndDateTime, date, dateString, startTimeString, endTimeString, note);
 
                 if (!success) {
                     toast.dismiss(id);
                     return;
                 }
+
                 toast.update(id, { render: "Se actualizó la reserva", type: "success", isLoading: false, autoClose: 2000 });
+                window.location.reload(false);
             } else {
+
                 debugger
-                //console.log(selectedMembership);
-                const date = dayjs(endDate).format('YYYY-MM-DD');
-                const time = dayjs(endDate).format('HH:mm');
-                var endTime = new Date(endDate);
-                setRemaining('');
-                // Sumar una hora
-                endTime.setHours(endTime.getHours() + parseInt(hour));
+                // const dateString = dayjs(date).format('YYYY-DD-MM');
+                const dateString = dayjs(date).format('DD [de] MMMM');
+                const startTimeString = dayjs(startDateTime).format('HH:mm');
+                const endTimeString = dayjs(endDateTime).format('HH:mm');
 
-                // Convertir la fecha a la zona horaria de Argentina (ART) manualmente
-                const fechaUtc = new Date(endDate);
-                const diferenciaHoraria = -3; // ART está UTC-3
-                const fechaArgentina = new Date(fechaUtc.getTime() + diferenciaHoraria * 60 * 60 * 1000);
-                console.log(fechaArgentina);
-                const fechaUtcEnd = new Date(endTime);
-                const fechaArgentinaEnd = new Date(fechaUtcEnd.getTime() + diferenciaHoraria * 60 * 60 * 1000);
-                console.log(membership);
+                // Suponiendo que startDateTime y endDateTime son strings en un formato compatible con Day.js, como 'YYYY-MM-DDTHH:mm:ss'
+                const startDateTimeDayjs = dayjs(startDateTime);
+                const endDateTimeDayjs = dayjs(endDateTime);
+                const dateDayJs = dayjs(date);
 
-                var endTimeString = ("0" + endTime.getHours()).slice(-2) + ":" + ("0" + endTime.getMinutes()).slice(-2);
-                console.log(startHour);
-                console.log(endHour);
-                console.log(roomId);
+                // Obtener la hora, minutos y segundos de 'nuevaHora'
+                const hora = startDateTimeDayjs.hour();
+                const minutos = startDateTimeDayjs.minute();
+                const segundos = startDateTimeDayjs.second();
 
 
-                // Supongamos que tienes dos objetos Dayjs: startTime y endTime
-                const startTime = dayjs(startDateTime);
-                const endTime2 = dayjs(endDateTime);
+                // Asignar la hora, minutos y segundos a 'fechaOriginal' mientras se conserva la fecha
+                dateDayJs.hour(hora);
+                dateDayJs.minute(minutos);
+                dateDayJs.second(segundos);
+                const newDateTime = dateDayJs.hour(hora).minute(minutos).second(segundos);
 
-                // Calcular la diferencia de tiempo en minutos
-                const differenceInMinutes = endTime2.diff(startTime, 'minute');
+                // Obtener la hora, minutos y segundos de 'nuevaHora'
+                const newEndDateTime = dateDayJs;
+                const horaEnd = endDateTimeDayjs.hour();
+                const minutosEnd = endDateTimeDayjs.minute();
+                const segundosEnd = endDateTimeDayjs.second();
 
-                // Convertir los minutos a horas y minutos
-                const hours = Math.floor(differenceInMinutes / 60);
-                const minutes = differenceInMinutes % 60;
+                // Asignar la hora, minutos y segundos a 'fechaOriginal' mientras se conserva la fecha
+                newEndDateTime.hour(horaEnd);
+                newEndDateTime.minute(minutosEnd);
+                newEndDateTime.second(segundosEnd);
 
-                // Formato para expresar la diferencia en el formato que mencionaste (X.Y)
-                const formattedDifference = parseFloat(`${hours}.${minutes}`).toFixed(1);
-                var member = "";
-                const { success } = await consumeHours(membershipId, formattedDifference, startDateTime, endDateTime, member);
+                console.log(newDateTime);
+                const finalEndDateTime = newEndDateTime.hour(horaEnd).minute(minutosEnd).second(segundosEnd);
+                console.log(finalEndDateTime);
+                console.log("a");
 
-                const membershipsResponse = await getMembershipByEmail(clientEmail);
-                console.log(membershipsResponse.memberships);
-                let membership2;
-                
-                if (membershipsResponse.memberships && membershipsResponse.memberships.length > 0) {
-                    membership2 = membershipsResponse.memberships[0];
+                const { success } = await createReservationMembership(client, membership._id, membership.room, newDateTime, finalEndDateTime, date, dateString, startTimeString, endTimeString, membership.paymentMethod, parseFloat(membership.total) || 0, parseFloat(membership.paid) || 0, membership.billing, note);
+
+                if (!success) {
+                    toast.dismiss(id);
+                    return;
                 }
 
-                if (membership2 && membership2.membershipID.name.length >= 5) {
-                    const totalSeconds2 = membership2.remaining_hours;
-                    // Convertir segundos a horas y minutos
-                    function convertToHoursMinutes(seconds) {
-                        const hours1 = Math.floor(seconds / 3600);
-                        const remainingSeconds = seconds % 3600;
-                        const minutes = Math.floor(remainingSeconds / 60);
-                        return { hours1, minutes };
-                    }
-
-                    // Convertir segundos a horas y minutos
-
-                    const { hours1, minutes } = convertToHoursMinutes(totalSeconds2);
-                    console.log(hours1, minutes);  // Output: 1 30
-
-                    //var remTime = hours1 + ':' + minutes;
-
-                    let remTime;
-                    if (minutes === 0) {
-                        remTime = hours1.toString();
-                    } else {
-                        remTime = hours1.toString() + ':' + minutes.toString();
-                    }
-
-                    if (!success) {
-                        toast.update(id, { render: "El cliente no tiene las horas suficientes para esta reserva.", type: "success", isLoading: false, autoClose: 2000 });
-                        return;
-                    } else {
-                        const { success2 } = await createReservationMembership(client, date, startDateTime, endDateTime, startHour, endHour, roomId, note, membershipId);
-                        toast.update(id, {
-                            render: <CustomNotification sala={roomName} fecha={date} horaInicio={startHour} horaFin={endHour} remaining={remTime}/>,
-                            type: 'success',
-                            isLoading: false,
-                            autoClose: 5000,
-                          });
-    
-                        console.log(remainingPost);
-                    }
-    
-
-                }
-
-
+                toast.update(id, {
+                    render: <CustomNotification sala={membership.room} fecha={dateString} horaInicio={startTimeString} horaFin={endTimeString} />,
+                    type: 'success',
+                    isLoading: false,
+                    autoClose: 5000,
+                });
 
 
             }
-
+            setCurrentReservation(ReservationEmpty);
             reset();
             // Esperar 5 segundos y luego recargar la página
             setTimeout(() => {
                 window.location.reload();
             }, 5000);
+
         } catch (e) {
             toast.dismiss(id);
             console.log(e.message);
@@ -363,13 +276,18 @@ export const CreateOrEditMembership = ({ isEdit, setEdit, setReservations, curre
                     return {
                         ...reservation,
                         clientID: reservation.clientID.full_name || "",
-                        roomID: reservation.roomID ? reservation.roomID.name : "",
-                        total: reservation.paymentID ? ('$ ' + reservation.paymentID.paid + ' / $ ' +reservation.paymentID.total) : "",
-                        date: reservation.date + ' ' + reservation.time + ' - ' + reservation.endTime,
+                        room: reservation.room,
+                        totalString: reservation.total ? ('$ ' + reservation.paid + ' / $ ' + reservation.total) : "",
+                        dateString: reservation.dateString + ' ' + reservation.time + ' - ' + reservation.endTime,
+                        date: reservation.date,
+                        startDateTime: reservation.startDateTime,
+                        endDateTime: reservation.endDateTime,
                         billing: reservation.billing ? reservation.billing : "",
+                        total: reservation.total,
                         note: reservation.note,
-                        statusEmoji: reservation.paymentID ? "🔑 Reserva" : "⭐ Membresía"
-
+                        paid: reservation.paid,
+                        paymentMethod: reservation.paymentMethod ? reservation.paymentMethod : "",
+                        statusEmoji: reservation.membershipID ? "⭐ Membresía" : "🔑 Reserva"
                     };
                 });
 
@@ -384,9 +302,10 @@ export const CreateOrEditMembership = ({ isEdit, setEdit, setReservations, curre
         setdisabledButton(false);
         setFormSubmitted(false);
         setEdit(true);
-        setTotal(0);
         refreshList();
         setModal(false);
+        setCurrentReservation(ReservationEmpty);
+        setMembership(null);
     }
 
     const handleOpen = () => {
@@ -402,78 +321,116 @@ export const CreateOrEditMembership = ({ isEdit, setEdit, setReservations, curre
     return (
         <>
             <Button disabled={!isEdit} onClick={handleOpen}>NUEVA RESERVA CON MEMBRESÍA</Button>
-            {/* <Button disabled={isEdit} onClick={handleOpen}>EDITAR</Button> */}
+            <> {currentReservation.membershipID != null &&
+            <Button disabled={isEdit} onClick={handleOpen}>EDITAR</Button>
+            }
+            </>
             <Dialog open={modal} onClose={handleClose}>
                 <form onSubmit={handleSubmit}>
                     <DialogTitle>
-                        <Typography hidden={!isEdit} color='primary.main' sx={{ ml: 1 }}>NUEVA RESERVA CON MEMBRESÍA</Typography>
+                        <Typography hidden={!isEdit} color='primary.main' sx={{ ml: 1 }}>NUEVA RESERVA</Typography>
                         <Typography hidden={isEdit} color='primary.main' sx={{ ml: 1 }}>EDITAR RESERVA</Typography>
                         <Divider />
                     </DialogTitle>
 
                     <DialogContent>
                         <Grid container>
-                            <Grid item xs={12} sx={{ mt: 2 }}>
-                                <Autocomplete
-                                    disablePortal
-                                    id="combo-box-demo"
-                                    options={clients}
-                                    getOptionLabel={(clients) => clients.full_name.toString()}
-                                    renderInput={(params) => <TextField {...params} label="Seleccionar cliente"
-                                        name='client' error={!!validClient && formSubmitted}
-                                        helperText={validClient} />}
-                                    name="client"
-                                    onChange={handleAutocompleteChange}
-                                    
-                                />
-                            </Grid>
+                            <> {isEdit &&
+                                <Grid item xs={12} sx={{ mt: 2 }}>
+                                    <Autocomplete
+                                        disablePortal
+                                        id="combo-box-demo"
+                                        options={clients}
+                                        getOptionLabel={(clients) => clients?.full_name.toString()}
+                                        renderInput={(params) => <TextField {...params} label="Seleccionar cliente"
+                                            name='client' error={!!validClient && formSubmitted}
+                                            helperText={validClient} />}
+                                        name="client"
+                                        onChange={handleAutocompleteChange}
+                                    />
+                                </Grid>
+                            }
+                            </>
 
-                            <Grid item xs={12} sx={{ mt: 4 }}>
-                                <Typography>
-                                    {membershipName} {remaining && parseInt(remaining) > 1 && `- Horas disponibles: ${remaining}`}
-                                </Typography>
-                            </Grid>
+                            <> {membership != null &&
+                                <Grid item xs={12} sx={{ mt: 2, mb: 2 }}>
+                                    <Box
+                                        sx={{
+                                            display: 'grid',
+                                            gap: 1,
+                                            gridTemplateColumns: 'repeat(2, 1fr)',
+                                        }}
+                                    >
+                                        <Item>Membresía {membership.room + " " + selectedClientTotalHours} horas</Item>
+                                        <Item>{selectedClientRemainingHours} horas restantes</Item>
+                                    </Box>
+                                </Grid>
+                            }
+                            </>
+                            <Grid item xs={12} md={12} >
 
-                            <Grid item xs={12} md={12} sx={{ mt: 2 }}>
-
-                            <Grid item xs={12} md={12} sx={{ mt: 2 }}>
-                                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                    <DemoContainer components={['TimePicker']}>
+                                <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
+                                    <DemoContainer components={['DatePicker']}>
                                         <DatePicker label="Fecha"
-                                            name="endDate"
                                             error={!!validEndDate && formSubmitted}
                                             helperText={validEndDate}
-                                            value={endDate}
-                                            onChange={(newValue) => handleDateChange(newValue)}
+                                            id="date"
+                                            type="date"
+                                            fullWidth
+                                            name="date"
+                                            className="form-input"
+                                            value={dayjs(date)}
+                                            onChange={date => onInputChange({ target: { value: date, name: 'date' } })}                                           
                                         />
                                     </DemoContainer>
                                 </LocalizationProvider>
                             </Grid>
+                            
+                            <Grid container>
+                                <Grid item xs={12} md={6} sx={{ mt: 1 }}>
+                                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                        <DemoContainer components={['TimePicker']}>
+                                            <TimePicker label="Hora inicio" error={!!formSubmitted}
+                                                ampm={false} // Configura el formato de 24 horas
+                                                views={['hours', 'minutes']} // Muestra solo las vistas de horas y minutos
+                                                minTime={dayjs().set('hour', 7).set('minute', 59)}
+                                                maxTime={dayjs().set('hour', 23).set('minute', 0)}
+                                                id="startDateTime"
+                                                type="dateTime"
+                                                name="startDateTime"
+                                                value={dayjs(startDateTime)}
+                                                onChange={startDateTime => onInputChange({ target: { value: startDateTime, name: 'startDateTime' } })}
+                                            />
+                                        </DemoContainer>
+                                    </LocalizationProvider>
+                                </Grid>
+                                <Grid item xs={12} md={6} sx={{ mt: 1 }} >
+                                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                        <DemoContainer components={['TimePicker']}>
+                                            <TimePicker label="Hora fin" error={!!formSubmitted}
+                                                ampm={false} // Configura el formato de 24 horas
+                                                views={['hours', 'minutes']} // Muestra solo las vistas de horas y minutos
+                                                minTime={dayjs().set('hour', 7).set('minute', 59)}
+                                                maxTime={dayjs().set('hour', 23).set('minute', 0)}
+                                                id="endDateTime"
+                                                type="dateTime"
+                                                name="endDateTime"
+                                                value={dayjs(endDateTime)}
+                                                onChange={endDateTime => onInputChange({ target: { value: endDateTime, name: 'endDateTime' } })}
+                                            />
+                                        </DemoContainer>
+                                    </LocalizationProvider>
+                                </Grid>
                             </Grid>
-                            <Grid item xs={12} md={6} sx={{ mt: 2 }}>
-                                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                    <DemoItem label="Hora inicio">
-                                        <TimePicker error={!!validStartHour && formSubmitted} onChange={(newValue) => handleStartHourChange(newValue)}
-                                            ampm={false} // Configura el formato de 24 horas
-                                            views={['hours', 'minutes']} // Muestra solo las vistas de horas y minutos
-                                            minTime={dayjs().set('hour', 7).set('minute', 59)} 
-                                            maxTime={dayjs().set('hour', 23).set('minute', 0)}
-                                        />
-                                    </DemoItem>
-                                </LocalizationProvider>
+
+
+                            <Grid item xs={12} sx={{ mt: 4 }}>
+                                <Typography color='primary.main' sx={{ ml: 1 }}>NOTA</Typography>
+
+                                <Divider />
                             </Grid>
-                            <Grid item xs={12} md={6} sx={{ mt: 2 }}>
-                                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                    <DemoItem label="Hora fin">
-                                        <TimePicker error={!!validEndHour && formSubmitted} onChange={(newValue) => handleEndHourChange(newValue)}
-                                            ampm={false} // Configura el formato de 24 horas
-                                            views={['hours', 'minutes']} // Muestra solo las vistas de horas y minutos
-                                            minTime={dayjs().set('hour', 7).set('minute', 59)} // Establece la hora mínima a las 8:00 AM
-                                            maxTime={dayjs().set('hour', 23).set('minute', 0)}
-                                        />
-                                    </DemoItem>
-                                </LocalizationProvider>
-                            </Grid>
+
+
                             <Grid item xs={12} sx={{ mt: 2 }}>
                                 <TextField
                                     label="Nota"
@@ -484,6 +441,7 @@ export const CreateOrEditMembership = ({ isEdit, setEdit, setReservations, curre
                                     name="note"
                                     value={note}
                                     onChange={onInputChange}
+                                    defaultValue=""
                                 />
                             </Grid>
 
