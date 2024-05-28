@@ -344,7 +344,7 @@ export const Table = () => {
             </Grid>
           </form>
 
-          <Grid item md={1}>
+          {/* <Grid item md={1}>
         <Card style={cardStyle}>
             <CardContent style={contentStyle}>
                 <Typography sx={{ fontSize: 13 }} color="text.secondary" gutterBottom>
@@ -371,8 +371,8 @@ export const Table = () => {
                 </Card>
             </Grid>
         ))}
-
-        </Grid>
+        */}
+        </Grid> 
             <br />
 
 
