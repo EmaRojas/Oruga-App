@@ -10,6 +10,10 @@ import { Button, ButtonGroup, Chip, Dialog, DialogContent, DialogTitle, Grid, Ca
 import { CreateOrEdit } from "./createOrEdit";
 import { ToastContainer, toast } from 'react-toastify';
 //https://github.com/gregnb/mui-datatables
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+import 'dayjs/locale/es'; // Asegúrate de importar el locale que necesitas
 
 const MembembershipByUserEmpty = {
   "_id": "",
@@ -21,7 +25,9 @@ const MembembershipByUserEmpty = {
 }
 
 export const TableMembershipsByUser = () => {
-
+    dayjs.extend(utc);
+    dayjs.extend(timezone);
+    dayjs.tz.setDefault('America/Buenos_Aires');
     const [membershipsByUser, setMembershipsByUser] = useState();
     const [edit, setEdit] = useState(true);
     const [currentMembershipByUser, setCurrentMembershipByUser] = useState(MembembershipByUserEmpty);
@@ -105,7 +111,8 @@ export const TableMembershipsByUser = () => {
               totalRemainingString: remainingSecsToHours + ' de ' + totalSecsToHours + 'hs',
               pendingString: '$ ' + (membership.total - membership.paid) + ' de $ ' + membership.total,
               billing: membership.billing,
-              paymentMethod: membership.paymentMethod
+              paymentMethod: membership.paymentMethod,
+              created: dayjs(membership.created).format('DD [de] MMMM')
             };
           });
           
@@ -193,6 +200,17 @@ export const TableMembershipsByUser = () => {
         {
           name: "paymentMethod",
           label: "Medio de pago",
+          options: {
+            filter: true,
+            sort: false,
+            customBodyRender: (value, tableMeta) => {
+              return value || "";
+            },
+          },
+        },
+        {
+          name: "created",
+          label: "Fecha de inicio",
           options: {
             filter: true,
             sort: false,

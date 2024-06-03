@@ -190,7 +190,8 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
                         endDate: day + '/' + month,
                         hours: remainingSecsToHours,
                         totalRemainingString: remainingSecsToHours + ' de ' + totalSecsToHours + 'hs',
-                        pendingString: '$ ' + (membership.total - membership.paid) + ' de $ ' + membership.total
+                        pendingString: '$ ' + (membership.total - membership.paid) + ' de $ ' + membership.total,
+                        created: dayjs(membership.created).format('DD [de] MMMM')
                     };
                 });
 
