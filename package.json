@@ -16,6 +16,7 @@
     "firebase": "^9.6.10",
     "imask": "^7.0.0-alpha.2",
     "mui-datatables": "^4.3.0",
+    "qrcode.react": "^3.1.0",
     "react": "18",
     "react-dom": "18",
     "react-hook-form": "^7.45.0",

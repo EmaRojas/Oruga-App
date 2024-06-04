@@ -8,6 +8,8 @@ import { useState } from "react";
 import { deleteMembershipByUser, getAllMembershipsByUser } from "../../services/membershipByUser.service";
 import { Button, ButtonGroup, Chip, Dialog, DialogContent, DialogTitle, Grid, Card, CardContent, Typography } from "@mui/material";
 import { CreateOrEdit } from "./createOrEdit";
+import { QrCode } from "./qrCode";
+
 import { ToastContainer, toast } from 'react-toastify';
 //https://github.com/gregnb/mui-datatables
 import dayjs from 'dayjs';
@@ -103,6 +105,7 @@ export const TableMembershipsByUser = () => {
             return {
               ...membership,
               clientID: membership.clientID ? membership.clientID.full_name : "",
+              clientEmail: membership.clientID.email,
               roomID: membership.room,
               membershipHours: totalSecsToHours,
               endDate: day + '/' + month,
@@ -374,6 +377,8 @@ export const TableMembershipsByUser = () => {
         
             <ButtonGroup variant="outlined" aria-label="outlined button group">
                 <CreateOrEdit isEdit={edit} setEdit={setEdit} setMembershipsByUser={setMembershipsByUser} membershipsByUser={membershipsByUser} currentMembershipByUser={currentMembershipByUser} setCurrentMembershipByUser={setCurrentMembershipByUser} />
+                <QrCode isEdit={edit} setEdit={setEdit} setMembershipsByUser={setMembershipsByUser} membershipsByUser={membershipsByUser} currentMembershipByUser={currentMembershipByUser} setCurrentMembershipByUser={setCurrentMembershipByUser} />
+
             </ButtonGroup>
 
             <CacheProvider value={muiCache} mt={5}>
