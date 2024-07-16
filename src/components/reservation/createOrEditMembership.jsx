@@ -84,10 +84,12 @@ export const CreateOrEditMembership = ({ isEdit, setEdit, setReservations, curre
             const { memberships } = await getMembershipByEmail(value.email);
             console.log("xd");
 
-            if(memberships) {
+            if(memberships.length > 0) {
                 setMembership(memberships[0]);
                 setSelectedClientTotalHours(convertToHoursMinutes(memberships[0].total_hours));
                 setSelectedClientRemainingHours(convertToHoursMinutes(memberships[0].remaining_hours));
+            } else {
+                setMembership("noMembership");
             }
             setValidClient(null);
         } else {
@@ -352,20 +354,34 @@ export const CreateOrEditMembership = ({ isEdit, setEdit, setReservations, curre
                             }
                             </>
 
-                            <> {membership != null &&
-                                <Grid item xs={12} sx={{ mt: 2, mb: 2 }}>
-                                    <Box
-                                        sx={{
-                                            display: 'grid',
-                                            gap: 1,
-                                            gridTemplateColumns: 'repeat(2, 1fr)',
-                                        }}
-                                    >
-                                        <Item>Membresía {membership.room + " " + selectedClientTotalHours} horas</Item>
-                                        <Item>{selectedClientRemainingHours} horas restantes</Item>
-                                    </Box>
-                                </Grid>
-                            }
+                            <>
+                                {membership !== null && membership !== "noMembership" && (
+                                    <Grid item xs={12} sx={{ mt: 2, mb: 2 }}>
+                                        <Box
+                                            sx={{
+                                                display: 'grid',
+                                                gap: 1,
+                                                gridTemplateColumns: 'repeat(2, 1fr)',
+                                            }}
+                                        >
+                                            <Item>Membresía {membership.room + " " + selectedClientTotalHours} horas</Item>
+                                            <Item>{selectedClientRemainingHours} horas restantes</Item>
+                                        </Box>
+                                    </Grid>
+                                )}
+                                {membership === "noMembership" && (
+                                    <Grid item xs={12} sx={{ mt: 2, mb: 2 }}>
+                                        <Box
+                                            sx={{
+                                                display: 'grid',
+                                                gap: 1,
+                                                gridTemplateColumns: 'repeat(1, 1fr)',
+                                            }}
+                                        >
+                                            <Item>El cliente seleccionado no tiene membresía activa.</Item>
+                                        </Box>
+                                    </Grid>
+                                )}
                             </>
                             <Grid item xs={12} md={12} >
 
