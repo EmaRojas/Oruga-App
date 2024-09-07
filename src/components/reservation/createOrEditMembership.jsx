@@ -66,7 +66,7 @@ export const CreateOrEditMembership = ({ isEdit, setEdit, setReservations, curre
     const [membership, setMembership] = useState(null);
     const [selectedClientTotalHours, setSelectedClientTotalHours] = useState('');
     const [selectedClientRemainingHours, setSelectedClientRemainingHours] = useState('');
-
+    const [clientEmail, setClientEmail] = useState('');
     const formValidations = {
         // note: [(value) => value.length >= 1, 'Es obligatorio.'],
         // room: [(value) => value.length >= 1, 'Es obligatorio.'],
@@ -82,6 +82,7 @@ export const CreateOrEditMembership = ({ isEdit, setEdit, setReservations, curre
             debugger
             setClient(value._id);
             const { memberships } = await getMembershipByEmail(value.email);
+            setClientEmail(value.email);
             console.log("xd");
 
             if(memberships.length > 0) {
@@ -245,8 +246,30 @@ export const CreateOrEditMembership = ({ isEdit, setEdit, setReservations, curre
                     return;
                 }
 
+                const membershipsResponse = await getMembershipByEmail(clientEmail);
+                let membership2;
+                
+                if (membershipsResponse.memberships && membershipsResponse.memberships.length > 0) {
+                    membership2 = membershipsResponse.memberships[0];
+                }
+                const remainingHours = membership2.remaining_hours;
+                function convertToHoursMinutes(seconds) {
+                    const hours1 = Math.floor(seconds / 3600);
+                    const remainingSeconds = seconds % 3600;
+                    const minutes = Math.floor(remainingSeconds / 60);
+                    return { hours1, minutes };
+                }
+
+                const { hours1, minutes } = convertToHoursMinutes(remainingHours);
+
+                let remTime;
+                if (minutes === 0) {
+                    remTime = hours1.toString();
+                } else {
+                    remTime = hours1.toString() + ':' + minutes.toString();
+                }
                 toast.update(id, {
-                    render: <CustomNotification sala={membership.room} fecha={dateString} horaInicio={startTimeString} horaFin={endTimeString} />,
+                    render: <CustomNotification sala={membership.room} fecha={dateString} horaInicio={startTimeString} horaFin={endTimeString} remaining={remTime}/>,
                     type: 'success',
                     isLoading: false,
                     autoClose: 5000,
