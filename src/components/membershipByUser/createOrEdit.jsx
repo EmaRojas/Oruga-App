@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, Grid, Input, InputAdornment, InputLabel, OutlinedInput, Slider, TextField, Typography } from '@mui/material';
 import { toast } from 'react-toastify';
 import Autocomplete from '@mui/material/Autocomplete';
@@ -33,7 +33,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
     const [modal, setModal] = useState(false);
     const [disabledButton, setdisabledButton] = useState(false);
 
-    const [clients, setClients] = useState({});
+    const [clients, setClients] = useState([]);
     const [memberships, setMemberships] = useState({});
 
     const [client, setClient] = useState('');
@@ -56,9 +56,18 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
         //paid: [(value) => value.length >= 1 && !isNaN(value), 'Es obligatorio. No se puede ingresar letras.'],
     }
 
+    const initialState = useCallback(() => ({
+        ...currentMembershipByUser,
+        hours: currentMembershipByUser.hours || '',
+        total: currentMembershipByUser.total || '',
+        paid: currentMembershipByUser.paid || '',
+        room: currentMembershipByUser.room || '', // Add this line
+        // ... other fields
+    }), [currentMembershipByUser]);
+
     const {
         isFormValid, total, paid, paymentMethod, billing, room, hours, paidValid, onInputChange
-    } = useForm(currentMembershipByUser, formValidations);
+    } = useForm(initialState, formValidations);
 
     const handleAutocompleteChange = (event, value) => {
         if (value !== null) {
@@ -73,7 +82,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
     const getClients = async () => {
         await getAll()
             .then(({ clients }) => {
-                setClients(clients)
+                setClients(Array.isArray(clients) ? clients : []);
                 console.log(clients);
 
             })
@@ -250,10 +259,16 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
                                     disablePortal
                                     id="combo-box-demo"
                                     options={clients}
-                                    getOptionLabel={(clients) => clients.full_name.toString()}
-                                    renderInput={(params) => <TextField {...params} label="Seleccionar cliente"
-                                        name='client' error={!!validClient && formSubmitted}
-                                        helperText={validClient} />}
+                                    getOptionLabel={(client) => client.full_name.toString()}
+                                    renderInput={(params) => (
+                                        <TextField
+                                            {...params}
+                                            label="Seleccionar cliente"
+                                            name='client'
+                                            error={!!validClient && formSubmitted}
+                                            helperText={validClient}
+                                        />
+                                    )}
                                     name="client"
                                     onChange={handleAutocompleteChange}
                                 />
@@ -267,7 +282,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
                                             fullWidth
                                             name="room"
                                             onChange={onInputChange}
-                                            value={room}
+                                            value={room || ''} // Ensure it's never undefined
                                         >
                                             <MenuItem value={"Alocasia"}>Alocasia</MenuItem>
                                             <MenuItem value={"Bromelia"}>Bromelia</MenuItem>
@@ -288,7 +303,6 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
                                     name="hours"
                                     onChange={onInputChange}
                                     value={hours}
-                                    defaultValue={0}
                                 />
                             </Grid>
                             </Grid>
@@ -309,7 +323,6 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
                                     name="total"
                                     onChange={onInputChange}
                                     value={total}
-                                    defaultValue={0}
                                 />
                             </Grid>
 
@@ -321,7 +334,6 @@ export const CreateOrEdit = ({ isEdit, setEdit, setMembershipsByUser, currentMem
                                     name="paid"
                                     onChange={onInputChange}
                                     value={paid}
-                                    defaultValue={0}
                                 />
                             </Grid>
                             

@@ -29,7 +29,7 @@ const MembembershipByUserEmpty = {
 }
 
 
-export const QrCode = ({ isEdit, setEdit, setMembershipsByUser, currentMembershipByUser, setCurrentMembershipByUser }) => {
+export const QrCode = ({ isEdit, setEdit, setMembershipsByUser, membershipsByUser, currentMembershipByUser, setCurrentMembershipByUser }) => {
 
     const [formSubmitted, setFormSubmitted] = useState(false);
     const [modal, setModal] = useState(false);
@@ -79,6 +79,15 @@ export const QrCode = ({ isEdit, setEdit, setMembershipsByUser, currentMembershi
         reset();
     }
     const confirmationUrl = `https://www.orugacoworking.com.ar/verificarCredencial/index.php?email=${clientEmail}`;
+
+    const handleQrCode = () => {
+        if (currentMembershipByUser && currentMembershipByUser.clientID) {
+            // Generate QR code
+        } else {
+            console.error('Invalid membership data for QR code generation');
+            // Handle the error, maybe show a message to the user
+        }
+    };
 
     return (
         <>

@@ -39,6 +39,9 @@ export const TableMembershipsByUser = () => {
     const [count, setCount] = useState(0);
     const [diffence, setDiffence] = useState(0);
 
+    const [currentPage, setCurrentPage] = useState(0);
+    const [selectedMembership, setSelectedMembership] = useState(null);
+
     useEffect(() => {
       const fetchMembershipTotals = async () => {
         try {
@@ -226,8 +229,9 @@ export const TableMembershipsByUser = () => {
 
     const options = {
         filterType: "dropdown",
-        page: 0, // Página inicial (por defecto es la primera, página 0)
-        rowsPerPage: 5,
+        page: currentPage,
+        rowsPerPage: 10, // Change this to 10, which is one of the default options
+        rowsPerPageOptions: [5, 10, 15, 100], // Add this line to include 5 as an option
         responsive,
         textLabels: {
             body: {
@@ -269,19 +273,23 @@ export const TableMembershipsByUser = () => {
                   },
             },
         },
+        onChangePage: (currentPage) => {
+            setCurrentPage(currentPage);
+        },
         onRowSelectionChange: (currentRowsSelected, allRowsSelected, rowsSelected) => {
-            if (rowsSelected.length <= 1) {
-                setEdit(false)
-                console.log(membershipsByUser[rowsSelected]);
-                setCurrentMembershipByUser(membershipsByUser[rowsSelected]);
-            }
-            if (rowsSelected.length > 1) {
-                setEdit(true)
-                setCurrentMembershipByUser(MembembershipByUserEmpty);
-            }
-            if (rowsSelected.length == 0) {
-                setEdit(true)
-                setCurrentMembershipByUser(MembembershipByUserEmpty);
+            if (rowsSelected.length === 1) {
+                setEdit(false);
+                const selectedIndex = rowsSelected[0];
+                if (membershipsByUser && membershipsByUser[selectedIndex]) {
+                    console.log('Selected membership:', membershipsByUser[selectedIndex]);
+                    setSelectedMembership(membershipsByUser[selectedIndex]);
+                } else {
+                    console.error('Selected membership not found. Index:', selectedIndex, 'Total memberships:', membershipsByUser ? membershipsByUser.length : 0);
+                    setSelectedMembership(null);
+                }
+            } else {
+                setEdit(true);
+                setSelectedMembership(null);
             }
         },
         onRowsDelete: (rowsDeleted) => {
@@ -376,9 +384,22 @@ export const TableMembershipsByUser = () => {
       <br /> */}
         
             <ButtonGroup variant="outlined" aria-label="outlined button group">
-                <CreateOrEdit isEdit={edit} setEdit={setEdit} setMembershipsByUser={setMembershipsByUser} membershipsByUser={membershipsByUser} currentMembershipByUser={currentMembershipByUser} setCurrentMembershipByUser={setCurrentMembershipByUser} />
-                <QrCode isEdit={edit} setEdit={setEdit} setMembershipsByUser={setMembershipsByUser} membershipsByUser={membershipsByUser} currentMembershipByUser={currentMembershipByUser} setCurrentMembershipByUser={setCurrentMembershipByUser} />
-
+                <CreateOrEdit 
+                    isEdit={edit} 
+                    setEdit={setEdit} 
+                    setMembershipsByUser={setMembershipsByUser} 
+                    membershipsByUser={membershipsByUser} 
+                    currentMembershipByUser={selectedMembership || MembembershipByUserEmpty} 
+                    setCurrentMembershipByUser={setSelectedMembership} 
+                />
+                <QrCode 
+                    isEdit={edit} 
+                    setEdit={setEdit} 
+                    setMembershipsByUser={setMembershipsByUser} 
+                    membershipsByUser={membershipsByUser} 
+                    currentMembershipByUser={selectedMembership || MembembershipByUserEmpty} 
+                    setCurrentMembershipByUser={setSelectedMembership} 
+                />
             </ButtonGroup>
 
             <CacheProvider value={muiCache} mt={5}>
