@@ -292,28 +292,36 @@ export const TableMembershipsByUser = () => {
                 setSelectedMembership(null);
             }
         },
-        onRowsDelete: (rowsDeleted) => {
+        onRowsDelete: async (rowsDeleted) => {
             const id = toast.loading("Eliminando...")
             const { data } = rowsDeleted;
 
-            const confirmAction = window.confirm("¿Estás seguro de que deseas eliminar esta membresía?");
+            const confirmAction = window.confirm("¿Estás seguro de que deseas eliminar esta membresía? Se elimintarán todas las reservas asociadas.");
 
             if (confirmAction) {
-              data.forEach(async ({ index }) => {
-                const { _id } = membershipsByUser[index];
-                await deleteMembershipByUser(_id);
-                refreshTable();
-                window.location.reload();
-            });            
-           
-              toast.update(id, { render: "Membresía eliminada", type: "success", isLoading: false, autoClose: 2000 });
-            } else {
-              // El usuario ha cancelado la acción, puedes manejar esto según tus necesidades
-              console.log("Activación de membresía cancelada por el usuario");
-              refreshTable();
-              window.location.reload(); // Otras acciones que puedas querer realizar en caso de cancelación
-            }
+                try {
+                    const deletePromises = data.map(async ({ dataIndex }) => {
+                        const membershipToDelete = membershipsByUser[dataIndex];
+                        if (membershipToDelete && membershipToDelete._id) {
+                            await deleteMembershipByUser(membershipToDelete._id);
+                        } else {
+                            console.error('Membership not found or invalid:', membershipToDelete);
+                        }
+                    });
 
+                    await Promise.all(deletePromises);
+                    
+                    await refreshTable();
+                    toast.update(id, { render: "Membresía eliminada", type: "success", isLoading: false, autoClose: 2000 });
+                } catch (error) {
+                    console.error('Error deleting memberships:', error);
+                    toast.update(id, { render: "Error al eliminar membresía", type: "error", isLoading: false, autoClose: 2000 });
+                }
+            } else {
+                console.log("Eliminación de membresía cancelada por el usuario");
+                toast.update(id, { render: "Eliminación cancelada", type: "info", isLoading: false, autoClose: 2000 });
+            }
+            return false; // Prevent default deletion behavior
         }
     };
 

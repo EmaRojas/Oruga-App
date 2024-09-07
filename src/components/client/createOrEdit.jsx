@@ -43,9 +43,7 @@ export const CreateOrEdit = ({ isEdit, setEdit, setClients, currentUser, setCurr
         e.preventDefault();
         const id = toast.loading("Validando formulario...")
         try {
-            debugger
             setFormSubmitted(true);
-            console.log(emailValid);
             if (!isFormValid) {
                 toast.dismiss(id);
                 return;
@@ -53,28 +51,35 @@ export const CreateOrEdit = ({ isEdit, setEdit, setClients, currentUser, setCurr
 
             setdisabledButton(true);
 
+            let result;
             if (currentUser._id.length > 1) {
-                const { success } = await updateClient(currentUser._id, full_name, phone, email, company_name, category, cuit);
-                if (!success) {
-                    toast.dismiss(id);
-                    return;
-                }
-                toast.update(id, { render: "Registro modificado", type: "success", isLoading: false, autoClose: 2000 });
+                result = await updateClient(currentUser._id, full_name, phone, email, company_name, category, cuit);
             } else {
-                const { success } = await createClient(full_name, phone, email, company_name, category, cuit);
-
-                if (!success) {
-                    toast.dismiss(id);
-                    return;
-                }
-                toast.update(id, { render: "Cliente registrado", type: "success", isLoading: false, autoClose: 2000 });
+                result = await createClient(full_name, phone, email, company_name, category, cuit);
             }
+
+            if (!result.success) {
+                if (result.message === "El correo electrónico ya está registrado") {
+                    toast.update(id, { render: "El correo electrónico ya está registrado", type: "error", isLoading: false, autoClose: 3000 });
+                } else {
+                    toast.update(id, { render: "Error al procesar la solicitud", type: "error", isLoading: false, autoClose: 3000 });
+                }
+                setdisabledButton(false);
+                return;
+            }
+
+            toast.update(id, { 
+                render: currentUser._id.length > 1 ? "Registro modificado" : "Cliente registrado", 
+                type: "success", 
+                isLoading: false, 
+                autoClose: 2000 
+            });
             setCurrentUser(ClientEmpty);
             reset();
         } catch (e) {
             setdisabledButton(false);
-            toast.dismiss(id);
-            console.log(e.message);
+            toast.update(id, { render: "Error en la operación", type: "error", isLoading: false, autoClose: 3000 });
+            console.error(e.message);
         }
     }
 
