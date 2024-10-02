@@ -12,7 +12,7 @@ import './style.css'
 import { CssBaseline } from '@mui/material';
 import { Client } from './pages/Client';
 import { Membership } from './pages/Membership';
-
+import Stats from './pages/Stats';
 //https://fkhadra.github.io/react-toastify/introduction
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -83,6 +83,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Availability />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path='/stats'
+            element={
+              <ProtectedRoute>
+                <Stats />
               </ProtectedRoute>
             }
           />
